@@ -1,5 +1,5 @@
 package reja
 
 type Manager interface {
-  Create() Instance
+	Create() Instance
 }
