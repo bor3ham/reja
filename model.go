@@ -1,9 +1,9 @@
 package reja
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
+  "database/sql"
 	"log"
 	"net/http"
 	"strings"
@@ -26,7 +26,28 @@ func (m Model) FieldColumns() []string {
 }
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
+	query := fmt.Sprintf(
+		`
+      select
+        %s,
+        %s
+      from %s
+    `,
+		m.IDColumn,
+		strings.Join(m.FieldColumns(), ","),
+		m.Table,
+	)
+	rows, err := Query(query)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
 	instances := make([]interface{}, 0)
+	for rows.Next() {
+		instance := m.Manager.Create()
+		rows.Scan(instance.GetFields()...)
+		instances = append(instances, instance)
+	}
 	response_data, err := json.Marshal(struct {
 		Data []interface{} `json:"data"`
 	}{
@@ -46,15 +67,15 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
         %s
       from %s
       where %s = $1
+      limit 1
     `,
 		m.IDColumn,
 		strings.Join(m.FieldColumns(), ","),
 		m.Table,
 		m.IDColumn,
 	)
-	fmt.Println(query)
 	instance := m.Manager.Create()
-	err := Database.QueryRow(query, 1).Scan(instance.GetFields()...)
+	err := QueryRow(query, 1).Scan(instance.GetFields()...)
 
 	switch {
 	case err == sql.ErrNoRows:
