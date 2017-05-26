@@ -25,6 +25,9 @@ func (m Model) FieldColumns() []string {
 	for _, attribute := range m.Attributes {
 		columns = append(columns, attribute.GetColumns()...)
 	}
+	for _, relationship := range m.Relationships {
+		columns = append(columns, relationship.GetColumns()...)
+	}
 	return columns
 }
 
@@ -49,6 +52,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		instance := m.Manager.Create()
 		rows.Scan(instance.GetFields()...)
+		instance.Clean()
 		instances = append(instances, instance)
 	}
 	response_data, err := json.Marshal(struct {
@@ -79,6 +83,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	instance := m.Manager.Create()
 	err := QueryRow(query, 1).Scan(instance.GetFields()...)
+	instance.Clean()
 
 	switch {
 	case err == sql.ErrNoRows:
