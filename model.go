@@ -2,6 +2,7 @@ package reja
 
 import (
 	"github.com/bor3ham/reja/attributes"
+	"github.com/bor3ham/reja/relationships"
 	"encoding/json"
 	"fmt"
   "database/sql"
@@ -15,6 +16,7 @@ type Model struct {
 	Table      string
 	IDColumn   string
 	Attributes []attributes.Attribute
+	Relationships []relationships.Relationship
 	Manager    Manager
 }
 
