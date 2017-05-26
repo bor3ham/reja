@@ -1,6 +1,7 @@
 package reja
 
 import (
+	"github.com/bor3ham/reja/attributes"
 	"encoding/json"
 	"fmt"
   "database/sql"
@@ -13,14 +14,14 @@ type Model struct {
 	Type       string
 	Table      string
 	IDColumn   string
-	Attributes []Field
+	Attributes []attributes.Attribute
 	Manager    Manager
 }
 
 func (m Model) FieldColumns() []string {
 	var columns []string
 	for _, attribute := range m.Attributes {
-		columns = append(columns, attribute.ColumnName)
+		columns = append(columns, attribute.GetColumns()...)
 	}
 	return columns
 }
