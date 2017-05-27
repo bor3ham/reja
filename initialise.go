@@ -5,5 +5,5 @@ import (
 )
 
 func Initialise(database *sql.DB) {
-  InitialiseDatabase(database)
+	InitialiseDatabase(database)
 }

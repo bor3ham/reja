@@ -1,24 +1,24 @@
 package reja
 
 import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
 	"github.com/bor3ham/reja/attributes"
 	"github.com/bor3ham/reja/relationships"
 	"github.com/gorilla/mux"
-	"encoding/json"
-	"fmt"
-  "database/sql"
 	"log"
 	"net/http"
 	"strings"
 )
 
 type Model struct {
-	Type       string
-	Table      string
-	IDColumn   string
-	Attributes []attributes.Attribute
+	Type          string
+	Table         string
+	IDColumn      string
+	Attributes    []attributes.Attribute
 	Relationships []relationships.Relationship
-	Manager    Manager
+	Manager       Manager
 }
 
 func (m Model) FieldColumns() []string {

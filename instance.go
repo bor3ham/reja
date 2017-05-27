@@ -2,5 +2,5 @@ package reja
 
 type Instance interface {
 	GetFields() []interface{}
-  Clean()
+	Clean()
 }
