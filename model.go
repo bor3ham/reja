@@ -3,6 +3,7 @@ package reja
 import (
 	"github.com/bor3ham/reja/attributes"
 	"github.com/bor3ham/reja/relationships"
+	"github.com/gorilla/mux"
 	"encoding/json"
 	"fmt"
   "database/sql"
@@ -67,6 +68,8 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 	query := fmt.Sprintf(
 		`
       select
@@ -82,7 +85,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		m.IDColumn,
 	)
 	instance := m.Manager.Create()
-	err := QueryRow(query, 1).Scan(instance.GetFields()...)
+	err := QueryRow(query, id).Scan(instance.GetFields()...)
 	instance.Clean()
 
 	switch {
