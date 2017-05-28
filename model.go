@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"github.com/bor3ham/reja/attributes"
+	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/relationships"
 	"github.com/gorilla/mux"
 	"log"
@@ -44,7 +46,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		strings.Join(m.FieldColumns(), ","),
 		m.Table,
 	)
-	rows, err := Query(query)
+	rows, err := database.Query(query)
 	if err != nil {
 		panic(err)
 	}
@@ -69,7 +71,11 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
+	string_id := vars["id"]
+	id, err := strconv.Atoi(string_id)
+	if err != nil {
+		panic(err)
+	}
 	query := fmt.Sprintf(
 		`
       select
@@ -85,7 +91,30 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		m.IDColumn,
 	)
 	instance := m.Manager.Create()
-	err := QueryRow(query, id).Scan(instance.GetFields()...)
+	err = database.QueryRow(query, id).Scan(instance.GetFields()...)
+
+	type RelationResult struct{
+		Values map[int]interface{}
+		Default interface{}
+	}
+	keyed_values := []RelationResult{}
+	for _, relationship := range m.Relationships {
+		keyed_values = append(keyed_values, RelationResult{
+			Values: relationship.GetKeyedValues("id = 1"),
+			Default: relationship.GetEmptyKeyedValue(),
+		})
+	}
+	instance_values := []interface{}{}
+	for _, value := range keyed_values {
+		item, exists := value.Values[id]
+		if exists {
+			instance_values = append(instance_values, item)
+		} else {
+			instance_values = append(instance_values, value.Default)
+		}
+	}
+	instance.SetValues(instance_values)
+
 	instance.Clean()
 
 	switch {

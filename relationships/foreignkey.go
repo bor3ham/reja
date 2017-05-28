@@ -8,3 +8,11 @@ type ForeignKey struct {
 func (a ForeignKey) GetColumns() []string {
   return []string{a.ColumnName}
 }
+
+func (a ForeignKey) GetEmptyKeyedValue() interface{} {
+  return nil
+}
+
+func (a ForeignKey) GetKeyedValues(filter string) map[int]interface{} {
+  return map[int]interface{}{}
+}

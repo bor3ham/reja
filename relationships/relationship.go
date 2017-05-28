@@ -2,6 +2,8 @@ package relationships
 
 type Relationship interface {
   GetColumns() []string
+  GetKeyedValues(string) map[int]interface{}
+  GetEmptyKeyedValue() interface{}
 }
 
 type PointerData struct {
@@ -11,6 +13,10 @@ type PointerData struct {
 
 type Pointer struct {
   Data *PointerData `json:"data"`
+}
+
+type Pointers struct {
+  Data []*PointerData `json:"data"`
 }
 
 func (p *Pointer) Clean() {
