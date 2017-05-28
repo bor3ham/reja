@@ -60,7 +60,6 @@ func (a ForeignKeyReverse) GetKeyedValues(filter string) map[int]interface{} {
     })
   }
   // ewww
-  // may be able to use type assertion
   return_values := map[int]interface{}{}
   for id, value := range values {
     return_values[id] = value

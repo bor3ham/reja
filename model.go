@@ -23,6 +23,11 @@ type Model struct {
 	Manager       Manager
 }
 
+type RelationResult struct{
+	Values map[int]interface{}
+	Default interface{}
+}
+
 func (m Model) FieldColumns() []string {
 	var columns []string
 	for _, attribute := range m.Attributes {
@@ -51,17 +56,49 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer rows.Close()
-	instances := make([]interface{}, 0)
+	instances := []Instance{}
 	for rows.Next() {
 		instance := m.Manager.Create()
 		rows.Scan(instance.GetFields()...)
 		instance.Clean()
 		instances = append(instances, instance)
 	}
+	ids := []string{}
+
+	for _, instance := range instances {
+		ids = append(ids, strconv.Itoa(instance.GetID()))
+	}
+	keyed_values := []RelationResult{}
+	for _, relationship := range m.Relationships {
+		keyed_values = append(keyed_values, RelationResult{
+			Values: relationship.GetKeyedValues(
+				fmt.Sprintf("id in (%s)", strings.Join(ids, ", ")),
+			),
+			Default: relationship.GetEmptyKeyedValue(),
+		})
+	}
+	for _, instance := range instances {
+		instance_values := []interface{}{}
+		for _, value := range keyed_values {
+			item, exists := value.Values[instance.GetID()]
+			if exists {
+				instance_values = append(instance_values, item)
+			} else {
+				instance_values = append(instance_values, value.Default)
+			}
+		}
+
+		instance.SetValues(instance_values)
+	}
+
+	general_instances := []interface{}{}
+	for _, instance := range instances {
+		general_instances = append(general_instances, instance)
+	}
 	response_data, err := json.Marshal(struct {
 		Data []interface{} `json:"data"`
 	}{
-		Data: instances,
+		Data: general_instances,
 	})
 	if err != nil {
 		panic(err)
@@ -93,10 +130,6 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	instance := m.Manager.Create()
 	err = database.QueryRow(query, id).Scan(instance.GetFields()...)
 
-	type RelationResult struct{
-		Values map[int]interface{}
-		Default interface{}
-	}
 	keyed_values := []RelationResult{}
 	for _, relationship := range m.Relationships {
 		keyed_values = append(keyed_values, RelationResult{
