@@ -2,7 +2,7 @@ package relationships
 
 type Relationship interface {
   GetColumns() []string
-  GetKeyedValues(string) map[int]interface{}
+  GetKeyedValues([]string) map[int]interface{}
   GetEmptyKeyedValue() interface{}
 }
 

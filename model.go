@@ -71,9 +71,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	keyed_values := []RelationResult{}
 	for _, relationship := range m.Relationships {
 		keyed_values = append(keyed_values, RelationResult{
-			Values: relationship.GetKeyedValues(
-				fmt.Sprintf("id in (%s)", strings.Join(ids, ", ")),
-			),
+			Values: relationship.GetKeyedValues(ids),
 			Default: relationship.GetEmptyKeyedValue(),
 		})
 	}
@@ -133,7 +131,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	keyed_values := []RelationResult{}
 	for _, relationship := range m.Relationships {
 		keyed_values = append(keyed_values, RelationResult{
-			Values: relationship.GetKeyedValues("id = 1"),
+			Values: relationship.GetKeyedValues([]string{strconv.Itoa(id)}),
 			Default: relationship.GetEmptyKeyedValue(),
 		})
 	}

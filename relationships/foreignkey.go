@@ -13,6 +13,6 @@ func (a ForeignKey) GetEmptyKeyedValue() interface{} {
   return nil
 }
 
-func (a ForeignKey) GetKeyedValues(filter string) map[int]interface{} {
+func (a ForeignKey) GetKeyedValues(ids []string) map[int]interface{} {
   return map[int]interface{}{}
 }

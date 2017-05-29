@@ -2,6 +2,7 @@ package relationships
 
 import (
   "fmt"
+  "strings"
   "github.com/bor3ham/reja/database"
 )
 
@@ -24,7 +25,9 @@ func (a ForeignKeyReverse) GetEmptyKeyedValue() interface{} {
 
 // get keyed values returns dictionary values (from query)
 // dictionary id: value
-func (a ForeignKeyReverse) GetKeyedValues(filter string) map[int]interface{} {
+func (a ForeignKeyReverse) GetKeyedValues(ids []string) map[int]interface{} {
+  filter := fmt.Sprintf("%s in (%s)", a.ColumnName, strings.Join(ids, ", "))
+
   // where id = 3
   // where id in (1,2,3,4,5,6,7,8)
   query := fmt.Sprintf(
