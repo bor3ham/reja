@@ -5,10 +5,12 @@ import (
   "fmt"
 )
 
-var Database *sql.DB
+var config struct {
+  Database *sql.DB
+}
 
 func InitialiseDatabase(database *sql.DB) {
-  Database = database
+  config.Database = database
 }
 
 func logQuery(query string) {
@@ -17,10 +19,10 @@ func logQuery(query string) {
 
 func QueryRow(query string, args ...interface{}) *sql.Row {
   logQuery(query)
-  return Database.QueryRow(query, args...)
+  return config.Database.QueryRow(query, args...)
 }
 
 func Query(query string, args ...interface{}) (*sql.Rows, error) {
   logQuery(query)
-  return Database.Query(query, args...)
+  return config.Database.Query(query, args...)
 }
