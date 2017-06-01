@@ -4,6 +4,12 @@ type Text struct {
   ColumnName string
 }
 
-func (a Text) GetColumns() []string {
-  return []string{a.ColumnName}
+func (t Text) GetColumnNames() []string {
+  return []string{t.ColumnName}
+}
+func (t Text) GetColumnVariables() []interface{} {
+  var destination *string
+  return []interface{}{
+    &destination,
+  }
 }

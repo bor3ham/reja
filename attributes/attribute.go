@@ -1,5 +1,6 @@
 package attributes
 
 type Attribute interface {
-  GetColumns() []string
+  GetColumnNames() []string
+  GetColumnVariables() []interface{}
 }

@@ -1,8 +1,7 @@
 package reja
 
 type Instance interface {
-  GetID() int
-	GetFields() []interface{}
+  GetID() string
+  SetID(string)
   SetValues(values []interface{})
-	Clean()
 }

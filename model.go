@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"github.com/bor3ham/reja/attributes"
 	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/relationships"
@@ -24,17 +23,28 @@ type Model struct {
 }
 
 type RelationResult struct{
-	Values map[int]interface{}
+	Values map[string]interface{}
 	Default interface{}
 }
 
-func (m Model) FieldColumns() []string {
-	var columns []string
+func (m Model) FieldVariables() []interface{} {
+	var fields []interface{}
 	for _, attribute := range m.Attributes {
-		columns = append(columns, attribute.GetColumns()...)
+		fields = append(fields, attribute.GetColumnVariables()...)
 	}
 	for _, relationship := range m.Relationships {
-		columns = append(columns, relationship.GetColumns()...)
+		fields = append(fields, relationship.GetColumnVariables()...)
+	}
+	return fields
+}
+
+func (m Model) FieldNames() []string {
+	var columns []string
+	for _, attribute := range m.Attributes {
+		columns = append(columns, attribute.GetColumnNames()...)
+	}
+	for _, relationship := range m.Relationships {
+		columns = append(columns, relationship.GetColumnNames()...)
 	}
 	return columns
 }
@@ -48,7 +58,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
       from %s
     `,
 		m.IDColumn,
-		strings.Join(m.FieldColumns(), ","),
+		strings.Join(m.FieldNames(), ","),
 		m.Table,
 	)
 	rows, err := database.Query(query)
@@ -56,37 +66,49 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer rows.Close()
-	instances := []Instance{}
-	for rows.Next() {
-		instance := m.Manager.Create()
-		rows.Scan(instance.GetFields()...)
-		instance.Clean()
-		instances = append(instances, instance)
-	}
-	ids := []string{}
 
-	for _, instance := range instances {
-		ids = append(ids, strconv.Itoa(instance.GetID()))
-	}
-	keyed_values := []RelationResult{}
-	for _, relationship := range m.Relationships {
-		keyed_values = append(keyed_values, RelationResult{
-			Values: relationship.GetKeyedValues(ids),
-			Default: relationship.GetEmptyKeyedValue(),
-		})
-	}
-	for _, instance := range instances {
-		instance_values := []interface{}{}
-		for _, value := range keyed_values {
-			item, exists := value.Values[instance.GetID()]
-			if exists {
-				instance_values = append(instance_values, item)
-			} else {
-				instance_values = append(instance_values, value.Default)
-			}
+	ids := []string{}
+	instances := []Instance{}
+	instance_fields := [][]interface{}{}
+	for rows.Next() {
+		var id string
+		fields := m.FieldVariables()
+		instance_fields = append(instance_fields, fields)
+		scan_fields := []interface{}{}
+		scan_fields = append(scan_fields, &id)
+		scan_fields = append(scan_fields, fields...)
+		err := rows.Scan(scan_fields...)
+		if err != nil {
+			panic(err)
 		}
 
-		instance.SetValues(instance_values)
+		instance := m.Manager.Create()
+		instance.SetID(id)
+		instances = append(instances, instance)
+
+		ids = append(ids, id)
+	}
+
+	relation_values := []RelationResult{}
+	for _, relationship := range m.Relationships {
+		relation_values = append(relation_values, RelationResult{
+			Values: relationship.GetValues(ids),
+			Default: relationship.GetDefaultValue(),
+		})
+	}
+	for instance_index, instance := range instances {
+		for _, value := range relation_values {
+			item, exists := value.Values[instance.GetID()]
+			if exists {
+				instance_fields[instance_index] = append(instance_fields[instance_index], item)
+			} else {
+				instance_fields[instance_index] = append(instance_fields[instance_index], value.Default)
+			}
+		}
+	}
+
+	for instance_index, instance := range instances {
+		instance.SetValues(instance_fields[instance_index])
 	}
 
 	general_instances := []interface{}{}
@@ -106,11 +128,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	string_id := vars["id"]
-	id, err := strconv.Atoi(string_id)
-	if err != nil {
-		panic(err)
-	}
+	id := vars["id"]
 	query := fmt.Sprintf(
 		`
       select
@@ -121,32 +139,16 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
       limit 1
     `,
 		m.IDColumn,
-		strings.Join(m.FieldColumns(), ","),
+		strings.Join(m.FieldNames(), ","),
 		m.Table,
 		m.IDColumn,
 	)
-	instance := m.Manager.Create()
-	err = database.QueryRow(query, id).Scan(instance.GetFields()...)
 
-	keyed_values := []RelationResult{}
-	for _, relationship := range m.Relationships {
-		keyed_values = append(keyed_values, RelationResult{
-			Values: relationship.GetKeyedValues([]string{strconv.Itoa(id)}),
-			Default: relationship.GetEmptyKeyedValue(),
-		})
-	}
-	instance_values := []interface{}{}
-	for _, value := range keyed_values {
-		item, exists := value.Values[id]
-		if exists {
-			instance_values = append(instance_values, item)
-		} else {
-			instance_values = append(instance_values, value.Default)
-		}
-	}
-	instance.SetValues(instance_values)
-
-	instance.Clean()
+	fields := m.FieldVariables()
+	scan_fields := []interface{}{}
+	scan_fields = append(scan_fields, &id)
+	scan_fields = append(scan_fields, fields...)
+	err := database.QueryRow(query, id).Scan(scan_fields...)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -154,6 +156,26 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	case err != nil:
 		log.Fatal(err)
 	default:
+		instance := m.Manager.Create()
+		instance.SetID(id)
+
+		relation_values := []RelationResult{}
+		for _, relationship := range m.Relationships {
+			relation_values = append(relation_values, RelationResult{
+				Values: relationship.GetValues([]string{id}),
+				Default: relationship.GetDefaultValue(),
+			})
+		}
+		for _, value := range relation_values {
+			item, exists := value.Values[id]
+			if exists {
+				fields = append(fields, item)
+			} else {
+				fields = append(fields, value.Default)
+			}
+		}
+		instance.SetValues(fields)
+
 		response_data, err := json.Marshal(struct {
 			Data interface{} `json:"data"`
 		}{

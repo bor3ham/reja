@@ -5,14 +5,19 @@ type ForeignKey struct {
   Type string
 }
 
-func (a ForeignKey) GetColumns() []string {
-  return []string{a.ColumnName}
+func (fk ForeignKey) GetColumnNames() []string {
+  return []string{fk.ColumnName}
+}
+func (fk ForeignKey) GetColumnVariables() []interface{} {
+  var destination *string
+  return []interface{}{
+    &destination,
+  }
 }
 
-func (a ForeignKey) GetEmptyKeyedValue() interface{} {
+func (fk ForeignKey) GetDefaultValue() interface{} {
   return nil
 }
-
-func (a ForeignKey) GetKeyedValues(ids []string) map[int]interface{} {
-  return map[int]interface{}{}
+func (fk ForeignKey) GetValues(ids []string) map[string]interface{} {
+  return map[string]interface{}{}
 }

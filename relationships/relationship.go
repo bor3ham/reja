@@ -1,14 +1,16 @@
 package relationships
 
 type Relationship interface {
-  GetColumns() []string
-  GetKeyedValues([]string) map[int]interface{}
-  GetEmptyKeyedValue() interface{}
+  GetColumnNames() []string
+  GetColumnVariables() []interface{}
+
+  GetDefaultValue() interface{}
+  GetValues([]string) map[string]interface{}
 }
 
 type PointerData struct {
   Type string `json:"type"`
-  ID interface{} `json:"id"`
+  ID *string `json:"id"`
 }
 
 type Pointer struct {

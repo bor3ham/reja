@@ -13,20 +13,20 @@ type ForeignKeyReverse struct {
   Type string
 }
 
-func (a ForeignKeyReverse) GetColumns() []string {
+func (fkr ForeignKeyReverse) GetColumnNames() []string {
   return []string{}
 }
+func (fkr ForeignKeyReverse) GetColumnVariables() []interface{} {
+  return []interface{}{}
+}
 
-func (a ForeignKeyReverse) GetEmptyKeyedValue() interface{} {
+func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
   return &Pointers{
     Data: []*PointerData{},
   }
 }
-
-// get keyed values returns dictionary values (from query)
-// dictionary id: value
-func (a ForeignKeyReverse) GetKeyedValues(ids []string) map[int]interface{} {
-  filter := fmt.Sprintf("%s in (%s)", a.ColumnName, strings.Join(ids, ", "))
+func (fkr ForeignKeyReverse) GetValues(ids []string) map[string]interface{} {
+  filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
   // where id = 3
   // where id in (1,2,3,4,5,6,7,8)
@@ -38,9 +38,9 @@ func (a ForeignKeyReverse) GetKeyedValues(ids []string) map[int]interface{} {
       from %s
       where %s
     `,
-    a.SourceIDColumn,
-    a.ColumnName,
-    a.SourceTable,
+    fkr.SourceIDColumn,
+    fkr.ColumnName,
+    fkr.SourceTable,
     filter,
   )
   rows, err := database.Query(query)
@@ -48,9 +48,9 @@ func (a ForeignKeyReverse) GetKeyedValues(ids []string) map[int]interface{} {
     panic(err)
   }
   defer rows.Close()
-  values := map[int]*Pointers{}
+  values := map[string]*Pointers{}
   for rows.Next() {
-    var id, my_id int
+    var id, my_id string
     rows.Scan(&id, &my_id)
     value, exists := values[my_id]
     if !exists {
@@ -58,14 +58,13 @@ func (a ForeignKeyReverse) GetKeyedValues(ids []string) map[int]interface{} {
       values[my_id] = value
     }
     value.Data = append(value.Data, &PointerData{
-      ID: id,
-      Type: a.Type,
+      ID: &id,
+      Type: fkr.Type,
     })
   }
-  // ewww
-  return_values := map[int]interface{}{}
+  general_values := map[string]interface{}{}
   for id, value := range values {
-    return_values[id] = value
+    general_values[id] = value
   }
-  return return_values
+  return general_values
 }
