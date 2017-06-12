@@ -49,6 +49,11 @@ func (m Model) FieldNames() []string {
 	return columns
 }
 
+func logQueryCount(r *http.Request) {
+	num_queries := database.GetRequestQueryCount(r)
+	fmt.Println("Database queries:", num_queries)
+}
+
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	query := fmt.Sprintf(
 		`
@@ -61,7 +66,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		strings.Join(m.FieldNames(), ","),
 		m.Table,
 	)
-	rows, err := database.Query(query)
+	rows, err := database.RequestQuery(r, query)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +97,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	relation_values := []RelationResult{}
 	for _, relationship := range m.Relationships {
 		relation_values = append(relation_values, RelationResult{
-			Values: relationship.GetValues(ids),
+			Values: relationship.GetValues(r, ids),
 			Default: relationship.GetDefaultValue(),
 		})
 	}
@@ -115,14 +120,16 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	for _, instance := range instances {
 		general_instances = append(general_instances, instance)
 	}
-	response_data, err := json.Marshal(struct {
+	response_data, err := json.MarshalIndent(struct {
 		Data []interface{} `json:"data"`
 	}{
 		Data: general_instances,
-	})
+	}, "", "    ")
 	if err != nil {
 		panic(err)
 	}
+
+	logQueryCount(r)
 	fmt.Fprintf(w, string(response_data))
 }
 
@@ -148,7 +155,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	scan_fields := []interface{}{}
 	scan_fields = append(scan_fields, &id)
 	scan_fields = append(scan_fields, fields...)
-	err := database.QueryRow(query, id).Scan(scan_fields...)
+	err := database.RequestQueryRow(r, query, id).Scan(scan_fields...)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -162,7 +169,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		relation_values := []RelationResult{}
 		for _, relationship := range m.Relationships {
 			relation_values = append(relation_values, RelationResult{
-				Values: relationship.GetValues([]string{id}),
+				Values: relationship.GetValues(r, []string{id}),
 				Default: relationship.GetDefaultValue(),
 			})
 		}
@@ -176,14 +183,16 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		instance.SetValues(fields)
 
-		response_data, err := json.Marshal(struct {
+		response_data, err := json.MarshalIndent(struct {
 			Data interface{} `json:"data"`
 		}{
 			Data: instance,
-		})
+		}, "", "    ")
 		if err != nil {
 			panic(err)
 		}
+
+		logQueryCount(r)
 		fmt.Fprintf(w, string(response_data))
 	}
 }

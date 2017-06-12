@@ -1,5 +1,9 @@
 package relationships
 
+import (
+    "net/http"
+)
+
 type ForeignKey struct {
   ColumnName string
   Type string
@@ -18,6 +22,6 @@ func (fk ForeignKey) GetColumnVariables() []interface{} {
 func (fk ForeignKey) GetDefaultValue() interface{} {
   return nil
 }
-func (fk ForeignKey) GetValues(ids []string) map[string]interface{} {
+func (fk ForeignKey) GetValues(r *http.Request, ids []string) map[string]interface{} {
   return map[string]interface{}{}
 }

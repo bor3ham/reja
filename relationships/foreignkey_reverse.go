@@ -4,6 +4,7 @@ import (
   "fmt"
   "strings"
   "github.com/bor3ham/reja/database"
+    "net/http"
 )
 
 type ForeignKeyReverse struct {
@@ -25,7 +26,7 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
     Data: []*PointerData{},
   }
 }
-func (fkr ForeignKeyReverse) GetValues(ids []string) map[string]interface{} {
+func (fkr ForeignKeyReverse) GetValues(r *http.Request, ids []string) map[string]interface{} {
   filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
   // where id = 3
@@ -43,7 +44,7 @@ func (fkr ForeignKeyReverse) GetValues(ids []string) map[string]interface{} {
     fkr.SourceTable,
     filter,
   )
-  rows, err := database.Query(query)
+  rows, err := database.RequestQuery(r, query)
   if err != nil {
     panic(err)
   }

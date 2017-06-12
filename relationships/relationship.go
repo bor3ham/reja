@@ -1,11 +1,15 @@
 package relationships
 
+import (
+    "net/http"
+)
+
 type Relationship interface {
   GetColumnNames() []string
   GetColumnVariables() []interface{}
 
   GetDefaultValue() interface{}
-  GetValues([]string) map[string]interface{}
+  GetValues(*http.Request, []string) map[string]interface{}
 }
 
 type PointerData struct {
