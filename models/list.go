@@ -1,41 +1,80 @@
 package models
 
 import (
+	"math"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/instances"
+	rejaHttp "github.com/bor3ham/reja/http"
 	"net/http"
-	"strconv"
 	"strings"
 )
+
+const defaultPageSize = 5
+const maximumPageSize = 400
+
+func JSONMarshal(v interface{}, safeEncoding bool) ([]byte, error) {
+	b, err := json.MarshalIndent(v, "", "    ")
+
+	if safeEncoding {
+		b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+		b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+		b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+	}
+	return b, err
+}
+
+func badRequest(w http.ResponseWriter, title string, detail string) {
+	errorBlob := struct{
+		Exceptions []interface{} `json:"errors"`
+	}{}
+	errorBlob.Exceptions = append(errorBlob.Exceptions, struct{
+		Title string
+		Detail string
+	}{
+		Title: title,
+		Detail: detail,
+	})
+	errorText, err := json.MarshalIndent(errorBlob, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprintf(w, string(errorText))
+}
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	queryStrings := r.URL.Query()
 
-	var pageSize int
-	pageSizeQueries, ok := queryStrings["page[size]"]
-	if ok {
-		if len(pageSizeQueries) == 0 {
-			panic("Empty page size argument given")
-		}
-		if len(pageSizeQueries) > 1 {
-			panic("Too many page size arguments given")
-		}
-		var err error
-		pageSize, err = strconv.Atoi(pageSizeQueries[0])
-		if err != nil {
-			panic("Invalid page size argument given")
-		}
-		if pageSize < 1 {
-			panic("Page size given less than 1")
-		}
-		if pageSize > 400 {
-			panic("Page size given greater than 400")
-		}
-	} else {
-		pageSize = 5
+	minPageSize := 1
+	maxPageSize := maximumPageSize
+	pageSize, err := rejaHttp.GetIntParam(
+		queryStrings,
+		"page[size]",
+		"Page Size",
+		defaultPageSize,
+		&minPageSize,
+		&maxPageSize,
+	)
+	if err != nil {
+		badRequest(w, "Bad Page Size Parameter", err.Error())
+		return
 	}
+	minPageOffset := 1
+	pageOffset, err := rejaHttp.GetIntParam(
+		queryStrings,
+		"page[offset]",
+		"Page Offset",
+		1,
+		&minPageOffset,
+		nil,
+	)
+	if err != nil {
+		badRequest(w, "Bad Page Offset Parameter", err.Error())
+		return
+	}
+	offset := (pageOffset - 1) * pageSize
 
 	countQuery := fmt.Sprintf(
 		`
@@ -46,9 +85,20 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		m.Table,
 	)
 	var count int
-	err := database.RequestQueryRow(r, countQuery).Scan(&count)
+	err = database.RequestQueryRow(r, countQuery).Scan(&count)
 	if err != nil {
 		panic(err)
+	}
+	lastPage := int(math.Ceil(float64(count) / float64(pageSize)))
+
+	var nextUrl, prevUrl string
+	if pageOffset < lastPage {
+		nextUrl = r.Host + r.URL.Path
+		nextUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset + 1)
+	}
+	if pageOffset > 1 {
+		prevUrl = r.Host + r.URL.Path
+		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset - 1)
 	}
 
 	resultsQuery := fmt.Sprintf(
@@ -58,11 +108,13 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
         %s
       from %s
       limit %d
+      offset %d
     `,
 		m.IDColumn,
 		strings.Join(m.FieldNames(), ","),
 		m.Table,
 		pageSize,
+		offset,
 	)
 	rows, err := database.RequestQuery(r, resultsQuery)
 	if err != nil {
@@ -114,29 +166,35 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		instance.SetValues(instance_fields[instance_index])
 	}
 
-	page_links := map[string]string{}
-	current_url := "http://here"
-	page_links["first"] = fmt.Sprintf("%s", current_url)
-	// page_links["last"] = fmt.Sprintf("%s?last", current_url)
-	// page_links["prev"] = fmt.Sprintf("%s?prev", current_url)
-	// page_links["next"] = fmt.Sprintf("%s?next", current_url)
-	page_meta := map[string]int{}
-	page_meta["total"] = count
-	page_meta["count"] = len(instances)
-
-	general_instances := []interface{}{}
-	for _, instance := range instances {
-		general_instances = append(general_instances, instance)
+	pageLinks := map[string]string{}
+	pageLinks["first"] = r.Host + r.URL.Path
+	pageLinks["last"] = r.Host + r.URL.Path + fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, lastPage)
+	if prevUrl != "" {
+		pageLinks["prev"] = prevUrl
 	}
-	response_data, err := json.MarshalIndent(struct {
+	if nextUrl != "" {
+		pageLinks["next"] = nextUrl
+	}
+	pageMeta := map[string]int{}
+	pageMeta["total"] = count
+	pageMeta["count"] = len(instances)
+
+	generalInstances := []interface{}{}
+	for _, instance := range instances {
+		generalInstances = append(generalInstances, instance)
+	}
+
+	responseBlob := struct {
 		Links    interface{}   `json:"links"`
 		Metadata interface{}   `json:"meta"`
 		Data     []interface{} `json:"data"`
 	}{
-		Links:    page_links,
-		Metadata: page_meta,
-		Data:     general_instances,
-	}, "", "    ")
+		Links:    pageLinks,
+		Metadata: pageMeta,
+		Data:     generalInstances,
+	}
+
+	response_data, err := JSONMarshal(responseBlob, true)
 	if err != nil {
 		panic(err)
 	}
