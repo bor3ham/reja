@@ -1,4 +1,4 @@
-package reja
+package instances
 
 type Instance interface {
   GetID() string

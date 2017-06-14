@@ -1,7 +1,11 @@
 package reja
 
-var Models map[string]Model = make(map[string]Model)
+import (
+  "github.com/bor3ham/reja/models"
+)
 
-func RegisterModel(m Model) {
+var Models map[string]models.Model = make(map[string]models.Model)
+
+func RegisterModel(m models.Model) {
 	Models[m.Type] = m
 }
