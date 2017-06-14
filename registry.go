@@ -1,7 +1,7 @@
 package reja
 
 import (
-  "github.com/bor3ham/reja/models"
+	"github.com/bor3ham/reja/models"
 )
 
 var Models map[string]models.Model = make(map[string]models.Model)

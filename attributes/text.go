@@ -1,15 +1,15 @@
 package attributes
 
 type Text struct {
-  ColumnName string
+	ColumnName string
 }
 
 func (t Text) GetColumnNames() []string {
-  return []string{t.ColumnName}
+	return []string{t.ColumnName}
 }
 func (t Text) GetColumnVariables() []interface{} {
-  var destination *string
-  return []interface{}{
-    &destination,
-  }
+	var destination *string
+	return []interface{}{
+		&destination,
+	}
 }

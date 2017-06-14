@@ -1,21 +1,21 @@
 package models
 
 import (
-    "database/sql"
-    "encoding/json"
-    "fmt"
-    "github.com/bor3ham/reja/database"
-    "github.com/gorilla/mux"
-    "log"
-    "net/http"
-    "strings"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"github.com/bor3ham/reja/database"
+	"github.com/gorilla/mux"
+	"log"
+	"net/http"
+	"strings"
 )
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    id := vars["id"]
-    query := fmt.Sprintf(
-        `
+	vars := mux.Vars(r)
+	id := vars["id"]
+	query := fmt.Sprintf(
+		`
       select
         %s,
         %s
@@ -23,56 +23,54 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
       where %s = $1
       limit 1
     `,
-        m.IDColumn,
-        strings.Join(m.FieldNames(), ","),
-        m.Table,
-        m.IDColumn,
-    )
+		m.IDColumn,
+		strings.Join(m.FieldNames(), ","),
+		m.Table,
+		m.IDColumn,
+	)
 
-    fields := m.FieldVariables()
-    scan_fields := []interface{}{}
-    scan_fields = append(scan_fields, &id)
-    scan_fields = append(scan_fields, fields...)
-    err := database.RequestQueryRow(r, query, id).Scan(scan_fields...)
+	fields := m.FieldVariables()
+	scan_fields := []interface{}{}
+	scan_fields = append(scan_fields, &id)
+	scan_fields = append(scan_fields, fields...)
+	err := database.RequestQueryRow(r, query, id).Scan(scan_fields...)
 
-    switch {
-    case err == sql.ErrNoRows:
-        fmt.Fprintf(w, "No %s with that ID", m.Type)
-    case err != nil:
-        log.Fatal(err)
-    default:
-        instance := m.Manager.Create()
-        instance.SetID(id)
+	switch {
+	case err == sql.ErrNoRows:
+		fmt.Fprintf(w, "No %s with that ID", m.Type)
+	case err != nil:
+		log.Fatal(err)
+	default:
+		instance := m.Manager.Create()
+		instance.SetID(id)
 
-        relation_values := []RelationResult{}
-        for _, relationship := range m.Relationships {
-            relation_values = append(relation_values, RelationResult{
-                Values: relationship.GetValues(r, []string{id}),
-                Default: relationship.GetDefaultValue(),
-            })
-        }
-        for _, value := range relation_values {
-            item, exists := value.Values[id]
-            if exists {
-                fields = append(fields, item)
-            } else {
-                fields = append(fields, value.Default)
-            }
-        }
-        instance.SetValues(fields)
+		relation_values := []RelationResult{}
+		for _, relationship := range m.Relationships {
+			relation_values = append(relation_values, RelationResult{
+				Values:  relationship.GetValues(r, []string{id}),
+				Default: relationship.GetDefaultValue(),
+			})
+		}
+		for _, value := range relation_values {
+			item, exists := value.Values[id]
+			if exists {
+				fields = append(fields, item)
+			} else {
+				fields = append(fields, value.Default)
+			}
+		}
+		instance.SetValues(fields)
 
-        response_data, err := json.MarshalIndent(struct {
-            Data interface{} `json:"data"`
-        }{
-            Data: instance,
-        }, "", "    ")
-        if err != nil {
-            panic(err)
-        }
+		response_data, err := json.MarshalIndent(struct {
+			Data interface{} `json:"data"`
+		}{
+			Data: instance,
+		}, "", "    ")
+		if err != nil {
+			panic(err)
+		}
 
-        logQueryCount(r)
-        fmt.Fprintf(w, string(response_data))
-    }
+		logQueryCount(r)
+		fmt.Fprintf(w, string(response_data))
+	}
 }
-
-
