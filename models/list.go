@@ -1,13 +1,13 @@
 package models
 
 import (
-	"math"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/instances"
 	rejaHttp "github.com/bor3ham/reja/http"
+	"github.com/bor3ham/reja/instances"
+	"math"
 	"net/http"
 	"strings"
 )
@@ -27,14 +27,14 @@ func JSONMarshal(v interface{}, safeEncoding bool) ([]byte, error) {
 }
 
 func badRequest(w http.ResponseWriter, title string, detail string) {
-	errorBlob := struct{
+	errorBlob := struct {
 		Exceptions []interface{} `json:"errors"`
 	}{}
-	errorBlob.Exceptions = append(errorBlob.Exceptions, struct{
-		Title string
+	errorBlob.Exceptions = append(errorBlob.Exceptions, struct {
+		Title  string
 		Detail string
 	}{
-		Title: title,
+		Title:  title,
 		Detail: detail,
 	})
 	errorText, err := json.MarshalIndent(errorBlob, "", "    ")
@@ -94,11 +94,11 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	var nextUrl, prevUrl string
 	if pageOffset < lastPage {
 		nextUrl = r.Host + r.URL.Path
-		nextUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset + 1)
+		nextUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset+1)
 	}
 	if pageOffset > 1 {
 		prevUrl = r.Host + r.URL.Path
-		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset - 1)
+		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
 	resultsQuery := fmt.Sprintf(

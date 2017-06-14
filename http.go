@@ -1,8 +1,8 @@
 package reja
 
 import (
-	"github.com/gorilla/mux"
 	"github.com/bor3ham/reja/models"
+	"github.com/gorilla/mux"
 )
 
 func RegisterHandlers(router *mux.Router, model models.Model, path string) {
