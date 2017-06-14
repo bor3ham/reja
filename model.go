@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"strconv"
 )
 
 type Model struct {
@@ -55,18 +56,60 @@ func logQueryCount(r *http.Request) {
 }
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
-	query := fmt.Sprintf(
+	queryStrings := r.URL.Query()
+
+	var pageSize int
+	pageSizeQueries, ok := queryStrings["page[size]"]
+	if ok {
+		if len(pageSizeQueries) == 0 {
+			panic("Empty page size argument given")
+		}
+		if len(pageSizeQueries) > 1 {
+			panic("Too many page size arguments given")
+		}
+		var err error
+		pageSize, err = strconv.Atoi(pageSizeQueries[0])
+		if err != nil {
+			panic("Invalid page size argument given")
+		}
+		if pageSize < 1 {
+			panic("Page size given less than 1")
+		}
+		if pageSize > 400 {
+			panic("Page size given greater than 400")
+		}
+	} else {
+		pageSize = 5
+	}
+
+	countQuery := fmt.Sprintf(
+		`
+		select
+			count(*)
+		from %s
+		`,
+		m.Table,
+	)
+	var count int
+	err := database.RequestQueryRow(r, countQuery).Scan(&count)
+	if err != nil {
+		panic(err)
+	}
+
+	resultsQuery := fmt.Sprintf(
 		`
       select
         %s,
         %s
       from %s
+      limit %d
     `,
 		m.IDColumn,
 		strings.Join(m.FieldNames(), ","),
 		m.Table,
+		pageSize,
 	)
-	rows, err := database.RequestQuery(r, query)
+	rows, err := database.RequestQuery(r, resultsQuery)
 	if err != nil {
 		panic(err)
 	}
@@ -116,13 +159,27 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		instance.SetValues(instance_fields[instance_index])
 	}
 
+	page_links := map[string]string{}
+	current_url := "http://here"
+	page_links["first"] = fmt.Sprintf("%s", current_url)
+	// page_links["last"] = fmt.Sprintf("%s?last", current_url)
+	// page_links["prev"] = fmt.Sprintf("%s?prev", current_url)
+	// page_links["next"] = fmt.Sprintf("%s?next", current_url)
+	page_meta := map[string]int{}
+	page_meta["total"] = count
+	page_meta["count"] = len(instances)
+
 	general_instances := []interface{}{}
 	for _, instance := range instances {
 		general_instances = append(general_instances, instance)
 	}
 	response_data, err := json.MarshalIndent(struct {
+		Links interface{} `json:"links"`
+		Metadata interface{} `json:"meta"`
 		Data []interface{} `json:"data"`
 	}{
+		Links: page_links,
+		Metadata: page_meta,
 		Data: general_instances,
 	}, "", "    ")
 	if err != nil {
