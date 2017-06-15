@@ -166,14 +166,18 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		instance.SetValues(instance_fields[instance_index])
 	}
 
-	pageLinks := map[string]string{}
-	pageLinks["first"] = r.Host + r.URL.Path
-	pageLinks["last"] = r.Host + r.URL.Path + fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, lastPage)
+	pageLinks := map[string]*string{}
+	firstPageLink := r.Host + r.URL.Path
+	pageLinks["first"] = &firstPageLink
+	lastPageLink := r.Host + r.URL.Path + fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, lastPage)
+	pageLinks["last"] = &lastPageLink
+	pageLinks["prev"] = nil
 	if prevUrl != "" {
-		pageLinks["prev"] = prevUrl
+		pageLinks["prev"] = &prevUrl
 	}
+	pageLinks["next"] = nil
 	if nextUrl != "" {
-		pageLinks["next"] = nextUrl
+		pageLinks["next"] = &nextUrl
 	}
 	pageMeta := map[string]int{}
 	pageMeta["total"] = count
