@@ -27,6 +27,9 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 	}
 }
 func (fkr ForeignKeyReverse) GetValues(r *http.Request, ids []string) map[string]interface{} {
+	if len(ids) == 0 {
+		return map[string]interface{}{}
+	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
 	// where id = 3

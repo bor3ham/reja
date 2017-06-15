@@ -27,6 +27,9 @@ func (m2m ManyToMany) GetDefaultValue() interface{} {
 	}
 }
 func (m2m ManyToMany) GetValues(r *http.Request, ids []string) map[string]interface{} {
+	if len(ids) == 0 {
+		return map[string]interface{}{}
+	}
 	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(ids, ", "))
 	query := fmt.Sprintf(
 		`
