@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/bor3ham/reja/database"
+	"github.com/bor3ham/reja/context"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -12,6 +12,8 @@ import (
 )
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
+	rc := context.RequestContext{Request: r}
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 	query := fmt.Sprintf(
@@ -33,7 +35,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	scan_fields := []interface{}{}
 	scan_fields = append(scan_fields, &id)
 	scan_fields = append(scan_fields, fields...)
-	err := database.RequestQueryRow(r, query, id).Scan(scan_fields...)
+	err := rc.QueryRow(query, id).Scan(scan_fields...)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -47,7 +49,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		relation_values := []RelationResult{}
 		for _, relationship := range m.Relationships {
 			relation_values = append(relation_values, RelationResult{
-				Values:  relationship.GetValues(r, []string{id}),
+				Values:  relationship.GetValues(&rc, []string{id}),
 				Default: relationship.GetDefaultValue(),
 			})
 		}
@@ -70,7 +72,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		logQueryCount(r)
+		logQueryCount(rc.GetQueryCount())
 		fmt.Fprintf(w, string(response_data))
 	}
 }

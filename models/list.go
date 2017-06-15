@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/bor3ham/reja/database"
+	"github.com/bor3ham/reja/context"
 	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/bor3ham/reja/instances"
 	"math"
@@ -45,6 +45,7 @@ func badRequest(w http.ResponseWriter, title string, detail string) {
 }
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
+	rc := context.RequestContext{Request: r}
 	queryStrings := r.URL.Query()
 
 	minPageSize := 1
@@ -85,7 +86,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		m.Table,
 	)
 	var count int
-	err = database.RequestQueryRow(r, countQuery).Scan(&count)
+	err = rc.QueryRow(countQuery).Scan(&count)
 	if err != nil {
 		panic(err)
 	}
@@ -116,7 +117,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		pageSize,
 		offset,
 	)
-	rows, err := database.RequestQuery(r, resultsQuery)
+	rows, err := rc.Query(resultsQuery)
 	if err != nil {
 		panic(err)
 	}
@@ -147,7 +148,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	relation_values := []RelationResult{}
 	for _, relationship := range m.Relationships {
 		relation_values = append(relation_values, RelationResult{
-			Values:  relationship.GetValues(r, ids),
+			Values:  relationship.GetValues(&rc, ids),
 			Default: relationship.GetDefaultValue(),
 		})
 	}
@@ -203,6 +204,6 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	logQueryCount(r)
+	logQueryCount(rc.GetQueryCount())
 	fmt.Fprintf(w, string(response_data))
 }

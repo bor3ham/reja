@@ -2,8 +2,7 @@ package relationships
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/database"
-	"net/http"
+	"github.com/bor3ham/reja/context"
 	"strings"
 )
 
@@ -26,7 +25,7 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 		Data: []*PointerData{},
 	}
 }
-func (fkr ForeignKeyReverse) GetValues(r *http.Request, ids []string) map[string]interface{} {
+func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[string]interface{} {
 	if len(ids) == 0 {
 		return map[string]interface{}{}
 	}
@@ -47,7 +46,7 @@ func (fkr ForeignKeyReverse) GetValues(r *http.Request, ids []string) map[string
 		fkr.SourceTable,
 		filter,
 	)
-	rows, err := database.RequestQuery(r, query)
+	rows, err := c.Query(query)
 	if err != nil {
 		panic(err)
 	}

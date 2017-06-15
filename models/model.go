@@ -3,10 +3,8 @@ package models
 import (
 	"fmt"
 	"github.com/bor3ham/reja/attributes"
-	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/managers"
 	"github.com/bor3ham/reja/relationships"
-	"net/http"
 )
 
 type Model struct {
@@ -45,7 +43,6 @@ func (m Model) FieldNames() []string {
 	return columns
 }
 
-func logQueryCount(r *http.Request) {
-	num_queries := database.GetRequestQueryCount(r)
-	fmt.Println("Database queries:", num_queries)
+func logQueryCount(count int) {
+	fmt.Println("Database queries:", count)
 }

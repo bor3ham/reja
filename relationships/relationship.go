@@ -1,7 +1,7 @@
 package relationships
 
 import (
-	"net/http"
+	"github.com/bor3ham/reja/context"
 )
 
 type Relationship interface {
@@ -9,7 +9,7 @@ type Relationship interface {
 	GetColumnVariables() []interface{}
 
 	GetDefaultValue() interface{}
-	GetValues(*http.Request, []string) map[string]interface{}
+	GetValues(context.Context, []string) map[string]interface{}
 }
 
 type PointerData struct {

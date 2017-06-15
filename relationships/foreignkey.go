@@ -1,7 +1,7 @@
 package relationships
 
 import (
-	"net/http"
+	"github.com/bor3ham/reja/context"
 )
 
 type ForeignKey struct {
@@ -22,6 +22,6 @@ func (fk ForeignKey) GetColumnVariables() []interface{} {
 func (fk ForeignKey) GetDefaultValue() interface{} {
 	return nil
 }
-func (fk ForeignKey) GetValues(r *http.Request, ids []string) map[string]interface{} {
+func (fk ForeignKey) GetValues(c context.Context, ids []string) map[string]interface{} {
 	return map[string]interface{}{}
 }

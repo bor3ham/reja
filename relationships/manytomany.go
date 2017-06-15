@@ -2,8 +2,7 @@ package relationships
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/database"
-	"net/http"
+	"github.com/bor3ham/reja/context"
 	"strings"
 )
 
@@ -26,7 +25,7 @@ func (m2m ManyToMany) GetDefaultValue() interface{} {
 		Data: []*PointerData{},
 	}
 }
-func (m2m ManyToMany) GetValues(r *http.Request, ids []string) map[string]interface{} {
+func (m2m ManyToMany) GetValues(c context.Context, ids []string) map[string]interface{} {
 	if len(ids) == 0 {
 		return map[string]interface{}{}
 	}
@@ -44,7 +43,7 @@ func (m2m ManyToMany) GetValues(r *http.Request, ids []string) map[string]interf
 		m2m.Table,
 		filter,
 	)
-	rows, err := database.RequestQuery(r, query)
+	rows, err := c.Query(query)
 	if err != nil {
 		panic(err)
 	}
