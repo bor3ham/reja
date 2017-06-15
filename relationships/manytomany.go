@@ -7,10 +7,10 @@ import (
 )
 
 type ManyToMany struct {
-	Table    string
-	OwnIDColumn string
+	Table         string
+	OwnIDColumn   string
 	OtherIDColumn string
-	OtherType string
+	OtherType     string
 }
 
 func (m2m ManyToMany) GetColumnNames() []string {

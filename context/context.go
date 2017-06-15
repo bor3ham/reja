@@ -1,8 +1,8 @@
 package context
 
 import (
-	"github.com/bor3ham/reja/database"
 	"database/sql"
+	"github.com/bor3ham/reja/database"
 	gorillaContext "github.com/gorilla/context"
 	"net/http"
 )
@@ -15,6 +15,7 @@ type Context interface {
 type RequestContext struct {
 	Request *http.Request
 }
+
 func (rc *RequestContext) incrementQueryCount() {
 	queries := rc.GetQueryCount()
 	queries += 1
