@@ -1,8 +1,6 @@
 package models
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	rejaHttp "github.com/bor3ham/reja/http"
@@ -14,35 +12,6 @@ import (
 
 const defaultPageSize = 5
 const maximumPageSize = 400
-
-func JSONMarshal(v interface{}, safeEncoding bool) ([]byte, error) {
-	b, err := json.MarshalIndent(v, "", "    ")
-
-	if safeEncoding {
-		b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
-		b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
-		b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
-	}
-	return b, err
-}
-
-func badRequest(w http.ResponseWriter, title string, detail string) {
-	errorBlob := struct {
-		Exceptions []interface{} `json:"errors"`
-	}{}
-	errorBlob.Exceptions = append(errorBlob.Exceptions, struct {
-		Title  string
-		Detail string
-	}{
-		Title:  title,
-		Detail: detail,
-	})
-	errorText, err := json.MarshalIndent(errorBlob, "", "    ")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Fprintf(w, string(errorText))
-}
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	rc := context.RequestContext{Request: r}
@@ -59,7 +28,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		&maxPageSize,
 	)
 	if err != nil {
-		badRequest(w, "Bad Page Size Parameter", err.Error())
+		rejaHttp.BadRequest(w, "Bad Page Size Parameter", err.Error())
 		return
 	}
 	minPageOffset := 1
@@ -72,7 +41,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		nil,
 	)
 	if err != nil {
-		badRequest(w, "Bad Page Offset Parameter", err.Error())
+		rejaHttp.BadRequest(w, "Bad Page Offset Parameter", err.Error())
 		return
 	}
 	offset := (pageOffset - 1) * pageSize
@@ -199,11 +168,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		Data:     generalInstances,
 	}
 
-	response_data, err := JSONMarshal(responseBlob, true)
-	if err != nil {
-		panic(err)
-	}
-
+	responseBytes := rejaHttp.MustJSONMarshal(responseBlob)
+	fmt.Fprintf(w, string(responseBytes))
 	logQueryCount(rc.GetQueryCount())
-	fmt.Fprintf(w, string(response_data))
 }

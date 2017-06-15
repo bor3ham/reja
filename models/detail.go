@@ -2,9 +2,9 @@ package models
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/context"
+	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -63,16 +63,12 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		instance.SetValues(fields)
 
-		response_data, err := json.MarshalIndent(struct {
+		responseBytes := rejaHttp.MustJSONMarshal(struct {
 			Data interface{} `json:"data"`
 		}{
 			Data: instance,
-		}, "", "    ")
-		if err != nil {
-			panic(err)
-		}
-
+		})
+		fmt.Fprintf(w, string(responseBytes))
 		logQueryCount(rc.GetQueryCount())
-		fmt.Fprintf(w, string(response_data))
 	}
 }
