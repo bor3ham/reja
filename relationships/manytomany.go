@@ -3,6 +3,7 @@ package relationships
 import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/format"
 	"strings"
 )
 
@@ -48,20 +49,47 @@ func (m2m ManyToMany) GetValues(c context.Context, ids []string) map[string]inte
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]*Pointers{}
+	values := map[string]*format.Page{}
+	// fill in initial page data
+	for _, id := range ids {
+		value := format.Page{
+			Metadata: map[string]interface{}{},
+			Links:    map[string]*string{},
+			Data:     []interface{}{},
+		}
+		value.Metadata["total"] = 0
+		value.Metadata["count"] = 0
+		values[id] = &value
+	}
+	// go through result data
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
 		value, exists := values[myID]
 		if !exists {
-			value = &Pointers{}
-			values[myID] = value
+			panic("Found unexpected id in results")
 		}
-		value.Data = append(value.Data, &PointerData{
-			ID:   &otherID,
-			Type: m2m.OtherType,
-		})
+
+		total, ok := value.Metadata["total"].(int)
+		if !ok {
+			panic("Bad total received")
+		}
+		count, ok := value.Metadata["count"].(int)
+		if !ok {
+			panic("Bad count received")
+		}
+		total += 1
+		if total <= defaultPageSize {
+			count += 1
+			value.Data = append(value.Data, PointerData{
+				ID:   &otherID,
+				Type: m2m.OtherType,
+			})
+			value.Metadata["count"] = count
+		}
+		value.Metadata["total"] = total
 	}
+	// generalise values
 	generalValues := map[string]interface{}{}
 	for id, value := range values {
 		generalValues[id] = value

@@ -64,6 +64,7 @@ func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[stri
 		value.Metadata["count"] = 0
 		values[id] = &value
 	}
+	// go through result data
 	for rows.Next() {
 		var id, my_id string
 		rows.Scan(&id, &my_id)
