@@ -63,3 +63,31 @@ func GetIntParam(
 	// success
 	return value, nil
 }
+
+func GetStringParam(
+	params map[string][]string,
+	key string,
+	name string,
+	defaultVal string,
+) (string, error) {
+	var value string
+	values, provided := params[key]
+
+	// not provided
+	if !provided {
+		return defaultVal, nil
+	}
+
+	// how could this even happen?
+	if len(values) == 0 {
+		panic("Provided but empty get parameter?")
+	}
+	// check for multiple values
+	if len(values) > 1 {
+		return "", errors.New(fmt.Sprintf("There can only be one %s value.", name))
+	}
+
+	// success
+	value = values[0]
+	return value, nil
+}

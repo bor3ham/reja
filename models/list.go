@@ -18,6 +18,18 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	rc := context.RequestContext{Request: r}
 	queryStrings := r.URL.Query()
 
+	// extract included information
+	_, err := rejaHttp.GetStringParam(
+		queryStrings,
+		"include",
+		"Included Relations",
+		"",
+	)
+	if err != nil {
+		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
+		return
+	}
+
 	minPageSize := 1
 	maxPageSize := maximumPageSize
 	pageSize, err := rejaHttp.GetIntParam(
