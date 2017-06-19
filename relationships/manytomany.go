@@ -8,10 +8,15 @@ import (
 )
 
 type ManyToMany struct {
+	Key string
 	Table         string
 	OwnIDColumn   string
 	OtherIDColumn string
 	OtherType     string
+}
+
+func (m2m ManyToMany) GetKey() string {
+	return m2m.Key
 }
 
 func (m2m ManyToMany) GetColumnNames() []string {

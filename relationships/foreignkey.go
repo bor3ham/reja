@@ -5,8 +5,13 @@ import (
 )
 
 type ForeignKey struct {
+	Key string
 	ColumnName string
 	Type       string
+}
+
+func (fk ForeignKey) GetKey() string {
+	return fk.Key
 }
 
 func (fk ForeignKey) GetColumnNames() []string {

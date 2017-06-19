@@ -10,10 +10,15 @@ import (
 const defaultPageSize = 5
 
 type ForeignKeyReverse struct {
+	Key string
 	SourceTable    string
 	SourceIDColumn string
 	ColumnName     string
 	Type           string
+}
+
+func (fkr ForeignKeyReverse) GetKey() string {
+	return fkr.Key
 }
 
 func (fkr ForeignKeyReverse) GetColumnNames() []string {
