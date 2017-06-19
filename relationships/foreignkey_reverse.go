@@ -3,8 +3,11 @@ package relationships
 import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/format"
 	"strings"
 )
+
+const defaultPageSize = 5
 
 type ForeignKeyReverse struct {
 	SourceTable    string
@@ -27,12 +30,10 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 }
 func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[string]interface{} {
 	if len(ids) == 0 {
-		return map[string]interface{}{}
+		return 	map[string]interface{}{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
-	// where id = 3
-	// where id in (1,2,3,4,5,6,7,8)
 	query := fmt.Sprintf(
 		`
       select
@@ -51,23 +52,48 @@ func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[stri
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]*Pointers{}
+	values := map[string]*format.Page{}
+	// fill in initial page data
+	for _, id := range ids {
+		value := format.Page{
+			Metadata: map[string]interface{}{},
+			Links: map[string]*string{},
+			Data: []interface{}{},
+		}
+		value.Metadata["total"] = 0
+		value.Metadata["count"] = 0
+		values[id] = &value
+	}
 	for rows.Next() {
 		var id, my_id string
 		rows.Scan(&id, &my_id)
 		value, exists := values[my_id]
 		if !exists {
-			value = &Pointers{}
-			values[my_id] = value
+			panic("Found unexpected id in results")
 		}
-		value.Data = append(value.Data, &PointerData{
-			ID:   &id,
-			Type: fkr.Type,
-		})
+		total, ok := value.Metadata["total"].(int)
+		if !ok {
+			panic("Bad total received")
+		}
+		count, ok := value.Metadata["count"].(int)
+		if !ok {
+			panic("Bad count received")
+		}
+		total += 1
+		if total <= defaultPageSize {
+			count += 1
+			value.Data = append(value.Data, PointerData{
+				ID:   &id,
+				Type: fkr.Type,
+			})
+			value.Metadata["count"] = count
+		}
+		value.Metadata["total"] = total
 	}
-	general_values := map[string]interface{}{}
+	// generalise values
+	generalValues := map[string]interface{}{}
 	for id, value := range values {
-		general_values[id] = value
+		generalValues[id] = value
 	}
-	return general_values
+	return generalValues
 }

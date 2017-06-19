@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/format"
 	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/bor3ham/reja/instances"
 	"math"
@@ -149,7 +150,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	if nextUrl != "" {
 		pageLinks["next"] = &nextUrl
 	}
-	pageMeta := map[string]int{}
+	pageMeta := map[string]interface{}{}
 	pageMeta["total"] = count
 	pageMeta["count"] = len(instances)
 
@@ -158,11 +159,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		generalInstances = append(generalInstances, instance)
 	}
 
-	responseBlob := struct {
-		Links    interface{}   `json:"links"`
-		Metadata interface{}   `json:"meta"`
-		Data     []interface{} `json:"data"`
-	}{
+	responseBlob := format.Page{
 		Links:    pageLinks,
 		Metadata: pageMeta,
 		Data:     generalInstances,
