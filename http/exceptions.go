@@ -1,8 +1,8 @@
 package http
 
 import (
-	"net/http"
 	"fmt"
+	"net/http"
 )
 
 func BadRequest(w http.ResponseWriter, title string, detail string) {

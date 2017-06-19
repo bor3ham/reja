@@ -30,7 +30,7 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 }
 func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[string]interface{} {
 	if len(ids) == 0 {
-		return 	map[string]interface{}{}
+		return map[string]interface{}{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
@@ -57,8 +57,8 @@ func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[stri
 	for _, id := range ids {
 		value := format.Page{
 			Metadata: map[string]interface{}{},
-			Links: map[string]*string{},
-			Data: []interface{}{},
+			Links:    map[string]*string{},
+			Data:     []interface{}{},
 		}
 		value.Metadata["total"] = 0
 		value.Metadata["count"] = 0
