@@ -18,6 +18,9 @@ type ManyToMany struct {
 func (m2m ManyToMany) GetKey() string {
 	return m2m.Key
 }
+func (m2m ManyToMany) GetType() string {
+	return m2m.OtherType
+}
 
 func (m2m ManyToMany) GetColumnNames() []string {
 	return []string{}

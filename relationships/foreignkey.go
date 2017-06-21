@@ -13,6 +13,9 @@ type ForeignKey struct {
 func (fk ForeignKey) GetKey() string {
 	return fk.Key
 }
+func (fk ForeignKey) GetType() string {
+	return fk.Type
+}
 
 func (fk ForeignKey) GetColumnNames() []string {
 	return []string{fk.ColumnName}

@@ -6,6 +6,7 @@ import (
 
 type Relationship interface {
 	GetKey() string
+	GetType() string
 
 	GetColumnNames() []string
 	GetColumnVariables() []interface{}

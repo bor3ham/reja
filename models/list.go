@@ -19,12 +19,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	_, err := rejaHttp.GetStringParam(
-		queryStrings,
-		"include",
-		"Included Relations",
-		"",
-	)
+	_, err := parseInclude(&m, queryStrings)
 	if err != nil {
 		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return

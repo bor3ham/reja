@@ -20,6 +20,9 @@ type ForeignKeyReverse struct {
 func (fkr ForeignKeyReverse) GetKey() string {
 	return fkr.Key
 }
+func (fkr ForeignKeyReverse) GetType() string {
+	return fkr.Type
+}
 
 func (fkr ForeignKeyReverse) GetColumnNames() []string {
 	return []string{}
