@@ -33,7 +33,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responseBlob := struct {
-		Data interface{} `json:"data"`
+		Data     interface{} `json:"data"`
 		Included interface{} `json:"included,omitempty"`
 	}{
 		Data: instances[0],

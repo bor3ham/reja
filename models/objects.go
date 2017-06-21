@@ -1,11 +1,11 @@
 package models
 
 import (
-	rejaInstances "github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/context"
-	"strings"
 	"fmt"
+	"github.com/bor3ham/reja/context"
+	rejaInstances "github.com/bor3ham/reja/instances"
 	"github.com/davecgh/go-spew/spew"
+	"strings"
 )
 
 func GetObjects(
@@ -55,7 +55,7 @@ func GetObjects(
 		)
 	}
 
-	rows, err :=rc.Query(query)
+	rows, err := rc.Query(query)
 	if err != nil {
 		return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
 	}
