@@ -8,7 +8,7 @@ import (
 )
 
 type ManyToMany struct {
-	Key string
+	Key           string
 	Table         string
 	OwnIDColumn   string
 	OtherIDColumn string

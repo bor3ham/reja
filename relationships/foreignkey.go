@@ -5,7 +5,7 @@ import (
 )
 
 type ForeignKey struct {
-	Key string
+	Key        string
 	ColumnName string
 	Type       string
 }

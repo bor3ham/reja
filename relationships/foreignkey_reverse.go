@@ -10,7 +10,7 @@ import (
 const defaultPageSize = 5
 
 type ForeignKeyReverse struct {
-	Key string
+	Key            string
 	SourceTable    string
 	SourceIDColumn string
 	ColumnName     string
