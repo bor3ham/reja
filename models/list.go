@@ -25,7 +25,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	included, err := parseInclude(&m, queryStrings)
+	include, err := parseInclude(&m, queryStrings)
 	if err != nil {
 		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
@@ -85,7 +85,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
-	instances, err := GetObjects(&rc, m, []string{}, offset, pageSize, included)
+	instances, included, err := GetObjects(&rc, m, []string{}, offset, pageSize, include)
 	if err != nil {
 		panic(err)
 	}
@@ -116,6 +116,13 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		Links:    pageLinks,
 		Metadata: pageMeta,
 		Data:     generalInstances,
+	}
+	if len(included) > 0 {
+		var generalIncluded []interface{}
+		for _, instance := range included {
+			generalIncluded = append(generalIncluded, instance)
+		}
+		responseBlob.Included = &generalIncluded
 	}
 
 	responseBytes := rejaHttp.MustJSONMarshal(responseBlob)

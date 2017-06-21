@@ -83,5 +83,5 @@ func parseInclude(model *Model, params map[string][]string) (*Include, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return &includeMap, nil
 }

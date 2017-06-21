@@ -5,6 +5,7 @@ import (
 	"github.com/bor3ham/reja/context"
 	"strings"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func GetObjects(
@@ -13,8 +14,9 @@ func GetObjects(
 	objectIds []string,
 	offset int,
 	limit int,
-	included *Include,
+	include *Include,
 ) (
+	[]rejaInstances.Instance,
 	[]rejaInstances.Instance,
 	error,
 ) {
@@ -55,7 +57,7 @@ func GetObjects(
 
 	rows, err :=rc.Query(query)
 	if err != nil {
-		return []rejaInstances.Instance{}, err
+		return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
 	}
 	defer rows.Close()
 
@@ -77,7 +79,7 @@ func GetObjects(
 		scanFields = append(scanFields, flatExtras...)
 		err := rows.Scan(scanFields...)
 		if err != nil {
-			return []rejaInstances.Instance{}, err
+			return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
 		}
 
 		instance := m.Manager.Create()
@@ -126,5 +128,29 @@ func GetObjects(
 		instance.SetValues(instanceFields[instance_index])
 	}
 
-	return instances, nil
+	spew.Dump(relationshipMap)
+	var included []rejaInstances.Instance
+	for modelType, attributes := range relationshipMap {
+		childModel := GetModel(modelType)
+		for attribute, ids := range attributes {
+			childIncludes, exists := include.Children[attribute]
+			if exists {
+				childInstances, childIncluded, err := GetObjects(
+					rc,
+					*childModel,
+					ids,
+					0,
+					0,
+					childIncludes,
+				)
+				if err != nil {
+					return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
+				}
+				included = append(included, childInstances...)
+				included = append(included, childIncluded...)
+			}
+		}
+	}
+
+	return instances, included, nil
 }
