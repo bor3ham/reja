@@ -9,10 +9,19 @@ import (
 	"math"
 	"net/http"
 	"strings"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const defaultPageSize = 5
 const maximumPageSize = 400
+
+func flattened(fields [][]interface{}) []interface{} {
+	var flatList []interface{}
+	for _, relation := range fields {
+		flatList = append(flatList, relation...)
+	}
+	return flatList
+}
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	rc := context.RequestContext{Request: r}
@@ -79,6 +88,8 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
+	columns := m.FieldNames()
+	columns = append(m.FieldNames(), m.ExtraNames()...)
 	resultsQuery := fmt.Sprintf(
 		`
       select
@@ -89,7 +100,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
       offset %d
     `,
 		m.IDColumn,
-		strings.Join(m.FieldNames(), ","),
+		strings.Join(columns, ","),
 		m.Table,
 		pageSize,
 		offset,
@@ -102,15 +113,21 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 	ids := []string{}
 	instances := []instances.Instance{}
-	instance_fields := [][]interface{}{}
+	instanceFields := [][]interface{}{}
+	extraFields := [][][]interface{}{}
 	for rows.Next() {
 		var id string
 		fields := m.FieldVariables()
-		instance_fields = append(instance_fields, fields)
-		scan_fields := []interface{}{}
-		scan_fields = append(scan_fields, &id)
-		scan_fields = append(scan_fields, fields...)
-		err := rows.Scan(scan_fields...)
+		instanceFields = append(instanceFields, fields)
+		extras := m.ExtraVariables()
+		extraFields = append(extraFields, extras)
+		flatExtras := flattened(extras)
+
+		scanFields := []interface{}{}
+		scanFields = append(scanFields, &id)
+		scanFields = append(scanFields, fields...)
+		scanFields = append(scanFields, flatExtras...)
+		err := rows.Scan(scanFields...)
 		if err != nil {
 			panic(err)
 		}
@@ -122,26 +139,31 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		ids = append(ids, id)
 	}
 
-	relation_values := []RelationResult{}
-	for _, relationship := range m.Relationships {
-		relation_values = append(relation_values, RelationResult{
-			Values:  relationship.GetValues(&rc, ids),
+	// relation map
+	_ = map[string]map[string][]int{}
+
+	relationValues := []RelationResult{}
+	for relationIndex, relationship := range m.Relationships {
+		values, relationIds := relationship.GetValues(&rc, ids, extraFields[relationIndex])
+		spew.Dump(relationIds)
+		relationValues = append(relationValues, RelationResult{
+			Values:  values,
 			Default: relationship.GetDefaultValue(),
 		})
 	}
 	for instance_index, instance := range instances {
-		for _, value := range relation_values {
+		for _, value := range relationValues {
 			item, exists := value.Values[instance.GetID()]
 			if exists {
-				instance_fields[instance_index] = append(instance_fields[instance_index], item)
+				instanceFields[instance_index] = append(instanceFields[instance_index], item)
 			} else {
-				instance_fields[instance_index] = append(instance_fields[instance_index], value.Default)
+				instanceFields[instance_index] = append(instanceFields[instance_index], value.Default)
 			}
 		}
 	}
 
 	for instance_index, instance := range instances {
-		instance.SetValues(instance_fields[instance_index])
+		instance.SetValues(instanceFields[instance_index])
 	}
 
 	pageLinks := map[string]*string{}

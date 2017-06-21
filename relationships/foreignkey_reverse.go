@@ -24,10 +24,16 @@ func (fkr ForeignKeyReverse) GetType() string {
 	return fkr.Type
 }
 
-func (fkr ForeignKeyReverse) GetColumnNames() []string {
+func (fkr ForeignKeyReverse) GetInstanceColumnNames() []string {
 	return []string{}
 }
-func (fkr ForeignKeyReverse) GetColumnVariables() []interface{} {
+func (fkr ForeignKeyReverse) GetInstanceColumnVariables() []interface{} {
+	return []interface{}{}
+}
+func (fkr ForeignKeyReverse) GetExtraColumnNames() []string {
+	return []string{}
+}
+func (fkr ForeignKeyReverse) GetExtraColumnVariables() []interface{} {
 	return []interface{}{}
 }
 
@@ -36,9 +42,9 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 		Data: []*PointerData{},
 	}
 }
-func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[string]interface{} {
+func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string, extra [][]interface{}) (map[string]interface{}, []string) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}
+		return map[string]interface{}{}, []string{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
@@ -73,9 +79,11 @@ func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[stri
 		values[id] = &value
 	}
 	// go through result data
+	relationIds := []string{}
 	for rows.Next() {
 		var id, my_id string
 		rows.Scan(&id, &my_id)
+		relationIds = append(relationIds, id)
 		value, exists := values[my_id]
 		if !exists {
 			panic("Found unexpected id in results")
@@ -104,5 +112,5 @@ func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string) map[stri
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues
+	return generalValues, relationIds
 }

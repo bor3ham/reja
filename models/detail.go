@@ -48,8 +48,9 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 
 		relation_values := []RelationResult{}
 		for _, relationship := range m.Relationships {
+			values, _ := relationship.GetValues(&rc, []string{id}, [][]interface{}{})
 			relation_values = append(relation_values, RelationResult{
-				Values:  relationship.GetValues(&rc, []string{id}),
+				Values:  values,
 				Default: relationship.GetDefaultValue(),
 			})
 		}

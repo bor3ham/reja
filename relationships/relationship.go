@@ -8,11 +8,13 @@ type Relationship interface {
 	GetKey() string
 	GetType() string
 
-	GetColumnNames() []string
-	GetColumnVariables() []interface{}
+	GetInstanceColumnNames() []string
+	GetInstanceColumnVariables() []interface{}
+	GetExtraColumnNames() []string
+	GetExtraColumnVariables() []interface{}
 
 	GetDefaultValue() interface{}
-	GetValues(context.Context, []string) map[string]interface{}
+	GetValues(context.Context, []string, [][]interface{}) (map[string]interface{}, []string)
 }
 
 type PointerData struct {

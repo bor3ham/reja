@@ -22,10 +22,16 @@ func (m2m ManyToMany) GetType() string {
 	return m2m.OtherType
 }
 
-func (m2m ManyToMany) GetColumnNames() []string {
+func (m2m ManyToMany) GetInstanceColumnNames() []string {
 	return []string{}
 }
-func (m2m ManyToMany) GetColumnVariables() []interface{} {
+func (m2m ManyToMany) GetInstanceColumnVariables() []interface{} {
+	return []interface{}{}
+}
+func (m2m ManyToMany) GetExtraColumnNames() []string {
+	return []string{}
+}
+func (m2m ManyToMany) GetExtraColumnVariables() []interface{} {
 	return []interface{}{}
 }
 
@@ -34,9 +40,9 @@ func (m2m ManyToMany) GetDefaultValue() interface{} {
 		Data: []*PointerData{},
 	}
 }
-func (m2m ManyToMany) GetValues(c context.Context, ids []string) map[string]interface{} {
+func (m2m ManyToMany) GetValues(c context.Context, ids []string, extra [][]interface{}) (map[string]interface{}, []string) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}
+		return map[string]interface{}{}, []string{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(ids, ", "))
 	query := fmt.Sprintf(
@@ -70,9 +76,11 @@ func (m2m ManyToMany) GetValues(c context.Context, ids []string) map[string]inte
 		values[id] = &value
 	}
 	// go through result data
+	relationIds := []string{}
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
+		relationIds = append(relationIds, otherID)
 		value, exists := values[myID]
 		if !exists {
 			panic("Found unexpected id in results")
@@ -102,5 +110,5 @@ func (m2m ManyToMany) GetValues(c context.Context, ids []string) map[string]inte
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues
+	return generalValues, relationIds
 }
