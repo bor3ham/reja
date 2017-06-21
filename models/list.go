@@ -118,8 +118,9 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		Data:     generalInstances,
 	}
 	if len(included) > 0 {
+		uniqueIncluded := UniqueInstances(included)
 		var generalIncluded []interface{}
-		for _, instance := range included {
+		for _, instance := range uniqueIncluded {
 			generalIncluded = append(generalIncluded, instance)
 		}
 		responseBlob.Included = &generalIncluded

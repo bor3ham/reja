@@ -14,7 +14,14 @@ type Relationship interface {
 	GetExtraColumnVariables() []interface{}
 
 	GetDefaultValue() interface{}
-	GetValues(context.Context, []string, [][]interface{}) (map[string]interface{}, map[string][]string)
+	GetValues(
+		context.Context,
+		[]string,
+		[][]interface{},
+	) (
+		map[string]interface{},
+		map[string][]string,
+	)
 }
 
 type PointerData struct {

@@ -39,8 +39,9 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 		Data: instances[0],
 	}
 	if len(included) > 0 {
+		uniqueIncluded := UniqueInstances(included)
 		var generalIncluded []interface{}
-		for _, instance := range included {
+		for _, instance := range uniqueIncluded {
 			generalIncluded = append(generalIncluded, instance)
 		}
 		responseBlob.Included = generalIncluded

@@ -154,3 +154,22 @@ func GetObjects(
 
 	return instances, included, nil
 }
+
+func UniqueInstances(set []rejaInstances.Instance) []rejaInstances.Instance {
+	var unique []rejaInstances.Instance
+	known := map[string]map[string]bool{}
+	for _, instance := range set {
+		instanceType := instance.GetType()
+		instanceId := instance.GetID()
+		_, exists := known[instanceType]
+		if !exists {
+			known[instanceType] = map[string]bool{}
+		}
+		_, exists = known[instanceType][instanceId]
+		if !exists {
+			unique = append(unique, instance)
+			known[instanceType][instanceId] = true
+		}
+	}
+	return unique
+}
