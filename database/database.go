@@ -18,11 +18,11 @@ func logQuery(query string) {
 }
 
 func QueryRow(query string, args ...interface{}) *sql.Row {
-	logQuery(query)
+	// logQuery(query)
 	return config.Database.QueryRow(query, args...)
 }
 
 func Query(query string, args ...interface{}) (*sql.Rows, error) {
-	logQuery(query)
+	// logQuery(query)
 	return config.Database.Query(query, args...)
 }

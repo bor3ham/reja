@@ -1,14 +1,14 @@
 package models
 
 import (
-	"database/sql"
+	// "database/sql"
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/gorilla/mux"
-	"log"
+	// "log"
 	"net/http"
-	"strings"
+	// "strings"
 )
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,60 +16,22 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id := vars["id"]
-	query := fmt.Sprintf(
-		`
-      select
-        %s,
-        %s
-      from %s
-      where %s = $1
-      limit 1
-    `,
-		m.IDColumn,
-		strings.Join(m.FieldNames(), ","),
-		m.Table,
-		m.IDColumn,
-	)
 
-	fields := m.FieldVariables()
-	scan_fields := []interface{}{}
-	scan_fields = append(scan_fields, &id)
-	scan_fields = append(scan_fields, fields...)
-	err := rc.QueryRow(query, id).Scan(scan_fields...)
-
-	switch {
-	case err == sql.ErrNoRows:
-		fmt.Fprintf(w, "No %s with that ID", m.Type)
-	case err != nil:
-		log.Fatal(err)
-	default:
-		instance := m.Manager.Create()
-		instance.SetID(id)
-
-		relation_values := []RelationResult{}
-		for _, relationship := range m.Relationships {
-			values, _ := relationship.GetValues(&rc, []string{id}, [][]interface{}{})
-			relation_values = append(relation_values, RelationResult{
-				Values:  values,
-				Default: relationship.GetDefaultValue(),
-			})
-		}
-		for _, value := range relation_values {
-			item, exists := value.Values[id]
-			if exists {
-				fields = append(fields, item)
-			} else {
-				fields = append(fields, value.Default)
-			}
-		}
-		instance.SetValues(fields)
-
-		responseBytes := rejaHttp.MustJSONMarshal(struct {
-			Data interface{} `json:"data"`
-		}{
-			Data: instance,
-		})
-		fmt.Fprintf(w, string(responseBytes))
-		logQueryCount(rc.GetQueryCount())
+	instances, err := GetObjects(&rc, m, []string{id}, 0, 0, nil)
+	if err != nil {
+		panic(err)
 	}
+
+	if len(instances) == 0 {
+		fmt.Fprintf(w, "No %s with that ID", m.Type)
+		return
+	}
+
+	responseBytes := rejaHttp.MustJSONMarshal(struct {
+		Data interface{} `json:"data"`
+	}{
+		Data: instances[0],
+	})
+	fmt.Fprintf(w, string(responseBytes))
+	logQueryCount(rc.GetQueryCount())
 }

@@ -5,11 +5,8 @@ import (
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	rejaHttp "github.com/bor3ham/reja/http"
-	"github.com/bor3ham/reja/instances"
 	"math"
 	"net/http"
-	"strings"
-	"github.com/davecgh/go-spew/spew"
 )
 
 const defaultPageSize = 5
@@ -28,7 +25,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	_, err := parseInclude(&m, queryStrings)
+	included, err := parseInclude(&m, queryStrings)
 	if err != nil {
 		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
@@ -88,82 +85,9 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
-	columns := m.FieldNames()
-	columns = append(m.FieldNames(), m.ExtraNames()...)
-	resultsQuery := fmt.Sprintf(
-		`
-      select
-        %s,
-        %s
-      from %s
-      limit %d
-      offset %d
-    `,
-		m.IDColumn,
-		strings.Join(columns, ","),
-		m.Table,
-		pageSize,
-		offset,
-	)
-	rows, err := rc.Query(resultsQuery)
+	instances, err := GetObjects(&rc, m, []string{}, offset, pageSize, included)
 	if err != nil {
 		panic(err)
-	}
-	defer rows.Close()
-
-	ids := []string{}
-	instances := []instances.Instance{}
-	instanceFields := [][]interface{}{}
-	extraFields := [][][]interface{}{}
-	for rows.Next() {
-		var id string
-		fields := m.FieldVariables()
-		instanceFields = append(instanceFields, fields)
-		extras := m.ExtraVariables()
-		extraFields = append(extraFields, extras)
-		flatExtras := flattened(extras)
-
-		scanFields := []interface{}{}
-		scanFields = append(scanFields, &id)
-		scanFields = append(scanFields, fields...)
-		scanFields = append(scanFields, flatExtras...)
-		err := rows.Scan(scanFields...)
-		if err != nil {
-			panic(err)
-		}
-
-		instance := m.Manager.Create()
-		instance.SetID(id)
-		instances = append(instances, instance)
-
-		ids = append(ids, id)
-	}
-
-	// relation map
-	_ = map[string]map[string][]int{}
-
-	relationValues := []RelationResult{}
-	for relationIndex, relationship := range m.Relationships {
-		values, relationIds := relationship.GetValues(&rc, ids, extraFields[relationIndex])
-		spew.Dump(relationIds)
-		relationValues = append(relationValues, RelationResult{
-			Values:  values,
-			Default: relationship.GetDefaultValue(),
-		})
-	}
-	for instance_index, instance := range instances {
-		for _, value := range relationValues {
-			item, exists := value.Values[instance.GetID()]
-			if exists {
-				instanceFields[instance_index] = append(instanceFields[instance_index], item)
-			} else {
-				instanceFields[instance_index] = append(instanceFields[instance_index], value.Default)
-			}
-		}
-	}
-
-	for instance_index, instance := range instances {
-		instance.SetValues(instanceFields[instance_index])
 	}
 
 	pageLinks := map[string]*string{}

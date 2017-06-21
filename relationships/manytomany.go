@@ -40,9 +40,16 @@ func (m2m ManyToMany) GetDefaultValue() interface{} {
 		Data: []*PointerData{},
 	}
 }
-func (m2m ManyToMany) GetValues(c context.Context, ids []string, extra [][]interface{}) (map[string]interface{}, []string) {
+func (m2m ManyToMany) GetValues(
+	c context.Context,
+	ids []string,
+	extra [][]interface{},
+) (
+	map[string]interface{},
+	map[string][]string,
+) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}, []string{}
+		return map[string]interface{}{}, map[string][]string{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(ids, ", "))
 	query := fmt.Sprintf(
@@ -76,7 +83,7 @@ func (m2m ManyToMany) GetValues(c context.Context, ids []string, extra [][]inter
 		values[id] = &value
 	}
 	// go through result data
-	relationIds := []string{}
+	var relationIds []string
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
@@ -105,10 +112,12 @@ func (m2m ManyToMany) GetValues(c context.Context, ids []string, extra [][]inter
 		}
 		value.Metadata["total"] = total
 	}
+	relationMap := map[string][]string{}
+	relationMap[m2m.OtherType] = relationIds
 	// generalise values
 	generalValues := map[string]interface{}{}
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, relationIds
+	return generalValues, relationMap
 }

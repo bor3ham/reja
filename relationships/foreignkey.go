@@ -39,13 +39,22 @@ func (fk ForeignKey) GetExtraColumnVariables() []interface{} {
 func (fk ForeignKey) GetDefaultValue() interface{} {
 	return nil
 }
-func (fk ForeignKey) GetValues(c context.Context, ids []string, extra [][]interface{}) (map[string]interface{}, []string) {
+func (fk ForeignKey) GetValues(
+	c context.Context,
+	ids []string,
+	extra [][]interface{},
+) (
+	map[string]interface{},
+	map[string][]string,
+) {
 	var relationIds []string
 	stringId, ok := extra[0][0].(**string)
 	if !ok {
 		panic("Unable to convert extra fk id")
 	}
 	relationIds = append(relationIds, **stringId)
+	relationMap := map[string][]string{}
+	relationMap[fk.Type] = relationIds
 
-	return map[string]interface{}{}, relationIds
+	return map[string]interface{}{}, relationMap
 }

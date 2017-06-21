@@ -42,9 +42,16 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 		Data: []*PointerData{},
 	}
 }
-func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string, extra [][]interface{}) (map[string]interface{}, []string) {
+func (fkr ForeignKeyReverse) GetValues(
+	c context.Context,
+	ids []string,
+	extra [][]interface{},
+) (
+	map[string]interface{},
+	map[string][]string,
+) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}, []string{}
+		return map[string]interface{}{}, map[string][]string{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
@@ -107,10 +114,12 @@ func (fkr ForeignKeyReverse) GetValues(c context.Context, ids []string, extra []
 		}
 		value.Metadata["total"] = total
 	}
+	relationMap := map[string][]string{}
+	relationMap[fkr.Type] = relationIds
 	// generalise values
 	generalValues := map[string]interface{}{}
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, relationIds
+	return generalValues, relationMap
 }
