@@ -21,6 +21,7 @@ type RelationResult struct {
 type IncludeResult struct {
 	Instances []rejaInstances.Instance
 	Included []rejaInstances.Instance
+	Error error
 }
 
 func GetObjects(
@@ -190,13 +191,17 @@ func GetObjects(
 						childIncludes,
 					)
 					if err != nil {
-						panic(err)
+						includedResults <- IncludeResult{
+							Error: err,
+						}
+					} else {
+						includedResults <- IncludeResult{
+							Instances: childInstances,
+							Included: childIncluded,
+							Error: nil,
+						}
 					}
 
-					includedResults <- IncludeResult{
-						Instances: childInstances,
-						Included: childIncluded,
-					}
 				}
 			}
 		}(&wg, rc, include, childModel, attributes)
@@ -207,6 +212,9 @@ func GetObjects(
 	}(&wg)
 	var included []rejaInstances.Instance
 	for result := range includedResults {
+		if result.Error != nil {
+			return []rejaInstances.Instance{}, []rejaInstances.Instance{}, result.Error
+		}
 		included = append(included, result.Instances...)
 		included = append(included, result.Included...)
 	}
