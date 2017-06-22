@@ -18,6 +18,11 @@ type RelationResult struct {
 	Map map[string][]string
 }
 
+type IncludeResult struct {
+	Instances []rejaInstances.Instance
+	Included []rejaInstances.Instance
+}
+
 func GetObjects(
 	rc context.Context,
 	m Model,
@@ -158,27 +163,52 @@ func GetObjects(
 		instance.SetValues(instanceFields[instance_index])
 	}
 
-	var included []rejaInstances.Instance
+	wg = *new(sync.WaitGroup)
+	includedResults := make(chan IncludeResult)
+	wg.Add(len(relationshipMap))
 	for modelType, attributes := range relationshipMap {
 		childModel := GetModel(modelType)
-		for attribute, ids := range attributes {
-			childIncludes, exists := include.Children[attribute]
-			if exists {
-				childInstances, childIncluded, err := GetObjects(
-					rc,
-					*childModel,
-					ids,
-					0,
-					0,
-					childIncludes,
-				)
-				if err != nil {
-					return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
+
+		go func(
+			wg *sync.WaitGroup,
+			rc context.Context,
+			include *Include,
+			model *Model,
+			attributes map[string][]string,
+		) {
+			defer wg.Done()
+
+			for attribute, ids := range attributes {
+				childIncludes, exists := include.Children[attribute]
+				if exists {
+					childInstances, childIncluded, err := GetObjects(
+						rc,
+						*model,
+						ids,
+						0,
+						0,
+						childIncludes,
+					)
+					if err != nil {
+						panic(err)
+					}
+
+					includedResults <- IncludeResult{
+						Instances: childInstances,
+						Included: childIncluded,
+					}
 				}
-				included = append(included, childInstances...)
-				included = append(included, childIncluded...)
 			}
-		}
+		}(&wg, rc, include, childModel, attributes)
+	}
+	go func(wg *sync.WaitGroup) {
+		wg.Wait()
+		close(includedResults)
+	}(&wg)
+	var included []rejaInstances.Instance
+	for result := range includedResults {
+		included = append(included, result.Instances...)
+		included = append(included, result.Included...)
 	}
 
 	return instances, included, nil
