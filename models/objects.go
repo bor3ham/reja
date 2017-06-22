@@ -4,9 +4,19 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	rejaInstances "github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/relationships"
 	"strings"
+	"sync"
 	// "github.com/davecgh/go-spew/spew"
 )
+
+type RelationResult struct {
+	Key string
+	Index int
+	Values  map[string]interface{}
+	Default interface{}
+	Map map[string][]string
+}
 
 func GetObjects(
 	rc context.Context,
@@ -89,37 +99,57 @@ func GetObjects(
 		ids = append(ids, id)
 	}
 
-	// relation map
-	relationshipMap := map[string]map[string][]string{}
 
-	relationValues := []RelationResult{}
+	var wg sync.WaitGroup
+	relationResults := make(chan RelationResult)
+	wg.Add(len(m.Relationships))
 	for relationIndex, relationship := range m.Relationships {
-		var relationExtras [][]interface{}
-		for _, result := range extraFields {
-			relationExtras = append(relationExtras, result[relationIndex])
-		}
+		go func(wg *sync.WaitGroup, index int, relation relationships.Relationship) {
+			defer wg.Done()
+			var relationExtras [][]interface{}
+			for _, result := range extraFields {
+				relationExtras = append(relationExtras, result[index])
+			}
 
-		values, relationMap := relationship.GetValues(rc, ids, relationExtras)
-		relationValues = append(relationValues, RelationResult{
-			Values:  values,
-			Default: relationship.GetDefaultValue(),
-		})
-		for modelType, ids := range relationMap {
+			values, relationMap := relation.GetValues(rc, ids, relationExtras)
+			relationResults <- RelationResult{
+				Index: index,
+				Key: relation.GetKey(),
+				Values: values,
+				Default: relation.GetDefaultValue(),
+				Map: relationMap,
+			}
+		}(&wg, relationIndex, relationship)
+	}
+	go func(wg *sync.WaitGroup) {
+		wg.Wait()
+		close(relationResults)
+	}(&wg)
+
+	relationValues := make([]map[string]interface{}, len(m.Relationships))
+	relationDefaults := make([]interface{}, len(m.Relationships))
+	relationshipMap := map[string]map[string][]string{}
+	for result := range relationResults {
+		// re order relation results
+		relationValues[result.Index] = result.Values
+		relationDefaults[result.Index] = result.Default
+		// take all relation maps
+		for modelType, ids := range result.Map {
 			_, exists := relationshipMap[modelType]
 			if !exists {
 				relationshipMap[modelType] = map[string][]string{}
 			}
-			relationshipMap[modelType][relationship.GetKey()] = ids
+			relationshipMap[modelType][result.Key] = ids
 		}
 	}
 
 	for instance_index, instance := range instances {
-		for _, value := range relationValues {
-			item, exists := value.Values[instance.GetID()]
+		for relationIndex, value := range relationValues {
+			item, exists := value[instance.GetID()]
 			if exists {
 				instanceFields[instance_index] = append(instanceFields[instance_index], item)
 			} else {
-				instanceFields[instance_index] = append(instanceFields[instance_index], value.Default)
+				instanceFields[instance_index] = append(instanceFields[instance_index], relationDefaults[relationIndex])
 			}
 		}
 	}

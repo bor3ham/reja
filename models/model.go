@@ -16,11 +16,6 @@ type Model struct {
 	Manager       managers.Manager
 }
 
-type RelationResult struct {
-	Values  map[string]interface{}
-	Default interface{}
-}
-
 func (m Model) FieldVariables() []interface{} {
 	var fields []interface{}
 	for _, attribute := range m.Attributes {
