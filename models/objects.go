@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	rejaInstances "github.com/bor3ham/reja/instances"
-	"github.com/davecgh/go-spew/spew"
 	"strings"
+	// "github.com/davecgh/go-spew/spew"
 )
 
 func GetObjects(
@@ -128,7 +128,6 @@ func GetObjects(
 		instance.SetValues(instanceFields[instance_index])
 	}
 
-	spew.Dump(relationshipMap)
 	var included []rejaInstances.Instance
 	for modelType, attributes := range relationshipMap {
 		childModel := GetModel(modelType)
