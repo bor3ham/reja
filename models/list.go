@@ -22,6 +22,7 @@ func flattened(fields [][]interface{}) []interface{} {
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 	rc := context.RequestContext{Request: r}
+	rc.InitCache()
 	queryStrings := r.URL.Query()
 
 	// extract included information

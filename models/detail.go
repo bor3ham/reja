@@ -10,6 +10,7 @@ import (
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	rc := context.RequestContext{Request: r}
+	rc.InitCache()
 	queryStrings := r.URL.Query()
 
 	// extract included information
