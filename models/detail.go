@@ -9,7 +9,7 @@ import (
 )
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
-	rc := context.RequestContext{Request: r}
+	rc := &context.RequestContext{Request: r}
 	rc.InitCache()
 	queryStrings := r.URL.Query()
 
@@ -23,7 +23,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	instances, included, err := GetObjects(&rc, m, []string{id}, 0, 0, include)
+	instances, included, err := GetObjects(rc, m, []string{id}, 0, 0, include)
 	if err != nil {
 		panic(err)
 	}

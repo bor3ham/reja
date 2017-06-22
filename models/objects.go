@@ -36,23 +36,41 @@ func GetObjects(
 	[]rejaInstances.Instance,
 	error,
 ) {
+	var cacheHits []rejaInstances.Instance
+	var cacheMaps []map[string]map[string][]string
+
 	var query string
 	columns := m.FieldNames()
 	columns = append(m.FieldNames(), m.ExtraNames()...)
 	if len(objectIds) > 0 {
-		query = fmt.Sprintf(
-			`
-				select
-					%s,
-					%s
-				from %s
-				where %s
-	    	`,
-			m.IDColumn,
-			strings.Join(columns, ","),
-			m.Table,
-			fmt.Sprintf("%s in (%s)", m.IDColumn, strings.Join(objectIds, ", ")),
-		)
+		// attempt to use cache
+		var newIds []string
+
+		for _, id := range objectIds {
+			instance, relationMap := rc.GetCachedObject(m.Type, id)
+			if instance != nil {
+				cacheHits = append(cacheHits, instance)
+				cacheMaps = append(cacheMaps, relationMap)
+			} else {
+				newIds = append(newIds, id)
+			}
+		}
+
+		if len(newIds) > 0 {
+			query = fmt.Sprintf(
+				`
+					select
+						%s,
+						%s
+					from %s
+					where %s
+		    	`,
+				m.IDColumn,
+				strings.Join(columns, ","),
+				m.Table,
+				fmt.Sprintf("%s in (%s)", m.IDColumn, strings.Join(newIds, ", ")),
+			)
+		}
 	} else {
 		query = fmt.Sprintf(
 			`
@@ -71,100 +89,121 @@ func GetObjects(
 		)
 	}
 
-	rows, err := rc.Query(query)
-	if err != nil {
-		return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
-	}
-	defer rows.Close()
-
-	ids := []string{}
 	instances := []rejaInstances.Instance{}
-	instanceFields := [][]interface{}{}
-	extraFields := [][][]interface{}{}
-	for rows.Next() {
-		var id string
-		fields := m.FieldVariables()
-		instanceFields = append(instanceFields, fields)
-		extras := m.ExtraVariables()
-		extraFields = append(extraFields, extras)
-		flatExtras := flattened(extras)
+	relationshipMap := map[string]map[string][]string{}
 
-		scanFields := []interface{}{}
-		scanFields = append(scanFields, &id)
-		scanFields = append(scanFields, fields...)
-		scanFields = append(scanFields, flatExtras...)
-		err := rows.Scan(scanFields...)
+	if len(query) > 0 {
+		rows, err := rc.Query(query)
 		if err != nil {
 			return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
 		}
+		defer rows.Close()
 
-		instance := m.Manager.Create()
-		instance.SetID(id)
-		instances = append(instances, instance)
+		ids := []string{}
+		instanceFields := [][]interface{}{}
+		extraFields := [][][]interface{}{}
+		for rows.Next() {
+			var id string
+			fields := m.FieldVariables()
+			instanceFields = append(instanceFields, fields)
+			extras := m.ExtraVariables()
+			extraFields = append(extraFields, extras)
+			flatExtras := flattened(extras)
 
-		ids = append(ids, id)
-	}
-
-
-	var wg sync.WaitGroup
-	relationResults := make(chan RelationResult)
-	wg.Add(len(m.Relationships))
-	for relationIndex, relationship := range m.Relationships {
-		go func(wg *sync.WaitGroup, index int, relation relationships.Relationship) {
-			defer wg.Done()
-			var relationExtras [][]interface{}
-			for _, result := range extraFields {
-				relationExtras = append(relationExtras, result[index])
+			scanFields := []interface{}{}
+			scanFields = append(scanFields, &id)
+			scanFields = append(scanFields, fields...)
+			scanFields = append(scanFields, flatExtras...)
+			err := rows.Scan(scanFields...)
+			if err != nil {
+				return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
 			}
 
-			values, relationMap := relation.GetValues(rc, ids, relationExtras)
-			relationResults <- RelationResult{
-				Index: index,
-				Key: relation.GetKey(),
-				Values: values,
-				Default: relation.GetDefaultValue(),
-				Map: relationMap,
-			}
-		}(&wg, relationIndex, relationship)
-	}
-	go func(wg *sync.WaitGroup) {
-		wg.Wait()
-		close(relationResults)
-	}(&wg)
+			instance := m.Manager.Create()
+			instance.SetID(id)
+			instances = append(instances, instance)
 
-	relationValues := make([]map[string]interface{}, len(m.Relationships))
-	relationDefaults := make([]interface{}, len(m.Relationships))
-	relationshipMap := map[string]map[string][]string{}
-	for result := range relationResults {
-		// re order relation results
-		relationValues[result.Index] = result.Values
-		relationDefaults[result.Index] = result.Default
-		// take all relation maps
-		for modelType, ids := range result.Map {
+			ids = append(ids, id)
+		}
+
+
+		var wg sync.WaitGroup
+		relationResults := make(chan RelationResult)
+		wg.Add(len(m.Relationships))
+		for relationIndex, relationship := range m.Relationships {
+			go func(wg *sync.WaitGroup, index int, relation relationships.Relationship) {
+				defer wg.Done()
+				var relationExtras [][]interface{}
+				for _, result := range extraFields {
+					relationExtras = append(relationExtras, result[index])
+				}
+
+				values, relationMap := relation.GetValues(rc, ids, relationExtras)
+				relationResults <- RelationResult{
+					Index: index,
+					Key: relation.GetKey(),
+					Values: values,
+					Default: relation.GetDefaultValue(),
+					Map: relationMap,
+				}
+			}(&wg, relationIndex, relationship)
+		}
+		go func(wg *sync.WaitGroup) {
+			wg.Wait()
+			close(relationResults)
+		}(&wg)
+
+		relationValues := make([]map[string]interface{}, len(m.Relationships))
+		relationDefaults := make([]interface{}, len(m.Relationships))
+
+		for result := range relationResults {
+			// re order relation results
+			relationValues[result.Index] = result.Values
+			relationDefaults[result.Index] = result.Default
+			// and add to running map
+			for modelType, ids := range result.Map {
+				_, exists := relationshipMap[modelType]
+				if !exists {
+					relationshipMap[modelType] = map[string][]string{}
+				}
+				relationshipMap[modelType][result.Key] = ids
+			}
+		}
+
+		for index, instance := range instances {
+			for relationIndex, value := range relationValues {
+				item, exists := value[instance.GetID()]
+				if exists {
+					instanceFields[index] = append(instanceFields[index], item)
+				} else {
+					instanceFields[index] = append(instanceFields[index], relationDefaults[relationIndex])
+				}
+			}
+			instance.SetValues(instanceFields[index])
+			// add instance to cache
+			rc.CacheObject(instance, relationshipMap)
+		}
+	}
+
+	// add cached instances and maps
+	instances = append(instances, cacheHits...)
+	for _, cacheMap := range cacheMaps {
+		for modelType, attributes := range cacheMap {
 			_, exists := relationshipMap[modelType]
 			if !exists {
 				relationshipMap[modelType] = map[string][]string{}
 			}
-			relationshipMap[modelType][result.Key] = ids
-		}
-	}
-
-	for instance_index, instance := range instances {
-		for relationIndex, value := range relationValues {
-			item, exists := value[instance.GetID()]
-			if exists {
-				instanceFields[instance_index] = append(instanceFields[instance_index], item)
-			} else {
-				instanceFields[instance_index] = append(instanceFields[instance_index], relationDefaults[relationIndex])
+			for attribute, ids := range attributes {
+				_, exists = relationshipMap[modelType][attribute]
+				if !exists {
+					relationshipMap[modelType][attribute] = []string{}
+				}
+				relationshipMap[modelType][attribute] = append(relationshipMap[modelType][attribute], ids...)
 			}
 		}
 	}
 
-	for instance_index, instance := range instances {
-		instance.SetValues(instanceFields[instance_index])
-	}
-
-	wg = *new(sync.WaitGroup)
+	var wg sync.WaitGroup
 	includedResults := make(chan IncludeResult)
 	wg.Add(len(relationshipMap))
 	for modelType, attributes := range relationshipMap {

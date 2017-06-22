@@ -9,13 +9,17 @@ import (
 	"net/http"
 )
 
+type CachedInstance struct {
+	Instance instances.Instance
+	RelationMap map[string]map[string][]string
+}
 type Context interface {
-	QueryRow(query string, args ...interface{}) *sql.Row
-	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(string, ...interface{}) *sql.Row
+	Query(string, ...interface{}) (*sql.Rows, error)
 
 	InitCache()
-	CacheObjects([]instances.Instance)
-	GetCachedObject(instanceType string, instanceId string) instances.Instance
+	CacheObject(instances.Instance, map[string]map[string][]string)
+	GetCachedObject(string, string) (instances.Instance, map[string]map[string][]string)
 }
 
 type RequestContext struct {
@@ -23,7 +27,7 @@ type RequestContext struct {
 
 	InstanceCache struct {
 		sync.Mutex
-		Instances map[string]map[string]instances.Instance
+		Instances map[string]map[string]CachedInstance
 	}
 }
 
@@ -54,32 +58,33 @@ func (rc *RequestContext) Query(query string, args ...interface{}) (*sql.Rows, e
 
 func (rc *RequestContext) InitCache() {
 	rc.InstanceCache.Lock()
-	rc.InstanceCache.Instances = map[string]map[string]instances.Instance{}
+	rc.InstanceCache.Instances = map[string]map[string]CachedInstance{}
 	rc.InstanceCache.Unlock()
 }
-func (rc *RequestContext) CacheObjects(objects []instances.Instance) {
+func (rc *RequestContext) CacheObject(object instances.Instance, relationMap map[string]map[string][]string) {
 	rc.InstanceCache.Lock()
-	for _, instance := range objects {
-		model := instance.GetType()
-		id := instance.GetID()
-		_, exists := rc.InstanceCache.Instances[model]
-		if !exists {
-			rc.InstanceCache.Instances[model] = map[string]instances.Instance{}
-		}
-		rc.InstanceCache.Instances[model][id] = instance
+	model := object.GetType()
+	id := object.GetID()
+	_, exists := rc.InstanceCache.Instances[model]
+	if !exists {
+		rc.InstanceCache.Instances[model] = map[string]CachedInstance{}
+	}
+	rc.InstanceCache.Instances[model][id] = CachedInstance{
+		Instance: object,
+		RelationMap: relationMap,
 	}
 	rc.InstanceCache.Unlock()
 }
-func (rc *RequestContext) GetCachedObject(instanceType string, instanceId string) instances.Instance {
+func (rc *RequestContext) GetCachedObject(instanceType string, instanceId string) (instances.Instance, map[string]map[string][]string) {
 	rc.InstanceCache.Lock()
 	defer rc.InstanceCache.Unlock()
 	models, modelExists := rc.InstanceCache.Instances[instanceType]
 	if modelExists {
 		instance, exists := models[instanceId]
 		if exists {
-			return instance
+			return instance.Instance, instance.RelationMap
 		}
 	}
-	return nil
+	return nil, nil
 }
 

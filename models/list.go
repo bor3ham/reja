@@ -21,7 +21,7 @@ func flattened(fields [][]interface{}) []interface{} {
 }
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
-	rc := context.RequestContext{Request: r}
+	rc := &context.RequestContext{Request: r}
 	rc.InitCache()
 	queryStrings := r.URL.Query()
 
@@ -86,7 +86,7 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
-	instances, included, err := GetObjects(&rc, m, []string{}, offset, pageSize, include)
+	instances, included, err := GetObjects(rc, m, []string{}, offset, pageSize, include)
 	if err != nil {
 		panic(err)
 	}
