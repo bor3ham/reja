@@ -47,14 +47,17 @@ func (fk ForeignKey) GetValues(
 	map[string]interface{},
 	map[string][]string,
 ) {
-	var relationIds []string
-	stringId, ok := extra[0][0].(**string)
-	if !ok {
-		panic("Unable to convert extra fk id")
-	}
-	relationIds = append(relationIds, **stringId)
 	relationMap := map[string][]string{}
-	relationMap[fk.Type] = relationIds
-
+	relationMap[fk.Type] = []string{}
+	for _, result := range extra {
+		stringId, ok := result[0].(**string)
+		if !ok {
+			panic("Unable to convert extra fk id")
+		}
+		if *stringId == nil {
+			continue
+		}
+		relationMap[fk.Type] = append(relationMap[fk.Type], **stringId)
+	}
 	return map[string]interface{}{}, relationMap
 }
