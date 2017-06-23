@@ -7,8 +7,10 @@ import (
 	"github.com/bor3ham/reja/relationships"
 	"strings"
 	"sync"
-	// "github.com/davecgh/go-spew/spew"
+	"github.com/davecgh/go-spew/spew"
 )
+
+const USE_OBJECT_CACHE = false
 
 type RelationResult struct {
 	Key string
@@ -48,7 +50,7 @@ func GetObjects(
 
 		for _, id := range objectIds {
 			instance, relationMap := rc.GetCachedObject(m.Type, id)
-			if instance != nil {
+			if instance != nil && USE_OBJECT_CACHE {
 				cacheHits = append(cacheHits, instance)
 				cacheMaps = append(cacheMaps, relationMap)
 			} else {
@@ -206,6 +208,7 @@ func GetObjects(
 	var wg sync.WaitGroup
 	includedResults := make(chan IncludeResult)
 	wg.Add(len(relationshipMap))
+	spew.Dump(relationshipMap)
 	for modelType, attributes := range relationshipMap {
 		childModel := GetModel(modelType)
 
