@@ -55,13 +55,13 @@ func (gfk GenericForeignKey) GetValues(
 		myId := ids[index]
 
 		// parse extra columns
-		stringId, ok := result[0].(**string)
-		if !ok {
-			panic("Unable to convert extra fk id")
-		}
-		modelType, ok := result[1].(**string)
+		modelType, ok := result[0].(**string)
 		if !ok {
 			panic("Unable to convert extra type")
+		}
+		stringId, ok := result[1].(**string)
+		if !ok {
+			panic("Unable to convert extra fk id")
 		}
 
 		// check value does not already exist

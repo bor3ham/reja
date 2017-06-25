@@ -7,7 +7,6 @@ import (
 	"github.com/bor3ham/reja/relationships"
 	"strings"
 	"sync"
-	"github.com/davecgh/go-spew/spew"
 )
 
 const USE_OBJECT_CACHE = false
@@ -208,9 +207,11 @@ func GetObjects(
 	var wg sync.WaitGroup
 	includedResults := make(chan IncludeResult)
 	wg.Add(len(relationshipMap))
-	spew.Dump(relationshipMap)
 	for modelType, attributes := range relationshipMap {
 		childModel := GetModel(modelType)
+		if childModel == nil {
+			panic(fmt.Sprintf("Could not find model for model: %s", modelType))
+		}
 
 		go func(
 			wg *sync.WaitGroup,
