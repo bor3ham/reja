@@ -76,6 +76,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	}
 	defer rows.Close()
 	values := map[string]*format.Page{}
+	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
 		value := format.Page{
@@ -88,11 +89,9 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		values[id] = &value
 	}
 	// go through result data
-	relationIds := []string{}
 	for rows.Next() {
 		var otherId, ownId string
 		rows.Scan(&otherId, &ownId)
-		relationIds = append(relationIds, otherId)
 		value, exists := values[ownId]
 		if !exists {
 			panic("Found unexpected id in results")
@@ -115,13 +114,19 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 			value.Metadata["count"] = count
 		}
 		value.Metadata["total"] = total
+
+		// add to maps
+		_, exists = maps[ownId]
+		if !exists {
+			maps[ownId] = map[string][]string{}
+			maps[ownId][gfkr.OtherType] = []string{}
+		}
+		maps[ownId][gfkr.OtherType] = append(maps[ownId][gfkr.OtherType], otherId)
 	}
-	relationMap := map[string][]string{}
-	relationMap[gfkr.OtherType] = relationIds
 	// generalise values
 	generalValues := map[string]interface{}{}
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, relationMap
+	return generalValues, FlattenMaps(maps)
 }

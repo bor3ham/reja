@@ -87,11 +87,9 @@ func (fkr ForeignKeyReverse) GetValues(
 		values[id] = &value
 	}
 	// go through result data
-	relationIds := []string{}
 	for rows.Next() {
 		var id, myId string
 		rows.Scan(&id, &myId)
-		relationIds = append(relationIds, id)
 		value, exists := values[myId]
 		if !exists {
 			panic("Found unexpected id in results")
