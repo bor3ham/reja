@@ -88,9 +88,9 @@ func (fkr ForeignKeyReverse) GetValues(
 	}
 	// go through result data
 	for rows.Next() {
-		var id, myId string
-		rows.Scan(&id, &myId)
-		value, exists := values[myId]
+		var otherId, ownId string
+		rows.Scan(&otherId, &ownId)
+		value, exists := values[ownId]
 		if !exists {
 			panic("Found unexpected id in results")
 		}
@@ -106,7 +106,7 @@ func (fkr ForeignKeyReverse) GetValues(
 		if total <= defaultPageSize {
 			count += 1
 			value.Data = append(value.Data, PointerData{
-				ID:   &id,
+				ID:   &otherId,
 				Type: fkr.Type,
 			})
 			value.Metadata["count"] = count
@@ -114,12 +114,12 @@ func (fkr ForeignKeyReverse) GetValues(
 		value.Metadata["total"] = total
 
 		// add to maps
-		_, exists = maps[myId]
+		_, exists = maps[ownId]
 		if !exists {
-			maps[myId] = map[string][]string{}
-			maps[myId][fkr.Type] = []string{}
+			maps[ownId] = map[string][]string{}
+			maps[ownId][fkr.Type] = []string{}
 		}
-		maps[myId][fkr.Type] = append(maps[myId][fkr.Type], id)
+		maps[ownId][fkr.Type] = append(maps[ownId][fkr.Type], otherId)
 	}
 	// generalise values
 	generalValues := map[string]interface{}{}
