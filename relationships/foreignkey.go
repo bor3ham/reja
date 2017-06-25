@@ -105,5 +105,5 @@ func (fk ForeignKey) GetValues(
 		}
 	}
 
-	return values, FlattenMaps(maps)
+	return values, flattenMaps(maps)
 }

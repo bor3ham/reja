@@ -126,5 +126,5 @@ func (fkr ForeignKeyReverse) GetValues(
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, FlattenMaps(maps)
+	return generalValues, flattenMaps(maps)
 }

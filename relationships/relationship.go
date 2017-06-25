@@ -38,7 +38,7 @@ type Pointers struct {
 }
 
 // temporary function to flatten list as part of refactor
-func FlattenMaps(relationMap map[string]map[string][]string) map[string][]string {
+func flattenMaps(relationMap map[string]map[string][]string) map[string][]string {
 	flatMap := map[string][]string{}
 	for _, relations := range relationMap {
 		for modelType, ids := range relations {

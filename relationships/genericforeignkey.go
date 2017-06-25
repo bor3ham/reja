@@ -114,5 +114,5 @@ func (gfk GenericForeignKey) GetValues(
 		}
 	}
 
-	return values, FlattenMaps(maps)
+	return values, flattenMaps(maps)
 }
