@@ -18,13 +18,10 @@ func (fk ForeignKey) GetType() string {
 }
 
 func (fk ForeignKey) GetInstanceColumnNames() []string {
-	return []string{fk.ColumnName}
+	return []string{}
 }
 func (fk ForeignKey) GetInstanceColumnVariables() []interface{} {
-	var destination *string
-	return []interface{}{
-		&destination,
-	}
+	return []interface{}{}
 }
 func (fk ForeignKey) GetExtraColumnNames() []string {
 	return []string{fk.ColumnName}
@@ -37,7 +34,7 @@ func (fk ForeignKey) GetExtraColumnVariables() []interface{} {
 }
 
 func (fk ForeignKey) GetDefaultValue() interface{} {
-	return nil
+	return &Pointer{}
 }
 func (fk ForeignKey) GetValues(
 	c context.Context,
@@ -47,17 +44,66 @@ func (fk ForeignKey) GetValues(
 	map[string]interface{},
 	map[string][]string,
 ) {
-	relationMap := map[string][]string{}
-	relationMap[fk.Type] = []string{}
-	for _, result := range extra {
+	values := map[string]interface{}{}
+	maps := map[string]map[string][]string{}
+	for index, result := range extra {
+		myId := ids[index]
+
+		// parse extra columns
 		stringId, ok := result[0].(**string)
 		if !ok {
 			panic("Unable to convert extra fk id")
 		}
-		if *stringId == nil {
+
+		// check value does not already exist
+		// a foreign key can only have one value
+		_, exists := values[myId]
+		if exists {
+			existingValue, ok := values[myId].(Pointer)
+			if !ok {
+				panic("Unable to convert previous value")
+			}
+			if *stringId == nil {
+				if existingValue.Data != nil {
+					panic("Contradictory values in query results")
+				}
+			} else {
+				if existingValue.Data == nil ||
+					*existingValue.Data.ID != **stringId ||
+					existingValue.Data.Type != fk.Type {
+					panic("Contradictory values in query results")
+				}
+			}
+
 			continue
 		}
-		relationMap[fk.Type] = append(relationMap[fk.Type], **stringId)
+
+		var newValue Pointer
+		if *stringId == nil {
+			newValue = Pointer{}
+		} else {
+			newValue = Pointer{
+				Data: &PointerData{
+					Type: fk.Type,
+					ID: *stringId,
+				},
+			}
+		}
+		values[myId] = &newValue
+
+		// add to relation map
+		if *stringId != nil {
+			_, exists = maps[myId]
+			if !exists {
+				maps[myId] = map[string][]string{}
+			}
+			_, exists = maps[myId][fk.Type]
+			if !exists {
+				maps[myId][fk.Type] = []string{}
+			}
+			maps[myId][fk.Type] = append(maps[myId][fk.Type], **stringId)
+		}
 	}
-	return map[string]interface{}{}, relationMap
+
+	return values, FlattenMaps(maps)
 }

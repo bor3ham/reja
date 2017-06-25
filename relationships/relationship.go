@@ -37,10 +37,29 @@ type Pointers struct {
 	Data []*PointerData `json:"data"`
 }
 
-func (p *Pointer) Clean() {
-	if p.Data != nil {
-		if p.Data.ID == nil {
-			p.Data = nil
+// temporary function to flatten list as part of refactor
+func FlattenMaps(relationMap map[string]map[string][]string) map[string][]string {
+	flatMap := map[string][]string{}
+	for _, relations := range relationMap {
+		for modelType, ids := range relations {
+			_, exists := flatMap[modelType]
+			if !exists {
+				flatMap[modelType] = []string{}
+			}
+			flatMap[modelType] = append(flatMap[modelType], ids...)
 		}
 	}
+	// unique the list of ids
+	distinctMap := map[string][]string{}
+	for model, ids := range flatMap {
+		distinctMap[model] = []string{}
+		distincts := map[string]bool{}
+		for _, id := range ids {
+			distincts[id] = true
+		}
+		for id, _ := range distincts {
+			distinctMap[model] = append(distinctMap[model], id)
+		}
+	}
+	return distinctMap
 }
