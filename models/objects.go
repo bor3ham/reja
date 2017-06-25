@@ -7,6 +7,7 @@ import (
 	"github.com/bor3ham/reja/relationships"
 	"strings"
 	"sync"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const USE_OBJECT_CACHE = false
@@ -203,6 +204,7 @@ func GetObjects(
 			}
 		}
 	}
+	spew.Dump(relationshipMap)
 
 	var wg sync.WaitGroup
 	includedResults := make(chan IncludeResult)
