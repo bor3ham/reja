@@ -20,7 +20,7 @@ type Relationship interface {
 		[][]interface{},
 	) (
 		map[string]interface{},
-		map[string][]string,
+		map[string]map[string][]string,
 	)
 }
 

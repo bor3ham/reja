@@ -7,23 +7,44 @@ import (
 	"github.com/bor3ham/reja/relationships"
 	"strings"
 	"sync"
-	"github.com/davecgh/go-spew/spew"
 )
 
-const USE_OBJECT_CACHE = false
+const USE_OBJECT_CACHE = true
 
 type RelationResult struct {
 	Key string
 	Index int
-	Values  map[string]interface{}
 	Default interface{}
-	Map map[string][]string
+	Values  map[string]interface{}
+	RelationMaps map[string]map[string][]string
 }
 
 type IncludeResult struct {
 	Instances []rejaInstances.Instance
 	Included []rejaInstances.Instance
 	Error error
+}
+
+func combineRelations(
+	maps ...map[string]map[string][]string,
+) (map[string]map[string][]string) {
+	combinedMap := map[string]map[string][]string{}
+	for _, relations := range maps {
+		for key, models := range relations {
+			_, exists := combinedMap[key]
+			if !exists {
+				combinedMap[key] = map[string][]string{}
+			}
+			for model, ids := range models {
+				_, exists = combinedMap[key][model]
+				if !exists {
+					combinedMap[key][model] = []string{}
+				}
+				combinedMap[key][model] = append(combinedMap[key][model], ids...)
+			}
+		}
+	}
+	return combinedMap
 }
 
 func GetObjects(
@@ -92,7 +113,7 @@ func GetObjects(
 	}
 
 	instances := []rejaInstances.Instance{}
-	relationshipMap := map[string]map[string][]string{}
+	listRelations := map[string]map[string][]string{}
 
 	if len(query) > 0 {
 		rows, err := rc.Query(query)
@@ -140,13 +161,13 @@ func GetObjects(
 					relationExtras = append(relationExtras, result[index])
 				}
 
-				values, relationMap := relation.GetValues(rc, ids, relationExtras)
+				values, maps := relation.GetValues(rc, ids, relationExtras)
 				relationResults <- RelationResult{
 					Index: index,
 					Key: relation.GetKey(),
-					Values: values,
 					Default: relation.GetDefaultValue(),
-					Map: relationMap,
+					Values: values,
+					RelationMaps: maps,
 				}
 			}(&wg, relationIndex, relationship)
 		}
@@ -155,76 +176,78 @@ func GetObjects(
 			close(relationResults)
 		}(&wg)
 
-		relationValues := make([]map[string]interface{}, len(m.Relationships))
 		relationDefaults := make([]interface{}, len(m.Relationships))
+		relationValues := make([]map[string]interface{}, len(m.Relationships))
+		relationMaps := make([]map[string]map[string][]string, len(m.Relationships))
 
 		for result := range relationResults {
 			// re order relation results
-			relationValues[result.Index] = result.Values
 			relationDefaults[result.Index] = result.Default
-			// and add to running map
-			for modelType, ids := range result.Map {
-				_, exists := relationshipMap[modelType]
-				if !exists {
-					relationshipMap[modelType] = map[string][]string{}
-				}
-				relationshipMap[modelType][result.Key] = ids
-			}
+			relationValues[result.Index] = result.Values
+			relationMaps[result.Index] = result.RelationMaps
 		}
 
 		for index, instance := range instances {
+			instanceRelations := map[string]map[string][]string{}
 			for relationIndex, value := range relationValues {
-				item, exists := value[instance.GetID()]
+				key := m.Relationships[relationIndex].GetKey()
+				// get value or default
+				id := instance.GetID()
+				item, exists := value[id]
 				if exists {
 					instanceFields[index] = append(instanceFields[index], item)
 				} else {
 					instanceFields[index] = append(instanceFields[index], relationDefaults[relationIndex])
 				}
+				// add to instance relation map
+				_, exists = relationMaps[relationIndex][id]
+				if exists {
+					_, exists = instanceRelations[key]
+					if !exists {
+						instanceRelations[key] = map[string][]string{}
+					}
+					for model, ids := range relationMaps[relationIndex][id] {
+						_, exists = instanceRelations[key][model]
+						if !exists {
+							instanceRelations[key][model] = []string{}
+						}
+						instanceRelations[key][model] = append(instanceRelations[key][model], ids...)
+					}
+				}
 			}
 			instance.SetValues(instanceFields[index])
+			// add complete relation map to flat map
+			listRelations = combineRelations(listRelations, instanceRelations)
 			// add instance to cache
-			rc.CacheObject(instance, relationshipMap)
+			rc.CacheObject(instance, instanceRelations)
 		}
 	}
 
 	// add cached instances and maps
 	instances = append(instances, cacheHits...)
 	for _, cacheMap := range cacheMaps {
-		for modelType, attributes := range cacheMap {
-			_, exists := relationshipMap[modelType]
-			if !exists {
-				relationshipMap[modelType] = map[string][]string{}
-			}
-			for attribute, ids := range attributes {
-				_, exists = relationshipMap[modelType][attribute]
-				if !exists {
-					relationshipMap[modelType][attribute] = []string{}
-				}
-				relationshipMap[modelType][attribute] = append(relationshipMap[modelType][attribute], ids...)
-			}
-		}
+		listRelations = combineRelations(listRelations, cacheMap)
 	}
-	spew.Dump(relationshipMap)
 
 	var wg sync.WaitGroup
 	includedResults := make(chan IncludeResult)
-	wg.Add(len(relationshipMap))
-	for modelType, attributes := range relationshipMap {
-		childModel := GetModel(modelType)
-		if childModel == nil {
-			panic(fmt.Sprintf("Could not find model for model: %s", modelType))
-		}
+	for attribute, modelTypes := range listRelations {
+		for modelType, ids := range modelTypes {
+			childModel := GetModel(modelType)
+			if childModel == nil {
+				panic(fmt.Sprintf("Could not find model for model: %s", modelType))
+			}
 
-		go func(
-			wg *sync.WaitGroup,
-			rc context.Context,
-			include *Include,
-			model *Model,
-			attributes map[string][]string,
-		) {
-			defer wg.Done()
+			wg.Add(1)
+			go func(
+				wg *sync.WaitGroup,
+				rc context.Context,
+				include *Include,
+				model *Model,
+				attribute string,
+			) {
+				defer wg.Done()
 
-			for attribute, ids := range attributes {
 				childIncludes, exists := include.Children[attribute]
 				if exists {
 					childInstances, childIncluded, err := GetObjects(
@@ -248,8 +271,8 @@ func GetObjects(
 					}
 
 				}
-			}
-		}(&wg, rc, include, childModel, attributes)
+			}(&wg, rc, include, childModel, attribute)
+		}
 	}
 	go func(wg *sync.WaitGroup) {
 		wg.Wait()

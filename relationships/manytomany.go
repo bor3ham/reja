@@ -46,19 +46,19 @@ func (m2m ManyToMany) GetValues(
 	extra [][]interface{},
 ) (
 	map[string]interface{},
-	map[string][]string,
+	map[string]map[string][]string,
 ) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}, map[string][]string{}
+		return map[string]interface{}{}, map[string]map[string][]string{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(ids, ", "))
 	query := fmt.Sprintf(
 		`
-	      select
-	        %s,
-	        %s
-	      from %s
-	      where %s
+			select
+				%s,
+				%s
+			from %s
+			where %s
 	    `,
 		m2m.OwnIDColumn,
 		m2m.OtherIDColumn,
@@ -71,6 +71,7 @@ func (m2m ManyToMany) GetValues(
 	}
 	defer rows.Close()
 	values := map[string]*format.Page{}
+	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
 		value := format.Page{
@@ -83,11 +84,9 @@ func (m2m ManyToMany) GetValues(
 		values[id] = &value
 	}
 	// go through result data
-	var relationIds []string
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
-		relationIds = append(relationIds, otherID)
 		value, exists := values[myID]
 		if !exists {
 			panic("Found unexpected id in results")
@@ -101,6 +100,14 @@ func (m2m ManyToMany) GetValues(
 		if !ok {
 			panic("Bad count received")
 		}
+
+		_, exists = maps[myID]
+		if !exists {
+			maps[myID] = map[string][]string{}
+			maps[myID][m2m.OtherType] = []string{}
+		}
+		maps[myID][m2m.OtherType] = append(maps[myID][m2m.OtherType], otherID)
+
 		total += 1
 		if total <= defaultPageSize {
 			count += 1
@@ -112,12 +119,10 @@ func (m2m ManyToMany) GetValues(
 		}
 		value.Metadata["total"] = total
 	}
-	relationMap := map[string][]string{}
-	relationMap[m2m.OtherType] = relationIds
 	// generalise values
 	generalValues := map[string]interface{}{}
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, relationMap
+	return generalValues, maps
 }

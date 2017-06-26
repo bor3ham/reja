@@ -48,10 +48,10 @@ func (fkr ForeignKeyReverse) GetValues(
 	extra [][]interface{},
 ) (
 	map[string]interface{},
-	map[string][]string,
+	map[string]map[string][]string,
 ) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}, map[string][]string{}
+		return map[string]interface{}{}, map[string]map[string][]string{}
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
@@ -126,5 +126,5 @@ func (fkr ForeignKeyReverse) GetValues(
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, flattenMaps(maps)
+	return generalValues, maps
 }

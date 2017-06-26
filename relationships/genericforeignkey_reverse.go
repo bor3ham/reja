@@ -48,10 +48,10 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	extra [][]interface{},
 ) (
 	map[string]interface{},
-	map[string][]string,
+	map[string]map[string][]string,
 ) {
 	if len(ids) == 0 {
-		return map[string]interface{}{}, map[string][]string{}
+		return map[string]interface{}{}, map[string]map[string][]string{}
 	}
 
 	idFilter := fmt.Sprintf("%s in (%s)", gfkr.OwnIDColumn, strings.Join(ids, ", "))
@@ -128,5 +128,5 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	for id, value := range values {
 		generalValues[id] = value
 	}
-	return generalValues, flattenMaps(maps)
+	return generalValues, maps
 }

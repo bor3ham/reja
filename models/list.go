@@ -63,9 +63,9 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 	countQuery := fmt.Sprintf(
 		`
-        select
-            count(*)
-        from %s
+			select
+				count(*)
+			from %s
         `,
 		m.Table,
 	)

@@ -42,7 +42,7 @@ func (fk ForeignKey) GetValues(
 	extra [][]interface{},
 ) (
 	map[string]interface{},
-	map[string][]string,
+	map[string]map[string][]string,
 ) {
 	values := map[string]interface{}{}
 	maps := map[string]map[string][]string{}
@@ -105,5 +105,5 @@ func (fk ForeignKey) GetValues(
 		}
 	}
 
-	return values, flattenMaps(maps)
+	return values, maps
 }

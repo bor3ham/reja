@@ -47,7 +47,7 @@ func (gfk GenericForeignKey) GetValues(
 	extra [][]interface{},
 ) (
 	map[string]interface{},
-	map[string][]string,
+	map[string]map[string][]string,
 ) {
 	values := map[string]interface{}{}
 	maps := map[string]map[string][]string{}
@@ -114,5 +114,5 @@ func (gfk GenericForeignKey) GetValues(
 		}
 	}
 
-	return values, flattenMaps(maps)
+	return values, maps
 }
