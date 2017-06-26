@@ -1,19 +1,27 @@
 package attributes
 
-// import (
-// 	"time"
-// )
+import (
+	"fmt"
+	"time"
+)
 
-// type Datetime struct {
-// 	ColumnName string
-// }
+type DatetimeValue time.Time
 
-// func (d Datetime) GetColumnNames() []string {
-// 	return []string{d.ColumnName}
-// }
-// func (d Datetime) GetColumnVariables() []interface{} {
-// 	var destination *time.Time
-// 	return []interface{}{
-// 		&destination,
-// 	}
-// }
+func (dtv DatetimeValue) MarshalJSON() ([]byte, error) {
+	stamp := fmt.Sprintf("\"%s\"", time.Time(dtv).Format(time.RFC3339))
+	return []byte(stamp), nil
+}
+
+type Datetime struct {
+	ColumnName string
+}
+
+func (dt Datetime) GetColumnNames() []string {
+	return []string{dt.ColumnName}
+}
+func (dt Datetime) GetColumnVariables() []interface{} {
+	var destination *DatetimeValue
+	return []interface{}{
+		&destination,
+	}
+}
