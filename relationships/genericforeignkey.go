@@ -116,3 +116,11 @@ func (gfk GenericForeignKey) GetValues(
 
 	return values, maps
 }
+
+func AssertGenericForeignKey(val interface{}) *Pointer {
+	gfkVal, ok := val.(*Pointer)
+	if !ok {
+		panic("Bad generic foreign key value")
+	}
+	return gfkVal
+}

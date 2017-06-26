@@ -13,3 +13,11 @@ func (t Text) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+
+func AssertText(val interface{}) *string {
+	stringVal, ok := val.(**string)
+	if !ok {
+		panic("Bad text value")
+	}
+	return *stringVal
+}

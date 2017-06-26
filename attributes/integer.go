@@ -13,3 +13,11 @@ func (i Integer) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+
+func AssertInteger(val interface{}) *int {
+	intVal, ok := val.(**int)
+	if !ok {
+		panic("Bad integer value")
+	}
+	return *intVal
+}

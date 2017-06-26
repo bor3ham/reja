@@ -25,3 +25,11 @@ func (d Date) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+
+func AssertDate(val interface{}) *DateValue {
+	dVal, ok := val.(**DateValue)
+	if !ok {
+		panic("Bad date value")
+	}
+	return *dVal
+}

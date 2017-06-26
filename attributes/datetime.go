@@ -25,3 +25,11 @@ func (dt Datetime) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+
+func AssertDatetime(val interface{}) *DatetimeValue {
+	dtVal, ok := val.(**DatetimeValue)
+	if !ok {
+		panic("Bad datetime value")
+	}
+	return *dtVal
+}

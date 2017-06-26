@@ -107,3 +107,11 @@ func (fk ForeignKey) GetValues(
 
 	return values, maps
 }
+
+func AssertForeignKey(val interface{}) *Pointer {
+	fkVal, ok := val.(*Pointer)
+	if !ok {
+		panic("Bad foreign key value")
+	}
+	return fkVal
+}

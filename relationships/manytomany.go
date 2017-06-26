@@ -126,3 +126,11 @@ func (m2m ManyToMany) GetValues(
 	}
 	return generalValues, maps
 }
+
+func AssertManyToMany(val interface{}) *format.Page {
+	m2mVal, ok := val.(*format.Page)
+	if !ok {
+		panic("Bad many to many value")
+	}
+	return m2mVal
+}

@@ -128,3 +128,11 @@ func (fkr ForeignKeyReverse) GetValues(
 	}
 	return generalValues, maps
 }
+
+func AssertForeignKeyReverse(val interface{}) *format.Page {
+	fkrVal, ok := val.(*format.Page)
+	if !ok {
+		panic("Bad foreign key reverse value")
+	}
+	return fkrVal
+}

@@ -13,3 +13,11 @@ func (b Bool) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+
+func AssertBool(val interface{}) *bool {
+	bVal, ok := val.(**bool)
+	if !ok {
+		panic("Bad boolean value")
+	}
+	return *bVal
+}
