@@ -24,6 +24,7 @@ type Context interface {
 
 type RequestContext struct {
 	Request *http.Request
+	gorillaMutex sync.Mutex
 
 	InstanceCache struct {
 		sync.Mutex
@@ -32,9 +33,11 @@ type RequestContext struct {
 }
 
 func (rc *RequestContext) incrementQueryCount() {
+	rc.gorillaMutex.Lock()
 	queries := rc.GetQueryCount()
 	queries += 1
 	gorillaContext.Set(rc.Request, "queries", queries)
+	rc.gorillaMutex.Unlock()
 }
 func (rc *RequestContext) GetQueryCount() int {
 	current := gorillaContext.Get(rc.Request, "queries")
