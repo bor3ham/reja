@@ -12,22 +12,22 @@ import (
 const USE_OBJECT_CACHE = true
 
 type RelationResult struct {
-	Key string
-	Index int
-	Default interface{}
-	Values  map[string]interface{}
+	Key          string
+	Index        int
+	Default      interface{}
+	Values       map[string]interface{}
 	RelationMaps map[string]map[string][]string
 }
 
 type IncludeResult struct {
 	Instances []rejaInstances.Instance
-	Included []rejaInstances.Instance
-	Error error
+	Included  []rejaInstances.Instance
+	Error     error
 }
 
 func combineRelations(
 	maps ...map[string]map[string][]string,
-) (map[string]map[string][]string) {
+) map[string]map[string][]string {
 	combinedMap := map[string]map[string][]string{}
 	for _, relations := range maps {
 		for key, models := range relations {
@@ -149,7 +149,6 @@ func GetObjects(
 			ids = append(ids, id)
 		}
 
-
 		var wg sync.WaitGroup
 		relationResults := make(chan RelationResult)
 		wg.Add(len(m.Relationships))
@@ -163,10 +162,10 @@ func GetObjects(
 
 				values, maps := relation.GetValues(rc, ids, relationExtras)
 				relationResults <- RelationResult{
-					Index: index,
-					Key: relation.GetKey(),
-					Default: relation.GetDefaultValue(),
-					Values: values,
+					Index:        index,
+					Key:          relation.GetKey(),
+					Default:      relation.GetDefaultValue(),
+					Values:       values,
 					RelationMaps: maps,
 				}
 			}(&wg, relationIndex, relationship)
@@ -265,8 +264,8 @@ func GetObjects(
 					} else {
 						includedResults <- IncludeResult{
 							Instances: childInstances,
-							Included: childIncluded,
-							Error: nil,
+							Included:  childIncluded,
+							Error:     nil,
 						}
 					}
 

@@ -85,7 +85,7 @@ func (fk ForeignKey) GetValues(
 			newValue = Pointer{
 				Data: &PointerData{
 					Type: fk.Type,
-					ID: *stringId,
+					ID:   *stringId,
 				},
 			}
 		}

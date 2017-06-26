@@ -1,14 +1,15 @@
 package attributes
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 type DateValue time.Time
+
 func (dv DateValue) MarshalJSON() ([]byte, error) {
-    stamp := fmt.Sprintf("\"%s\"", time.Time(dv).Format("2006-01-02"))
-    return []byte(stamp), nil
+	stamp := fmt.Sprintf("\"%s\"", time.Time(dv).Format("2006-01-02"))
+	return []byte(stamp), nil
 }
 
 type Date struct {

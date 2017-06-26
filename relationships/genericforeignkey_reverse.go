@@ -8,13 +8,13 @@ import (
 )
 
 type GenericForeignKeyReverse struct {
-	Key            string
-	Table    string
-	OwnType string
+	Key           string
+	Table         string
+	OwnType       string
 	OwnTypeColumn string
-	OwnIDColumn string
+	OwnIDColumn   string
 	OtherIDColumn string
-	OtherType           string
+	OtherType     string
 }
 
 func (gfkr GenericForeignKeyReverse) GetKey() string {

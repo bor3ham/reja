@@ -5,9 +5,9 @@ import (
 )
 
 type GenericForeignKey struct {
-	Key        string
+	Key            string
 	TypeColumnName string
-	IDColumnName string
+	IDColumnName   string
 }
 
 func (gfk GenericForeignKey) GetKey() string {
@@ -94,7 +94,7 @@ func (gfk GenericForeignKey) GetValues(
 			newValue = Pointer{
 				Data: &PointerData{
 					Type: **modelType,
-					ID: *stringId,
+					ID:   *stringId,
 				},
 			}
 		}

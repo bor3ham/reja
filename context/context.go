@@ -1,16 +1,16 @@
 package context
 
 import (
-	"sync"
 	"database/sql"
 	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/instances"
 	gorillaContext "github.com/gorilla/context"
 	"net/http"
+	"sync"
 )
 
 type CachedInstance struct {
-	Instance instances.Instance
+	Instance    instances.Instance
 	RelationMap map[string]map[string][]string
 }
 type Context interface {
@@ -70,7 +70,7 @@ func (rc *RequestContext) CacheObject(object instances.Instance, relationMap map
 		rc.InstanceCache.Instances[model] = map[string]CachedInstance{}
 	}
 	rc.InstanceCache.Instances[model][id] = CachedInstance{
-		Instance: object,
+		Instance:    object,
 		RelationMap: relationMap,
 	}
 	rc.InstanceCache.Unlock()
@@ -87,4 +87,3 @@ func (rc *RequestContext) GetCachedObject(instanceType string, instanceId string
 	}
 	return nil, nil
 }
-
