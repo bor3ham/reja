@@ -117,6 +117,10 @@ func (gfk GenericForeignKey) GetValues(
 	return values, maps
 }
 
+func (gfk *GenericForeignKey) ValidateNew(val interface{}) error {
+	return nil
+}
+
 func AssertGenericForeignKey(val interface{}) *Pointer {
 	gfkVal, ok := val.(*Pointer)
 	if !ok {

@@ -127,6 +127,10 @@ func (m2m ManyToMany) GetValues(
 	return generalValues, maps
 }
 
+func (m2m *ManyToMany) ValidateNew(val interface{}) error {
+	return nil
+}
+
 func AssertManyToMany(val interface{}) *format.Page {
 	m2mVal, ok := val.(*format.Page)
 	if !ok {

@@ -131,6 +131,10 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	return generalValues, maps
 }
 
+func (gfkr *GenericForeignKeyReverse) ValidateNew(val interface{}) error {
+	return nil
+}
+
 func AssertGenericForeignKeyReverse(val interface{}) *format.Page {
 	gfkrVal, ok := val.(*format.Page)
 	if !ok {

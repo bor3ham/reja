@@ -40,6 +40,9 @@ func (t Text) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+func (t *Text) ValidateNew(val interface{}) error {
+	return nil
+}
 
 func AssertText(val interface{}) TextValue {
 	textVal, ok := val.(TextValue)

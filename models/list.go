@@ -45,6 +45,21 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 	instance := m.Manager.Create()
 	rejaHttp.MustJSONUnmarshal(body, instance)
 	values := instance.GetValues()
+	valueIndex := 0
+	for _, attribute := range m.Attributes {
+		err := attribute.ValidateNew(values[valueIndex])
+		if err != nil {
+			rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
+		}
+		valueIndex += 1
+	}
+	for _, relation := range m.Relationships {
+		err := relation.ValidateNew(values[valueIndex])
+		if err != nil {
+			rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
+		}
+		valueIndex += 1
+	}
 	spew.Dump(values)
 
 	// newName := instance.GetValues()[0]

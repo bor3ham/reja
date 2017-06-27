@@ -13,6 +13,9 @@ func (b Bool) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
+func (b *Bool) ValidateNew(val interface{}) error {
+	return nil
+}
 
 func AssertBool(val interface{}) *bool {
 	bVal, ok := val.(**bool)

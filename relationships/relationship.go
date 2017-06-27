@@ -22,6 +22,8 @@ type Relationship interface {
 		map[string]interface{},
 		map[string]map[string][]string,
 	)
+
+	ValidateNew(interface{}) error
 }
 
 type PointerData struct {
