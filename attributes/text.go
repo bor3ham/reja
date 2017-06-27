@@ -29,7 +29,6 @@ func (tv *TextValue) UnmarshalJSON(data []byte) error {
 type Text struct {
 	ColumnName string
 }
-
 func (t Text) GetColumnNames() []string {
 	return []string{t.ColumnName}
 }
@@ -43,12 +42,12 @@ func (t Text) GetColumnVariables() []interface{} {
 func AssertText(val interface{}) TextValue {
 	textVal, ok := val.(TextValue)
 	if !ok {
-		stringVal, ok := val.(**string)
+		plainVal, ok := val.(**string)
 		if !ok {
 			panic("Bad text value")
 		}
 		return TextValue{
-			Value: *stringVal,
+			Value: *plainVal,
 			Provided: true,
 		}
 	}
