@@ -5,10 +5,10 @@ import (
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	rejaHttp "github.com/bor3ham/reja/http"
+	"github.com/davecgh/go-spew/spew"
+	"io/ioutil"
 	"math"
 	"net/http"
-	"io/ioutil"
-	"github.com/davecgh/go-spew/spew"
 )
 
 const defaultPageSize = 5
@@ -38,25 +38,25 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
 	fmt.Fprintf(w, "Hello there postman")
 	body, err := ioutil.ReadAll(r.Body)
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
-    instance := m.Manager.Create()
-    rejaHttp.MustJSONUnmarshal(body, instance)
-    values := instance.GetValues()
-    spew.Dump(values)
+	instance := m.Manager.Create()
+	rejaHttp.MustJSONUnmarshal(body, instance)
+	values := instance.GetValues()
+	spew.Dump(values)
 
-    // newName := instance.GetValues()[0]
-    // if newName == emptyString {
-    // 	spew.Dump("name is unchanged")
-    // } else if newName == nil {
-    // 	spew.Dump("name is explicitly removed")
-    // } else {
-    // 	spew.Dump("name is new, value", newName)
-    // }
+	// newName := instance.GetValues()[0]
+	// if newName == emptyString {
+	// 	spew.Dump("name is unchanged")
+	// } else if newName == nil {
+	// 	spew.Dump("name is explicitly removed")
+	// } else {
+	// 	spew.Dump("name is new, value", newName)
+	// }
 
-    spew.Dump("posting done")
+	spew.Dump("posting done")
 }
 
 func getList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {

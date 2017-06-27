@@ -23,7 +23,7 @@ type Context interface {
 }
 
 type RequestContext struct {
-	Request *http.Request
+	Request      *http.Request
 	gorillaMutex sync.Mutex
 
 	InstanceCache struct {
