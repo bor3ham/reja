@@ -15,3 +15,10 @@ func MustJSONMarshal(v interface{}) []byte {
 	b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
 	return b
 }
+
+func MustJSONUnmarshal(b []byte, shape interface{}) {
+	err := json.Unmarshal(b, shape)
+	if err != nil {
+		panic(err)
+	}
+}

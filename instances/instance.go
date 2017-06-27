@@ -5,4 +5,5 @@ type Instance interface {
 	SetID(string)
 	GetType() string
 	SetValues(values []interface{})
+	GetValues() []interface{}
 }

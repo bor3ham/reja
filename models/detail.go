@@ -9,8 +9,23 @@ import (
 )
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
-	rc := &context.RequestContext{Request: r}
+	rc := context.RequestContext{Request: r}
 	rc.InitCache()
+
+	if r.Method == "PATCH" || r.Method == "PUT" {
+		patchDetail(w, r, &rc, m)
+	} else if r.Method == "GET" {
+		getDetail(w, r, &rc, m)
+	}
+
+	logQueryCount(rc.GetQueryCount())
+}
+
+func patchDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
+
+}
+
+func getDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
 	queryStrings := r.URL.Query()
 
 	// extract included information
@@ -49,5 +64,4 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	responseBytes := rejaHttp.MustJSONMarshal(responseBlob)
 	fmt.Fprintf(w, string(responseBytes))
-	logQueryCount(rc.GetQueryCount())
 }

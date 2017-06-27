@@ -7,6 +7,8 @@ import (
 	rejaHttp "github.com/bor3ham/reja/http"
 	"math"
 	"net/http"
+	"io/ioutil"
+	"github.com/davecgh/go-spew/spew"
 )
 
 const defaultPageSize = 5
@@ -21,8 +23,43 @@ func flattened(fields [][]interface{}) []interface{} {
 }
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
-	rc := &context.RequestContext{Request: r}
+	rc := context.RequestContext{Request: r}
 	rc.InitCache()
+
+	if r.Method == "POST" {
+		postList(w, r, &rc, m)
+	} else if r.Method == "GET" {
+		getList(w, r, &rc, m)
+	}
+
+	logQueryCount(rc.GetQueryCount())
+}
+
+func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
+	fmt.Fprintf(w, "Hello there postman")
+	body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        panic(err)
+    }
+
+    instance := m.Manager.Create()
+    rejaHttp.MustJSONUnmarshal(body, instance)
+    values := instance.GetValues()
+    spew.Dump(values)
+
+    // newName := instance.GetValues()[0]
+    // if newName == emptyString {
+    // 	spew.Dump("name is unchanged")
+    // } else if newName == nil {
+    // 	spew.Dump("name is explicitly removed")
+    // } else {
+    // 	spew.Dump("name is new, value", newName)
+    // }
+
+    spew.Dump("posting done")
+}
+
+func getList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
 	queryStrings := r.URL.Query()
 
 	// extract included information
@@ -129,5 +166,4 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 
 	responseBytes := rejaHttp.MustJSONMarshal(responseBlob)
 	fmt.Fprintf(w, string(responseBytes))
-	logQueryCount(rc.GetQueryCount())
 }
