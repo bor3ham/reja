@@ -108,8 +108,8 @@ func (fk ForeignKey) GetValues(
 	return values, maps
 }
 
-func (fk *ForeignKey) ValidateNew(val interface{}) error {
-	return nil
+func (fk *ForeignKey) ValidateNew(val interface{}) (interface{}, error) {
+	return nil, nil
 }
 
 func AssertForeignKey(val interface{}) *Pointer {

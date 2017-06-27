@@ -13,8 +13,8 @@ func (b Bool) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
-func (b *Bool) ValidateNew(val interface{}) error {
-	return nil
+func (b *Bool) ValidateNew(val interface{}) (interface{}, error) {
+	return nil, nil
 }
 
 func AssertBool(val interface{}) *bool {

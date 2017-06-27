@@ -25,8 +25,8 @@ func (d Date) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
-func (d *Date) ValidateNew(val interface{}) error {
-	return nil
+func (d *Date) ValidateNew(val interface{}) (interface{}, error) {
+	return nil, nil
 }
 
 func AssertDate(val interface{}) *DateValue {

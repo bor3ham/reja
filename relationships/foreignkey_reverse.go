@@ -129,8 +129,8 @@ func (fkr ForeignKeyReverse) GetValues(
 	return generalValues, maps
 }
 
-func (fkr *ForeignKeyReverse) ValidateNew(val interface{}) error {
-	return nil
+func (fkr *ForeignKeyReverse) ValidateNew(val interface{}) (interface{}, error) {
+	return nil, nil
 }
 
 func AssertForeignKeyReverse(val interface{}) *format.Page {

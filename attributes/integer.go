@@ -40,8 +40,8 @@ func (i Integer) GetColumnVariables() []interface{} {
 		&destination,
 	}
 }
-func (i *Integer) ValidateNew(val interface{}) error {
-	return nil
+func (i *Integer) ValidateNew(val interface{}) (interface{}, error) {
+	return nil, nil
 }
 
 func AssertInteger(val interface{}) IntegerValue {

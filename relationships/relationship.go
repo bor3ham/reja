@@ -23,7 +23,7 @@ type Relationship interface {
 		map[string]map[string][]string,
 	)
 
-	ValidateNew(interface{}) error
+	ValidateNew(interface{}) (interface{}, error)
 }
 
 type PointerData struct {

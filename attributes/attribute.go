@@ -4,5 +4,5 @@ type Attribute interface {
 	GetColumnNames() []string
 	GetColumnVariables() []interface{}
 
-	ValidateNew(interface{}) error
+	ValidateNew(interface{}) (interface{}, error)
 }
