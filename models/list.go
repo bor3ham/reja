@@ -36,20 +36,24 @@ func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
-	fmt.Fprintf(w, "Hello there postman")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
 	}
 
 	instance := m.Manager.Create()
-	rejaHttp.MustJSONUnmarshal(body, instance)
+	err = rejaHttp.JSONUnmarshal(body, instance)
+	if err != nil {
+		rejaHttp.BadRequest(w, "Unable to Parse JSON", err.Error())
+		return
+	}
 	values := instance.GetValues()
 	valueIndex := 0
 	for _, attribute := range m.Attributes {
 		values[valueIndex], err = attribute.ValidateNew(values[valueIndex])
 		if err != nil {
 			rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
+			return
 		}
 		valueIndex += 1
 	}
@@ -57,9 +61,12 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 		values[valueIndex], err = relation.ValidateNew(values[valueIndex])
 		if err != nil {
 			rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
+			return
 		}
 		valueIndex += 1
 	}
+	// instance.SetValues(values)
+	// spew.Dump(instance)
 	spew.Dump(values)
 
 	// newName := instance.GetValues()[0]
@@ -71,7 +78,7 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 	// 	spew.Dump("name is new, value", newName)
 	// }
 
-	spew.Dump("posting done")
+	fmt.Fprintf(w, "Post valid")
 }
 
 func getList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {

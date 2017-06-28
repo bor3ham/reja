@@ -23,6 +23,7 @@ func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
 
 func patchDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
 
+	
 }
 
 func getDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {

@@ -16,9 +16,6 @@ func MustJSONMarshal(v interface{}) []byte {
 	return b
 }
 
-func MustJSONUnmarshal(b []byte, shape interface{}) {
-	err := json.Unmarshal(b, shape)
-	if err != nil {
-		panic(err)
-	}
+func JSONUnmarshal(b []byte, shape interface{}) error {
+	return json.Unmarshal(b, shape)
 }

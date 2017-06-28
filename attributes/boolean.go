@@ -1,7 +1,10 @@
 package attributes
 
 type Bool struct {
+	Key string
 	ColumnName string
+	Nullable bool
+	Default *bool
 }
 
 func (b Bool) GetColumnNames() []string {
