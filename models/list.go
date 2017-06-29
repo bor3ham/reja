@@ -43,7 +43,7 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 
 	// parse the user input into instance data struct
 	instance := m.Manager.Create()
-	dataBlob := struct{
+	dataBlob := struct {
 		Data interface{} `json:"data"`
 	}{
 		Data: instance,

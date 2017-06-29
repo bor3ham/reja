@@ -2,8 +2,8 @@ package attributes
 
 import (
 	"encoding/json"
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 type IntegerValue struct {
@@ -30,10 +30,10 @@ func (iv *IntegerValue) UnmarshalJSON(data []byte) error {
 }
 
 type Integer struct {
-	Key string
+	Key        string
 	ColumnName string
-	Nullable bool
-	Default *int
+	Nullable   bool
+	Default    *int
 }
 
 func (i Integer) GetColumnNames() []string {

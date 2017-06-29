@@ -7,7 +7,7 @@ import (
 )
 
 type BoolValue struct {
-	Value *bool
+	Value    *bool
 	Provided bool
 }
 
@@ -30,10 +30,10 @@ func (bv *BoolValue) UnmarshalJSON(data []byte) error {
 }
 
 type Bool struct {
-	Key string
+	Key        string
 	ColumnName string
-	Nullable bool
-	Default *bool
+	Nullable   bool
+	Default    *bool
 }
 
 func (b Bool) GetColumnNames() []string {
@@ -69,7 +69,7 @@ func AssertBool(val interface{}) BoolValue {
 			panic("Bad boolean value")
 		}
 		return BoolValue{
-			Value: *plainVal,
+			Value:    *plainVal,
 			Provided: true,
 		}
 	}

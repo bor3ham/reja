@@ -1,16 +1,16 @@
 package attributes
 
 import (
-	"fmt"
-	"time"
-	"strings"
 	"errors"
+	"fmt"
+	"strings"
+	"time"
 )
 
 const DATE_LAYOUT = "2006-01-02"
 
 type DateValue struct {
-	Value *time.Time
+	Value    *time.Time
 	Provided bool
 }
 
@@ -40,10 +40,10 @@ func (dv *DateValue) UnmarshalJSON(data []byte) error {
 }
 
 type Date struct {
-	Key string
+	Key        string
 	ColumnName string
-	Default *time.Time
-	Nullable bool
+	Default    *time.Time
+	Nullable   bool
 }
 
 func (d Date) GetColumnNames() []string {
@@ -87,7 +87,7 @@ func AssertDate(val interface{}) DateValue {
 			panic("Bad date value")
 		}
 		return DateValue{
-			Value: *plainVal,
+			Value:    *plainVal,
 			Provided: true,
 		}
 	}

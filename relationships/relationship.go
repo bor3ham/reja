@@ -1,9 +1,9 @@
 package relationships
 
 import (
-	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/format"
 	"errors"
+	"github.com/bor3ham/reja/format"
+	"github.com/bor3ham/reja/instances"
 )
 
 type Pointer struct {
@@ -11,7 +11,7 @@ type Pointer struct {
 }
 
 type PointerSet struct {
-	Data     []instances.InstancePointer `json:"data"`
+	Data []instances.InstancePointer `json:"data"`
 }
 
 // temporary function to flatten list as part of refactor
@@ -84,7 +84,7 @@ func ParsePagePointerSet(val interface{}) (PointerSet, error) {
 		// valid pointer
 		pointersVal.Data = append(pointersVal.Data, instances.InstancePointer{
 			Type: parsedType,
-			ID: &parsedId,
+			ID:   &parsedId,
 		})
 	}
 	return pointersVal, nil

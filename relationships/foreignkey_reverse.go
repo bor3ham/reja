@@ -1,13 +1,13 @@
 package relationships
 
 import (
+	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
 	"github.com/bor3ham/reja/models"
 	"strings"
-	"errors"
 )
 
 const defaultPageSize = 5
@@ -179,7 +179,7 @@ func (fkr *ForeignKeyReverse) validate(c context.Context, val PointerSet) (inter
 	include := models.Include{
 		Children: map[string]*models.Include{},
 	}
-	instances, _ , err:= models.GetObjects(
+	instances, _, err := models.GetObjects(
 		c,
 		*model,
 		instanceIds,
