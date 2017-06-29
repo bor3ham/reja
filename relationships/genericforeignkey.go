@@ -2,6 +2,7 @@ package relationships
 
 import (
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/instances"
 )
 
 type GenericForeignKey struct {
@@ -92,12 +93,13 @@ func (gfk GenericForeignKey) GetValues(
 			newValue = Pointer{}
 		} else {
 			newValue = Pointer{
-				Data: &PointerData{
+				Data: &instances.InstancePointer{
 					Type: **modelType,
 					ID:   *stringId,
 				},
 			}
 		}
+		// update the value
 		values[myId] = &newValue
 
 		// add to relation map

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
+	"github.com/bor3ham/reja/instances"
 	"strings"
 )
 
@@ -36,9 +37,7 @@ func (m2m ManyToMany) GetExtraColumnVariables() []interface{} {
 }
 
 func (m2m ManyToMany) GetDefaultValue() interface{} {
-	return &Pointers{
-		Data: []*PointerData{},
-	}
+	return format.Page{}
 }
 func (m2m ManyToMany) GetValues(
 	c context.Context,
@@ -111,13 +110,15 @@ func (m2m ManyToMany) GetValues(
 		total += 1
 		if total <= defaultPageSize {
 			count += 1
-			value.Data = append(value.Data, PointerData{
+			value.Data = append(value.Data, instances.InstancePointer{
 				ID:   &otherID,
 				Type: m2m.OtherType,
 			})
 			value.Metadata["count"] = count
 		}
 		value.Metadata["total"] = total
+		// update the value
+		values[myID] = value
 	}
 	// generalise values
 	generalValues := map[string]interface{}{}

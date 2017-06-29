@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
+	"github.com/bor3ham/reja/instances"
 	"strings"
 )
 
@@ -38,9 +39,7 @@ func (fkr ForeignKeyReverse) GetExtraColumnVariables() []interface{} {
 }
 
 func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
-	return &Pointers{
-		Data: []*PointerData{},
-	}
+	return format.Page{}
 }
 func (fkr ForeignKeyReverse) GetValues(
 	c context.Context,
@@ -105,7 +104,7 @@ func (fkr ForeignKeyReverse) GetValues(
 		total += 1
 		if total <= defaultPageSize {
 			count += 1
-			value.Data = append(value.Data, PointerData{
+			value.Data = append(value.Data, instances.InstancePointer{
 				ID:   &otherId,
 				Type: fkr.Type,
 			})
@@ -120,6 +119,8 @@ func (fkr ForeignKeyReverse) GetValues(
 			maps[ownId][fkr.Type] = []string{}
 		}
 		maps[ownId][fkr.Type] = append(maps[ownId][fkr.Type], otherId)
+		// update value
+		values[ownId] = value
 	}
 	// generalise values
 	generalValues := map[string]interface{}{}
@@ -130,11 +131,11 @@ func (fkr ForeignKeyReverse) GetValues(
 }
 
 func (fkr *ForeignKeyReverse) ValidateNew(val interface{}) (interface{}, error) {
-	fkrVal := AssertForeignKeyReverse(val)
+	fkrVal := AssertPointerSet(val)
 	return fkr.validate(fkrVal)
 }
-func (fkr *ForeignKeyReverse) validate(val format.Page) (interface{}, error) {
-	return nil, nil
+func (fkr *ForeignKeyReverse) validate(val PointerSet) (interface{}, error) {
+	return val, nil
 }
 
 func AssertForeignKeyReverse(val interface{}) format.Page {

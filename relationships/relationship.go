@@ -2,6 +2,8 @@ package relationships
 
 import (
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/format"
 )
 
 type Relationship interface {
@@ -26,17 +28,12 @@ type Relationship interface {
 	ValidateNew(interface{}) (interface{}, error)
 }
 
-type PointerData struct {
-	Type string  `json:"type"`
-	ID   *string `json:"id"`
-}
-
 type Pointer struct {
-	Data *PointerData `json:"data"`
+	Data *instances.InstancePointer `json:"data"`
 }
 
-type Pointers struct {
-	Data []*PointerData `json:"data"`
+type PointerSet struct {
+	Data     []instances.InstancePointer `json:"data"`
 }
 
 // temporary function to flatten list as part of refactor
@@ -64,4 +61,28 @@ func flattenMaps(relationMap map[string]map[string][]string) map[string][]string
 		}
 	}
 	return distinctMap
+}
+
+func AssertPointerSet(val interface{}) PointerSet {
+	pageVal, ok := val.(PointerSet)
+	if !ok {
+		instanceVals, ok := val.(format.Page)
+		if !ok {
+			panic("Bad pointer page value")
+		}
+		pageVal = PointerSet{}
+		for _, genericInstance := range instanceVals.Data {
+			instance, ok := genericInstance.(instances.Instance)
+			if !ok {
+				panic("Bad pointer page value")
+			}
+			instanceId := instance.GetID()
+			pageVal.Data = append(pageVal.Data, instances.InstancePointer{
+				ID: &instanceId,
+				Type: instance.GetType(),
+			})
+		}
+
+	}
+	return pageVal
 }

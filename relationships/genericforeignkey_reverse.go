@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
+	"github.com/bor3ham/reja/instances"
 	"strings"
 )
 
@@ -38,9 +39,7 @@ func (gfkr GenericForeignKeyReverse) GetExtraColumnVariables() []interface{} {
 }
 
 func (gfkr GenericForeignKeyReverse) GetDefaultValue() interface{} {
-	return &Pointers{
-		Data: []*PointerData{},
-	}
+	return format.Page{}
 }
 func (gfkr GenericForeignKeyReverse) GetValues(
 	c context.Context,
@@ -107,13 +106,15 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		total += 1
 		if total <= defaultPageSize {
 			count += 1
-			value.Data = append(value.Data, PointerData{
+			value.Data = append(value.Data, instances.InstancePointer{
 				ID:   &otherId,
 				Type: gfkr.OtherType,
 			})
 			value.Metadata["count"] = count
 		}
 		value.Metadata["total"] = total
+		// update the value
+		values[ownId] = value
 
 		// add to maps
 		_, exists = maps[ownId]
