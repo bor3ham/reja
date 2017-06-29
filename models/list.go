@@ -41,12 +41,32 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 		panic(err)
 	}
 
+	// parse the user input into instance data struct
 	instance := m.Manager.Create()
-	err = rejaHttp.JSONUnmarshal(body, instance)
+	dataBlob := struct{
+		Data interface{} `json:"data"`
+	}{
+		Data: instance,
+	}
+	err = rejaHttp.JSONUnmarshal(body, &dataBlob)
 	if err != nil {
 		rejaHttp.BadRequest(w, "Unable to Parse JSON", err.Error())
 		return
 	}
+
+	// user cannot choose their own id
+	if len(instance.GetID()) != 0 {
+		rejaHttp.BadRequest(w, "Bad Object Value", "ID's are assigned not chosen.")
+		return
+	}
+	// type cannot be messed with
+	instanceType := instance.GetType()
+	if !(len(instanceType) == 0 || instanceType == m.Type) {
+		rejaHttp.BadRequest(w, "Bad Object Value", "Type does not match endpoint model.")
+		return
+	}
+
+	// validate values
 	values := instance.GetValues()
 	valueIndex := 0
 	for _, attribute := range m.Attributes {
@@ -66,17 +86,8 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 		valueIndex += 1
 	}
 	// instance.SetValues(values)
-	// spew.Dump(instance)
+	spew.Dump(instance)
 	spew.Dump(values)
-
-	// newName := instance.GetValues()[0]
-	// if newName == emptyString {
-	// 	spew.Dump("name is unchanged")
-	// } else if newName == nil {
-	// 	spew.Dump("name is explicitly removed")
-	// } else {
-	// 	spew.Dump("name is new, value", newName)
-	// }
 
 	fmt.Fprintf(w, "Post valid")
 }

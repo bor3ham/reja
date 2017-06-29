@@ -75,7 +75,6 @@ func (d *Date) validate(val DateValue) (interface{}, error) {
 		if !d.Nullable {
 			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", d.Key))
 		}
-	} else {
 	}
 	return val, nil
 }

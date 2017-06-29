@@ -2,6 +2,8 @@ package attributes
 
 import (
 	"encoding/json"
+	"fmt"
+	"errors"
 )
 
 type IntegerValue struct {
@@ -28,7 +30,10 @@ func (iv *IntegerValue) UnmarshalJSON(data []byte) error {
 }
 
 type Integer struct {
+	Key string
 	ColumnName string
+	Nullable bool
+	Default *int
 }
 
 func (i Integer) GetColumnNames() []string {
@@ -41,7 +46,19 @@ func (i Integer) GetColumnVariables() []interface{} {
 	}
 }
 func (i *Integer) ValidateNew(val interface{}) (interface{}, error) {
-	return nil, nil
+	intVal := AssertInteger(val)
+	if !intVal.Provided && i.Default != nil {
+		intVal.Value = i.Default
+	}
+	return i.validate(intVal)
+}
+func (i *Integer) validate(val IntegerValue) (interface{}, error) {
+	if val.Value == nil {
+		if !i.Nullable {
+			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", i.Key))
+		}
+	}
+	return val, nil
 }
 
 func AssertInteger(val interface{}) IntegerValue {

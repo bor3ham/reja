@@ -84,7 +84,6 @@ func (t *Text) validate(val TextValue) (interface{}, error) {
 			))
 		}
 	}
-
 	return val, nil
 }
 
