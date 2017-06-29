@@ -75,7 +75,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]*format.Page{}
+	values := map[string]format.Page{}
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
@@ -86,7 +86,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		}
 		value.Metadata["total"] = 0
 		value.Metadata["count"] = 0
-		values[id] = &value
+		values[id] = value
 	}
 	// go through result data
 	for rows.Next() {
@@ -135,8 +135,8 @@ func (gfkr *GenericForeignKeyReverse) ValidateNew(val interface{}) (interface{},
 	return nil, nil
 }
 
-func AssertGenericForeignKeyReverse(val interface{}) *format.Page {
-	gfkrVal, ok := val.(*format.Page)
+func AssertGenericForeignKeyReverse(val interface{}) format.Page {
+	gfkrVal, ok := val.(format.Page)
 	if !ok {
 		panic("Bad generic foreign key reverse value")
 	}

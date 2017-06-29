@@ -70,7 +70,7 @@ func (m2m ManyToMany) GetValues(
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]*format.Page{}
+	values := map[string]format.Page{}
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
@@ -81,7 +81,7 @@ func (m2m ManyToMany) GetValues(
 		}
 		value.Metadata["total"] = 0
 		value.Metadata["count"] = 0
-		values[id] = &value
+		values[id] = value
 	}
 	// go through result data
 	for rows.Next() {
@@ -131,8 +131,8 @@ func (m2m *ManyToMany) ValidateNew(val interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func AssertManyToMany(val interface{}) *format.Page {
-	m2mVal, ok := val.(*format.Page)
+func AssertManyToMany(val interface{}) format.Page {
+	m2mVal, ok := val.(format.Page)
 	if !ok {
 		panic("Bad many to many value")
 	}
