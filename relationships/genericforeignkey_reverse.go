@@ -132,7 +132,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	return generalValues, maps
 }
 
-func (gfkr *GenericForeignKeyReverse) ValidateNew(val interface{}) (interface{}, error) {
+func (gfkr *GenericForeignKeyReverse) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
 	return nil, nil
 }
 

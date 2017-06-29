@@ -128,7 +128,7 @@ func (m2m ManyToMany) GetValues(
 	return generalValues, maps
 }
 
-func (m2m *ManyToMany) ValidateNew(val interface{}) (interface{}, error) {
+func (m2m *ManyToMany) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
 	return nil, nil
 }
 

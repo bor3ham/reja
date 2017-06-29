@@ -119,7 +119,7 @@ func (gfk GenericForeignKey) GetValues(
 	return values, maps
 }
 
-func (gfk *GenericForeignKey) ValidateNew(val interface{}) (interface{}, error) {
+func (gfk *GenericForeignKey) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
 	return nil, nil
 }
 

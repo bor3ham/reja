@@ -78,7 +78,7 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 		valueIndex += 1
 	}
 	for _, relation := range m.Relationships {
-		values[valueIndex], err = relation.ValidateNew(values[valueIndex])
+		values[valueIndex], err = relation.ValidateNew(rc, values[valueIndex])
 		if err != nil {
 			rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
 			return

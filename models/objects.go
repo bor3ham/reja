@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	rejaInstances "github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/relationships"
 	"strings"
 	"sync"
 )
@@ -153,7 +152,7 @@ func GetObjects(
 		relationResults := make(chan RelationResult)
 		wg.Add(len(m.Relationships))
 		for relationIndex, relationship := range m.Relationships {
-			go func(wg *sync.WaitGroup, index int, relation relationships.Relationship) {
+			go func(wg *sync.WaitGroup, index int, relation Relationship) {
 				defer wg.Done()
 				var relationExtras [][]interface{}
 				for _, result := range extraFields {

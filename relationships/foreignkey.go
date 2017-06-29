@@ -109,7 +109,7 @@ func (fk ForeignKey) GetValues(
 	return values, maps
 }
 
-func (fk *ForeignKey) ValidateNew(val interface{}) (interface{}, error) {
+func (fk *ForeignKey) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
 	return nil, nil
 }
 

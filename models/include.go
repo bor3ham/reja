@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/http"
-	"github.com/bor3ham/reja/relationships"
 	"strings"
 )
 
@@ -23,7 +22,7 @@ func validateInclude(model *Model, include *Include) error {
 	}
 	// go through children
 	for key, child := range include.Children {
-		var relation relationships.Relationship
+		var relation Relationship
 		for _, modelRelation := range model.Relationships {
 			if modelRelation.GetKey() == key {
 				relation = modelRelation

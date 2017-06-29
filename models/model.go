@@ -4,15 +4,37 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/attributes"
 	"github.com/bor3ham/reja/managers"
-	"github.com/bor3ham/reja/relationships"
+	"github.com/bor3ham/reja/context"
 )
+
+type Relationship interface {
+	GetKey() string
+	GetType() string
+
+	GetInstanceColumnNames() []string
+	GetInstanceColumnVariables() []interface{}
+	GetExtraColumnNames() []string
+	GetExtraColumnVariables() []interface{}
+
+	GetDefaultValue() interface{}
+	GetValues(
+		context.Context,
+		[]string,
+		[][]interface{},
+	) (
+		map[string]interface{},
+		map[string]map[string][]string,
+	)
+
+	ValidateNew(context.Context, interface{}) (interface{}, error)
+}
 
 type Model struct {
 	Type          string
 	Table         string
 	IDColumn      string
 	Attributes    []attributes.Attribute
-	Relationships []relationships.Relationship
+	Relationships []Relationship
 	Manager       managers.Manager
 }
 
