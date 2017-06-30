@@ -2,9 +2,9 @@ package relationships
 
 import (
 	"errors"
+	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/context"
 )
 
 type Pointer struct {
@@ -15,7 +15,8 @@ type PointerSet struct {
 	Data []instances.InstancePointer `json:"data"`
 }
 
-type RelationshipStub struct {}
+type RelationshipStub struct{}
+
 func (stub RelationshipStub) GetSelectDirectColumns() []string {
 	return []string{}
 }
