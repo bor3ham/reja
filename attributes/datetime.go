@@ -13,6 +13,7 @@ func (dtv DatetimeValue) MarshalJSON() ([]byte, error) {
 }
 
 type Datetime struct {
+	AttributeStub
 	ColumnName string
 }
 

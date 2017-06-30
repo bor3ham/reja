@@ -30,6 +30,7 @@ func (iv *IntegerValue) UnmarshalJSON(data []byte) error {
 }
 
 type Integer struct {
+	AttributeStub
 	Key        string
 	ColumnName string
 	Nullable   bool

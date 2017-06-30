@@ -30,6 +30,7 @@ func (tv *TextValue) UnmarshalJSON(data []byte) error {
 }
 
 type Text struct {
+	AttributeStub
 	Key        string
 	ColumnName string
 	Nullable   bool

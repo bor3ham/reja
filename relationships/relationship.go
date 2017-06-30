@@ -32,6 +32,12 @@ func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
 func (stub RelationshipStub) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
 	return val, nil
 }
+func (stub RelationshipStub) GetInsertColumns() []string {
+	return []string{}
+}
+func (stub RelationshipStub) GetInsertValues() []interface{} {
+	return []interface{}{}
+}
 
 func AssertPointerSet(val interface{}) PointerSet {
 	pageVal, ok := val.(PointerSet)

@@ -7,6 +7,7 @@ import (
 )
 
 type BoolValue struct {
+	AttributeStub
 	Value    *bool
 	Provided bool
 }
