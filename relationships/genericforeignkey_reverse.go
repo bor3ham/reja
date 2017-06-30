@@ -5,7 +5,9 @@ import (
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/models"
 	"strings"
+	"errors"
 )
 
 type GenericForeignKeyReverse struct {
@@ -132,8 +134,86 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	return generalValues, maps
 }
 
-func (gfkr *GenericForeignKeyReverse) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
-	return nil, nil
+func (gfkr *GenericForeignKeyReverse) ValidateNew(
+	c context.Context,
+	val interface{},
+) (
+	interface{},
+	error,
+) {
+	var gfkrVal PointerSet
+	if val == nil {
+		gfkrVal = PointerSet{}
+	} else {
+		var err error
+		gfkrVal, err = ParsePagePointerSet(val)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: %s",
+				gfkr.Key,
+				err.Error(),
+			))
+		}
+	}
+	return gfkr.validate(c, gfkrVal)
+}
+func (gfkr *GenericForeignKeyReverse) validate(
+	c context.Context,
+	val PointerSet,
+) (
+	interface{},
+	error,
+) {
+	// validate the types are correct
+	for _, pointer := range val.Data {
+		if pointer.Type != gfkr.OtherType {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Incorrect type in set.",
+				gfkr.Key,
+			))
+		}
+	}
+	// find duplicates
+	ids := map[string]bool{}
+	for _, pointer := range val.Data {
+		_, exists := ids[*pointer.ID]
+		if exists {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Duplicate object in set.",
+				gfkr.Key,
+			))
+		}
+		ids[*pointer.ID] = true
+	}
+	// extract ids
+	var instanceIds []string
+	for _, pointer := range val.Data {
+		instanceIds = append(instanceIds, *pointer.ID)
+	}
+
+	// check that the objects exist
+	model := models.GetModel(gfkr.OtherType)
+	include := models.Include{
+		Children: map[string]*models.Include{},
+	}
+	instances, _, err := models.GetObjects(
+		c,
+		*model,
+		instanceIds,
+		0,
+		0,
+		&include,
+	)
+	if err != nil {
+		panic(err)
+	}
+	if len(instances) != len(ids) {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: Not all objects in set exist",
+			gfkr.Key,
+		))
+	}
+	return val, nil
 }
 
 func AssertGenericForeignKeyReverse(val interface{}) format.Page {

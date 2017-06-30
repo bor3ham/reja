@@ -164,7 +164,10 @@ func (fkr *ForeignKeyReverse) validate(c context.Context, val PointerSet) (inter
 	for _, pointer := range val.Data {
 		_, exists := ids[*pointer.ID]
 		if exists {
-			return nil, errors.New(fmt.Sprintf("Relationship '%s' invalid: Duplicate object in set.", fkr.Key))
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Duplicate object in set.",
+				fkr.Key,
+			))
 		}
 		ids[*pointer.ID] = true
 	}
