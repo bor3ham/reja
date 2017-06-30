@@ -36,10 +36,10 @@ type Integer struct {
 	Default    *int
 }
 
-func (i Integer) GetColumnNames() []string {
+func (i Integer) GetSelectDirectColumns() []string {
 	return []string{i.ColumnName}
 }
-func (i Integer) GetColumnVariables() []interface{} {
+func (i Integer) GetSelectDirectVariables() []interface{} {
 	var destination *int
 	return []interface{}{
 		&destination,

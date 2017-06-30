@@ -36,10 +36,10 @@ type Bool struct {
 	Default    *bool
 }
 
-func (b Bool) GetColumnNames() []string {
+func (b Bool) GetSelectDirectColumns() []string {
 	return []string{b.ColumnName}
 }
-func (b Bool) GetColumnVariables() []interface{} {
+func (b Bool) GetSelectDirectVariables() []interface{} {
 	var destination *bool
 	return []interface{}{
 		&destination,

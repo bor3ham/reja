@@ -1,8 +1,8 @@
 package attributes
 
 type Attribute interface {
-	GetColumnNames() []string
-	GetColumnVariables() []interface{}
+	GetSelectDirectColumns() []string
+	GetSelectDirectVariables() []interface{}
 
 	ValidateNew(interface{}) (interface{}, error)
 }

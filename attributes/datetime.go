@@ -16,10 +16,10 @@ type Datetime struct {
 	ColumnName string
 }
 
-func (dt Datetime) GetColumnNames() []string {
+func (dt Datetime) GetSelectDirectColumns() []string {
 	return []string{dt.ColumnName}
 }
-func (dt Datetime) GetColumnVariables() []interface{} {
+func (dt Datetime) GetSelectDirectVariables() []interface{} {
 	var destination *DatetimeValue
 	return []interface{}{
 		&destination,

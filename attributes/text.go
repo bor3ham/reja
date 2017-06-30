@@ -38,10 +38,10 @@ type Text struct {
 	Default    *string
 }
 
-func (t Text) GetColumnNames() []string {
+func (t Text) GetSelectDirectColumns() []string {
 	return []string{t.ColumnName}
 }
-func (t Text) GetColumnVariables() []interface{} {
+func (t Text) GetSelectDirectVariables() []interface{} {
 	var destination *string
 	return []interface{}{
 		&destination,

@@ -11,10 +11,10 @@ type Relationship interface {
 	GetKey() string
 	GetType() string
 
-	GetInstanceColumnNames() []string
-	GetInstanceColumnVariables() []interface{}
-	GetExtraColumnNames() []string
-	GetExtraColumnVariables() []interface{}
+	GetSelectDirectColumns() []string
+	GetSelectDirectVariables() []interface{}
+	GetSelectExtraColumns() []string
+	GetSelectExtraVariables() []interface{}
 
 	GetDefaultValue() interface{}
 	GetValues(
@@ -38,40 +38,40 @@ type Model struct {
 	Manager       managers.Manager
 }
 
+func (m Model) FieldColumns() []string {
+	var columns []string
+	for _, attribute := range m.Attributes {
+		columns = append(columns, attribute.GetSelectDirectColumns()...)
+	}
+	for _, relationship := range m.Relationships {
+		columns = append(columns, relationship.GetSelectDirectColumns()...)
+	}
+	return columns
+}
 func (m Model) FieldVariables() []interface{} {
 	var fields []interface{}
 	for _, attribute := range m.Attributes {
-		fields = append(fields, attribute.GetColumnVariables()...)
+		fields = append(fields, attribute.GetSelectDirectVariables()...)
 	}
 	for _, relationship := range m.Relationships {
-		fields = append(fields, relationship.GetInstanceColumnVariables()...)
+		fields = append(fields, relationship.GetSelectDirectVariables()...)
 	}
 	return fields
 }
-func (m Model) FieldNames() []string {
+
+func (m Model) ExtraColumns() []string {
 	var columns []string
-	for _, attribute := range m.Attributes {
-		columns = append(columns, attribute.GetColumnNames()...)
-	}
 	for _, relationship := range m.Relationships {
-		columns = append(columns, relationship.GetInstanceColumnNames()...)
+		columns = append(columns, relationship.GetSelectExtraColumns()...)
 	}
 	return columns
 }
-
 func (m Model) ExtraVariables() [][]interface{} {
 	var fields [][]interface{}
 	for _, relationship := range m.Relationships {
-		fields = append(fields, relationship.GetExtraColumnVariables())
+		fields = append(fields, relationship.GetSelectExtraVariables())
 	}
 	return fields
-}
-func (m Model) ExtraNames() []string {
-	var columns []string
-	for _, relationship := range m.Relationships {
-		columns = append(columns, relationship.GetExtraColumnNames()...)
-	}
-	return columns
 }
 
 func logQueryCount(count int) {

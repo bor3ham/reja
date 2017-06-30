@@ -19,10 +19,10 @@ func (fk ForeignKey) GetType() string {
 	return fk.Type
 }
 
-func (fk ForeignKey) GetExtraColumnNames() []string {
+func (fk ForeignKey) GetSelectExtraColumns() []string {
 	return []string{fk.ColumnName}
 }
-func (fk ForeignKey) GetExtraColumnVariables() []interface{} {
+func (fk ForeignKey) GetSelectExtraVariables() []interface{} {
 	var destination *string
 	return []interface{}{
 		&destination,

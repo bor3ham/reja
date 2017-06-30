@@ -16,16 +16,16 @@ type PointerSet struct {
 }
 
 type RelationshipStub struct {}
-func (stub RelationshipStub) GetInstanceColumnNames() []string {
+func (stub RelationshipStub) GetSelectDirectColumns() []string {
 	return []string{}
 }
-func (stub RelationshipStub) GetInstanceColumnVariables() []interface{} {
+func (stub RelationshipStub) GetSelectDirectVariables() []interface{} {
 	return []interface{}{}
 }
-func (stub RelationshipStub) GetExtraColumnNames() []string {
+func (stub RelationshipStub) GetSelectExtraColumns() []string {
 	return []string{}
 }
-func (stub RelationshipStub) GetExtraColumnVariables() []interface{} {
+func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
 	return []interface{}{}
 }
 func (stub RelationshipStub) ValidateNew(c context.Context, val interface{}) (interface{}, error) {

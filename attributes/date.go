@@ -46,10 +46,10 @@ type Date struct {
 	Nullable   bool
 }
 
-func (d Date) GetColumnNames() []string {
+func (d Date) GetSelectDirectColumns() []string {
 	return []string{d.ColumnName}
 }
-func (d Date) GetColumnVariables() []interface{} {
+func (d Date) GetSelectDirectVariables() []interface{} {
 	var destination *time.Time
 	return []interface{}{
 		&destination,

@@ -62,8 +62,8 @@ func GetObjects(
 	var cacheMaps []map[string]map[string][]string
 
 	var query string
-	columns := m.FieldNames()
-	columns = append(m.FieldNames(), m.ExtraNames()...)
+	columns := m.FieldColumns()
+	columns = append(m.FieldColumns(), m.ExtraColumns()...)
 	if len(objectIds) > 0 {
 		// attempt to use cache
 		var newIds []string
