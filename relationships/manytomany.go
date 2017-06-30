@@ -5,7 +5,9 @@ import (
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/models"
 	"strings"
+	"errors"
 )
 
 type ManyToMany struct {
@@ -129,7 +131,73 @@ func (m2m ManyToMany) GetValues(
 }
 
 func (m2m *ManyToMany) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
-	return nil, nil
+	var m2mVal PointerSet
+	if val == nil {
+		m2mVal = PointerSet{}
+	} else {
+		var err error
+		m2mVal, err = ParsePagePointerSet(val)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: %s",
+				m2m.Key,
+				err.Error(),
+			))
+		}
+	}
+	return m2m.validate(c, m2mVal)
+}
+func (m2m *ManyToMany) validate(c context.Context, val PointerSet) (interface{}, error) {
+	// validate the types are correct
+	for _, pointer := range val.Data {
+		if pointer.Type != m2m.OtherType {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Incorrect type in set.",
+				m2m.Key,
+			))
+		}
+	}
+	// find duplicates
+	ids := map[string]bool{}
+	for _, pointer := range val.Data {
+		_, exists := ids[*pointer.ID]
+		if exists {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Duplicate object in set.",
+				m2m.Key,
+			))
+		}
+		ids[*pointer.ID] = true
+	}
+	// extract ids
+	var instanceIds []string
+	for _, pointer := range val.Data {
+		instanceIds = append(instanceIds, *pointer.ID)
+	}
+
+	// check that the objects exist
+	model := models.GetModel(m2m.OtherType)
+	include := models.Include{
+		Children: map[string]*models.Include{},
+	}
+	instances, _, err := models.GetObjects(
+		c,
+		*model,
+		instanceIds,
+		0,
+		0,
+		&include,
+	)
+	if err != nil {
+		panic(err)
+	}
+	if len(instances) != len(ids) {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: Not all objects in set exist",
+			m2m.Key,
+		))
+	}
+	return val, nil
 }
 
 func AssertManyToMany(val interface{}) format.Page {
