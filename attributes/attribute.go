@@ -5,6 +5,9 @@ type Attribute interface {
 	GetSelectDirectVariables() []interface{}
 
 	ValidateNew(interface{}) (interface{}, error)
+
+	GetInsertColumns() []string
+	GetInsertValues() []interface{}
 }
 
 type AttributeStub struct {}

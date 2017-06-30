@@ -1,36 +1,12 @@
 package attributes
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
 
-type BoolValue struct {
-	AttributeStub
-	Value    *bool
-	Provided bool
-}
-
-func (bv *BoolValue) MarshalJSON() ([]byte, error) {
-	return json.Marshal(bv.Value)
-}
-func (bv *BoolValue) UnmarshalJSON(data []byte) error {
-	bv.Provided = true
-
-	if string(data) == "null" {
-		return nil
-	}
-
-	var val bool
-	if err := json.Unmarshal(data, &val); err != nil {
-		return err
-	}
-	bv.Value = &val
-	return nil
-}
-
 type Bool struct {
+	AttributeStub
 	Key        string
 	ColumnName string
 	Nullable   bool
@@ -60,19 +36,4 @@ func (b *Bool) validate(val BoolValue) (interface{}, error) {
 		}
 	}
 	return val, nil
-}
-
-func AssertBool(val interface{}) BoolValue {
-	bVal, ok := val.(BoolValue)
-	if !ok {
-		plainVal, ok := val.(**bool)
-		if !ok {
-			panic("Bad boolean value")
-		}
-		return BoolValue{
-			Value:    *plainVal,
-			Provided: true,
-		}
-	}
-	return bVal
 }
