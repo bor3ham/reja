@@ -6,6 +6,7 @@ import (
 )
 
 type ForeignKey struct {
+	RelationshipStub
 	Key        string
 	ColumnName string
 	Type       string
@@ -18,12 +19,6 @@ func (fk ForeignKey) GetType() string {
 	return fk.Type
 }
 
-func (fk ForeignKey) GetInstanceColumnNames() []string {
-	return []string{}
-}
-func (fk ForeignKey) GetInstanceColumnVariables() []interface{} {
-	return []interface{}{}
-}
 func (fk ForeignKey) GetExtraColumnNames() []string {
 	return []string{fk.ColumnName}
 }
@@ -107,10 +102,6 @@ func (fk ForeignKey) GetValues(
 	}
 
 	return values, maps
-}
-
-func (fk *ForeignKey) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
-	return nil, nil
 }
 
 func AssertForeignKey(val interface{}) *Pointer {

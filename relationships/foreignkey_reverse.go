@@ -13,6 +13,7 @@ import (
 const defaultPageSize = 5
 
 type ForeignKeyReverse struct {
+	RelationshipStub
 	Key            string
 	SourceTable    string
 	SourceIDColumn string
@@ -25,19 +26,6 @@ func (fkr ForeignKeyReverse) GetKey() string {
 }
 func (fkr ForeignKeyReverse) GetType() string {
 	return fkr.Type
-}
-
-func (fkr ForeignKeyReverse) GetInstanceColumnNames() []string {
-	return []string{}
-}
-func (fkr ForeignKeyReverse) GetInstanceColumnVariables() []interface{} {
-	return []interface{}{}
-}
-func (fkr ForeignKeyReverse) GetExtraColumnNames() []string {
-	return []string{}
-}
-func (fkr ForeignKeyReverse) GetExtraColumnVariables() []interface{} {
-	return []interface{}{}
 }
 
 func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {

@@ -6,6 +6,7 @@ import (
 )
 
 type GenericForeignKey struct {
+	RelationshipStub
 	Key            string
 	TypeColumnName string
 	IDColumnName   string
@@ -18,12 +19,6 @@ func (gfk GenericForeignKey) GetType() string {
 	return ""
 }
 
-func (gfk GenericForeignKey) GetInstanceColumnNames() []string {
-	return []string{}
-}
-func (gfk GenericForeignKey) GetInstanceColumnVariables() []interface{} {
-	return []interface{}{}
-}
 func (gfk GenericForeignKey) GetExtraColumnNames() []string {
 	return []string{
 		gfk.TypeColumnName,
@@ -117,10 +112,6 @@ func (gfk GenericForeignKey) GetValues(
 	}
 
 	return values, maps
-}
-
-func (gfk *GenericForeignKey) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
-	return nil, nil
 }
 
 func AssertGenericForeignKey(val interface{}) *Pointer {

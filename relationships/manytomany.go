@@ -11,6 +11,7 @@ import (
 )
 
 type ManyToMany struct {
+	RelationshipStub
 	Key           string
 	Table         string
 	OwnIDColumn   string
@@ -23,19 +24,6 @@ func (m2m ManyToMany) GetKey() string {
 }
 func (m2m ManyToMany) GetType() string {
 	return m2m.OtherType
-}
-
-func (m2m ManyToMany) GetInstanceColumnNames() []string {
-	return []string{}
-}
-func (m2m ManyToMany) GetInstanceColumnVariables() []interface{} {
-	return []interface{}{}
-}
-func (m2m ManyToMany) GetExtraColumnNames() []string {
-	return []string{}
-}
-func (m2m ManyToMany) GetExtraColumnVariables() []interface{} {
-	return []interface{}{}
 }
 
 func (m2m ManyToMany) GetDefaultValue() interface{} {

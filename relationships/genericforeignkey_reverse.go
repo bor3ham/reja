@@ -11,6 +11,7 @@ import (
 )
 
 type GenericForeignKeyReverse struct {
+	RelationshipStub
 	Key           string
 	Table         string
 	OwnType       string
@@ -25,19 +26,6 @@ func (gfkr GenericForeignKeyReverse) GetKey() string {
 }
 func (gfkr GenericForeignKeyReverse) GetType() string {
 	return gfkr.OtherType
-}
-
-func (gfkr GenericForeignKeyReverse) GetInstanceColumnNames() []string {
-	return []string{}
-}
-func (gfkr GenericForeignKeyReverse) GetInstanceColumnVariables() []interface{} {
-	return []interface{}{}
-}
-func (gfkr GenericForeignKeyReverse) GetExtraColumnNames() []string {
-	return []string{}
-}
-func (gfkr GenericForeignKeyReverse) GetExtraColumnVariables() []interface{} {
-	return []interface{}{}
 }
 
 func (gfkr GenericForeignKeyReverse) GetDefaultValue() interface{} {

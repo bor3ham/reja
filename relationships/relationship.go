@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/context"
 )
 
 type Pointer struct {
@@ -12,6 +13,23 @@ type Pointer struct {
 
 type PointerSet struct {
 	Data []instances.InstancePointer `json:"data"`
+}
+
+type RelationshipStub struct {}
+func (stub RelationshipStub) GetInstanceColumnNames() []string {
+	return []string{}
+}
+func (stub RelationshipStub) GetInstanceColumnVariables() []interface{} {
+	return []interface{}{}
+}
+func (stub RelationshipStub) GetExtraColumnNames() []string {
+	return []string{}
+}
+func (stub RelationshipStub) GetExtraColumnVariables() []interface{} {
+	return []interface{}{}
+}
+func (stub RelationshipStub) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
+	return val, nil
 }
 
 func AssertPointerSet(val interface{}) PointerSet {
