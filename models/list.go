@@ -130,9 +130,15 @@ func listPOST(
 		m.IDColumn,
 	)
 
+	// start a transaction
+	tx, err := rc.Begin()
+	if err != nil {
+		panic(err)
+	}
+
 	// execute insert query
 	var newId string
-	err = rc.QueryRow(query, insertValues...).Scan(&newId)
+	err = tx.QueryRow(query, insertValues...).Scan(&newId)
 	if err != nil {
 		panic(err)
 	}
@@ -148,10 +154,16 @@ func listPOST(
 
 	// execute additional queries
 	for _, query := range queries {
-		_, err := rc.Exec(query.Query, query.Args...)
+		_, err := tx.Exec(query.Query, query.Args...)
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	// commit transaction
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
 	}
 
 	// return created object as though it were a GET

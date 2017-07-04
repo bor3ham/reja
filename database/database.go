@@ -36,3 +36,7 @@ func Exec(query string, args ...interface{}) (sql.Result, error) {
 	// logQuery(query)
 	return config.Database.Exec(query, args...)
 }
+
+func Begin() (*sql.Tx, error) {
+	return config.Database.Begin()
+}
