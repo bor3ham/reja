@@ -3,9 +3,9 @@ package relationships
 import (
 	"errors"
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/database"
 )
 
 type Pointer struct {

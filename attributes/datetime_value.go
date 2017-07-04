@@ -1,8 +1,8 @@
 package attributes
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 type DatetimeValue time.Time

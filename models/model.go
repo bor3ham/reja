@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/attributes"
 	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/managers"
 	"github.com/bor3ham/reja/database"
+	"github.com/bor3ham/reja/managers"
 )
 
 type Relationship interface {

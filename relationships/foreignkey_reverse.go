@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
 	"github.com/bor3ham/reja/models"
-	"github.com/bor3ham/reja/database"
 	"strings"
 )
 

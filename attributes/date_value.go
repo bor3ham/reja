@@ -1,9 +1,9 @@
 package attributes
 
 import (
-	"time"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type DateValue struct {

@@ -11,7 +11,7 @@ var config struct {
 
 type QueryBlob struct {
 	Query string
-	Args []interface{}
+	Args  []interface{}
 }
 
 func InitialiseDatabase(database *sql.DB) {

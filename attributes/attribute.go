@@ -10,7 +10,7 @@ type Attribute interface {
 	GetInsertValues(interface{}) []interface{}
 }
 
-type AttributeStub struct {}
+type AttributeStub struct{}
 
 func (stub AttributeStub) GetInsertColumns(val interface{}) []string {
 	return []string{}

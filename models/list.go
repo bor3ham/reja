@@ -3,14 +3,14 @@ package models
 import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/database"
+	"github.com/bor3ham/reja/format"
 	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"math"
-	"strings"
 	"net/http"
+	"strings"
 )
 
 const defaultPageSize = 5
@@ -120,7 +120,7 @@ func listPOST(
 
 	var valuePlaces []string
 	for index, _ := range insertValues {
-		valuePlaces = append(valuePlaces, fmt.Sprintf("$%d", index + 1))
+		valuePlaces = append(valuePlaces, fmt.Sprintf("$%d", index+1))
 	}
 	query := fmt.Sprintf(
 		`insert into %s (%s) values (%s) returning %s;`,
