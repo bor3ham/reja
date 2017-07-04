@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/context"
+	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
 	"github.com/bor3ham/reja/models"
-	"github.com/bor3ham/reja/database"
 	"strings"
 )
 
@@ -208,9 +208,7 @@ func (gfkr *GenericForeignKeyReverse) validate(
 func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 	newId string,
 	val interface{},
-) (
-	[]database.QueryBlob,
-) {
+) []database.QueryBlob {
 	gfkrVal, ok := val.(PointerSet)
 	if !ok {
 		panic("Bad pointer set value")
