@@ -7,6 +7,7 @@ import (
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
 	"github.com/bor3ham/reja/models"
+	"github.com/bor3ham/reja/database"
 	"strings"
 )
 
@@ -186,6 +187,35 @@ func (m2m *ManyToMany) validate(c context.Context, val PointerSet) (interface{},
 		))
 	}
 	return val, nil
+}
+
+func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {
+	m2mVal, ok := val.(PointerSet)
+	if !ok {
+		panic("Bad pointer set value")
+	}
+
+	var ids []string
+	for _, pointer := range m2mVal.Data {
+		ids = append(ids, *pointer.ID)
+	}
+
+	var queries []database.QueryBlob
+	for _, id := range ids {
+		queries = append(queries, database.QueryBlob{
+			Query: fmt.Sprintf(
+				`insert into %s (%s, %s) values ($1, $2);`,
+				m2m.Table,
+				m2m.OwnIDColumn,
+				m2m.OtherIDColumn,
+			),
+			Args: []interface{}{
+				newId,
+				id,
+			},
+		})
+	}
+	return queries
 }
 
 func AssertManyToMany(val interface{}) format.Page {

@@ -202,8 +202,12 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 		ids = append(ids, *pointer.ID)
 	}
 
+	if len(ids) == 0 {
+		return []database.QueryBlob{}
+	}
+
 	query := fmt.Sprintf(
-		`update %s set %s = $1 where %s in (%s)`,
+		`update %s set %s = $1 where %s in (%s);`,
 		fkr.SourceTable,
 		fkr.ColumnName,
 		fkr.SourceIDColumn,
