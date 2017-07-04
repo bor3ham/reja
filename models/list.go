@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
+	"github.com/bor3ham/reja/database"
 	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"math"
+	"strings"
 	"net/http"
 )
 
@@ -23,19 +25,38 @@ func flattened(fields [][]interface{}) []interface{} {
 }
 
 func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
+	// initialise request context
 	rc := context.RequestContext{Request: r}
 	rc.InitCache()
 
+	// parse query strings
+	queryStrings := r.URL.Query()
+
+	// extract included information
+	include, err := parseInclude(&m, queryStrings)
+	if err != nil {
+		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
+		return
+	}
+
+	// handle request based on method
 	if r.Method == "POST" {
-		postList(w, r, &rc, m)
+		listPOST(w, r, &rc, m, queryStrings, include)
 	} else if r.Method == "GET" {
-		getList(w, r, &rc, m)
+		listGET(w, r, &rc, m, queryStrings, include)
 	}
 
 	logQueryCount(rc.GetQueryCount())
 }
 
-func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
+func listPOST(
+	w http.ResponseWriter,
+	r *http.Request,
+	rc context.Context,
+	m Model,
+	queryStrings map[string][]string,
+	include *Include,
+) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
@@ -85,23 +106,67 @@ func postList(w http.ResponseWriter, r *http.Request, rc context.Context, m Mode
 		}
 		valueIndex += 1
 	}
-	// instance.SetValues(values)
-	spew.Dump(instance)
-	spew.Dump(values)
 
-	fmt.Fprintf(w, "Post valid")
-}
+	// build insert query
+	var insertColumns []string
+	var insertValues []interface{}
 
-func getList(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
-	queryStrings := r.URL.Query()
-
-	// extract included information
-	include, err := parseInclude(&m, queryStrings)
-	if err != nil {
-		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
-		return
+	valueIndex = 0
+	for _, attribute := range m.Attributes {
+		insertColumns = append(insertColumns, attribute.GetInsertColumns(values[valueIndex])...)
+		insertValues = append(insertValues, attribute.GetInsertValues(values[valueIndex])...)
+		valueIndex += 1
 	}
 
+	var valuePlaces []string
+	for index, _ := range insertValues {
+		valuePlaces = append(valuePlaces, fmt.Sprintf("$%d", index + 1))
+	}
+	query := fmt.Sprintf(
+		`insert into %s (%s) values (%s) returning %s;`,
+		m.Table,
+		strings.Join(insertColumns, ", "),
+		strings.Join(valuePlaces, ", "),
+		m.IDColumn,
+	)
+
+	// execute insert query
+	var newId string
+	err = rc.QueryRow(query, insertValues...).Scan(&newId)
+	if err != nil {
+		panic(err)
+	}
+
+	// build additional queries
+	var queries []database.QueryBlob
+	valueIndex = 0
+	valueIndex += len(m.Attributes)
+	for _, relationship := range m.Relationships {
+		queries = append(queries, relationship.GetInsertQueries(newId, values[valueIndex])...)
+		valueIndex += 1
+	}
+	spew.Dump(queries)
+
+	// execute additional queries
+	for _, query := range queries {
+		_, err := rc.Exec(query.Query, query.Args...)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// return created object as though it were a GET
+	detailGET(w, r, rc, m, newId, include)
+}
+
+func listGET(
+	w http.ResponseWriter,
+	r *http.Request,
+	rc context.Context,
+	m Model,
+	queryStrings map[string][]string,
+	include *Include,
+) {
 	minPageSize := 1
 	maxPageSize := maximumPageSize
 	pageSize, err := rejaHttp.GetIntParam(

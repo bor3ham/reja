@@ -6,15 +6,15 @@ type Attribute interface {
 
 	ValidateNew(interface{}) (interface{}, error)
 
-	GetInsertColumns() []string
-	GetInsertValues() []interface{}
+	GetInsertColumns(interface{}) []string
+	GetInsertValues(interface{}) []interface{}
 }
 
 type AttributeStub struct {}
 
-func (stub AttributeStub) GetInsertColumns() []string {
+func (stub AttributeStub) GetInsertColumns(val interface{}) []string {
 	return []string{}
 }
-func (stub AttributeStub) GetInsertValues() []interface{} {
+func (stub AttributeStub) GetInsertValues(val interface{}) []interface{} {
 	return []interface{}{}
 }

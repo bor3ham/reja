@@ -37,3 +37,16 @@ func (b *Bool) validate(val BoolValue) (interface{}, error) {
 	}
 	return val, nil
 }
+
+func (b *Bool) GetInsertColumns(val interface{}) []string {
+	var columns []string
+	columns = append(columns, b.ColumnName)
+	return columns
+}
+func (b *Bool) GetInsertValues(val interface{}) []interface{} {
+	boolVal := AssertBool(val)
+
+	var values []interface{}
+	values = append(values, boolVal.Value)
+	return values
+}

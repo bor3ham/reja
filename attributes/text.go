@@ -64,9 +64,15 @@ func (t *Text) validate(val TextValue) (interface{}, error) {
 	return val, nil
 }
 
-func (t *Text) GetInsertColumns() []string {
-	return []string{}
+func (t *Text) GetInsertColumns(val interface{}) []string {
+	var columns []string
+	columns = append(columns, t.ColumnName)
+	return columns
 }
-func (t *Text) GetInsertValues() []interface{} {
-	return []interface{}{}
+func (t *Text) GetInsertValues(val interface{}) []interface{} {
+	textVal := AssertText(val)
+
+	var values []interface{}
+	values = append(values, textVal.Value)
+	return values
 }

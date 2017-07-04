@@ -5,6 +5,7 @@ import (
 	"github.com/bor3ham/reja/attributes"
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/managers"
+	"github.com/bor3ham/reja/database"
 )
 
 type Relationship interface {
@@ -25,6 +26,8 @@ type Relationship interface {
 		map[string]interface{},
 		map[string]map[string][]string,
 	)
+
+	GetInsertQueries(string, interface{}) []database.QueryBlob
 
 	ValidateNew(context.Context, interface{}) (interface{}, error)
 }

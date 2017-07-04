@@ -5,6 +5,7 @@ import (
 	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/database"
 )
 
 type Pointer struct {
@@ -37,6 +38,9 @@ func (stub RelationshipStub) GetInsertColumns() []string {
 }
 func (stub RelationshipStub) GetInsertValues() []interface{} {
 	return []interface{}{}
+}
+func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {
+	return []database.QueryBlob{}
 }
 
 func AssertPointerSet(val interface{}) PointerSet {

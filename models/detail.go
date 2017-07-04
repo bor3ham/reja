@@ -9,23 +9,11 @@ import (
 )
 
 func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
+	// initialise request context
 	rc := context.RequestContext{Request: r}
 	rc.InitCache()
 
-	if r.Method == "PATCH" || r.Method == "PUT" {
-		patchDetail(w, r, &rc, m)
-	} else if r.Method == "GET" {
-		getDetail(w, r, &rc, m)
-	}
-
-	logQueryCount(rc.GetQueryCount())
-}
-
-func patchDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
-
-}
-
-func getDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Model) {
+	// parse query strings
 	queryStrings := r.URL.Query()
 
 	// extract included information
@@ -35,9 +23,40 @@ func getDetail(w http.ResponseWriter, r *http.Request, rc context.Context, m Mod
 		return
 	}
 
+	// extract id
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	// handle request based on method
+	if r.Method == "PATCH" || r.Method == "PUT" {
+		detailPATCH(w, r, &rc, m, id, include)
+	} else if r.Method == "GET" {
+		detailGET(w, r, &rc, m, id, include)
+	}
+
+	// log request stats
+	logQueryCount(rc.GetQueryCount())
+}
+
+func detailPATCH(
+	w http.ResponseWriter,
+	r *http.Request,
+	rc context.Context,
+	m Model,
+	id string,
+	include *Include,
+) {
+
+}
+
+func detailGET(
+	w http.ResponseWriter,
+	r *http.Request,
+	rc context.Context,
+	m Model,
+	id string,
+	include *Include,
+) {
 	instances, included, err := GetObjects(rc, m, []string{id}, 0, 0, include)
 	if err != nil {
 		panic(err)

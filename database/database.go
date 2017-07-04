@@ -9,6 +9,11 @@ var config struct {
 	Database *sql.DB
 }
 
+type QueryBlob struct {
+	Query string
+	Args []interface{}
+}
+
 func InitialiseDatabase(database *sql.DB) {
 	config.Database = database
 }
@@ -25,4 +30,9 @@ func QueryRow(query string, args ...interface{}) *sql.Row {
 func Query(query string, args ...interface{}) (*sql.Rows, error) {
 	// logQuery(query)
 	return config.Database.Query(query, args...)
+}
+
+func Exec(query string, args ...interface{}) (sql.Result, error) {
+	// logQuery(query)
+	return config.Database.Exec(query, args...)
 }

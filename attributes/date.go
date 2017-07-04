@@ -48,3 +48,16 @@ func (d *Date) validate(val DateValue) (interface{}, error) {
 	}
 	return val, nil
 }
+
+func (d *Date) GetInsertColumns(val interface{}) []string {
+	var columns []string
+	columns = append(columns, d.ColumnName)
+	return columns
+}
+func (d *Date) GetInsertValues(val interface{}) []interface{} {
+	dateVal := AssertDate(val)
+
+	var values []interface{}
+	values = append(values, dateVal.Value)
+	return values
+}

@@ -16,6 +16,7 @@ type CachedInstance struct {
 type Context interface {
 	QueryRow(string, ...interface{}) *sql.Row
 	Query(string, ...interface{}) (*sql.Rows, error)
+	Exec(string, ...interface{}) (sql.Result, error)
 
 	InitCache()
 	CacheObject(instances.Instance, map[string]map[string][]string)
@@ -57,6 +58,10 @@ func (rc *RequestContext) QueryRow(query string, args ...interface{}) *sql.Row {
 func (rc *RequestContext) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	rc.incrementQueryCount()
 	return database.Query(query, args...)
+}
+func (rc *RequestContext) Exec(query string, args ...interface{}) (sql.Result, error) {
+	rc.incrementQueryCount()
+	return database.Exec(query, args...)
 }
 
 func (rc *RequestContext) InitCache() {
