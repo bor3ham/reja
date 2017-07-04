@@ -91,15 +91,11 @@ func listPOST(
 	values := instance.GetValues()
 	valueIndex := 0
 	for _, attribute := range m.Attributes {
-		// values[valueIndex], err = attribute.ValidateNew(values[valueIndex])
-		// if err != nil {
-		// 	rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
-		// 	return
-		// }
-		// valueIndex += 1
-
 		values[valueIndex] = attribute.DefaultFallback(values[valueIndex], instance)
-		values[valueIndex], err = attribute.Validate(values[valueIndex])
+		// nil values are not included in the insert statement (use db default)
+		if values[valueIndex] != nil {
+			values[valueIndex], err = attribute.Validate(values[valueIndex])
+		}
 		if err != nil {
 			rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
 			return
@@ -121,8 +117,11 @@ func listPOST(
 
 	valueIndex = 0
 	for _, attribute := range m.Attributes {
-		insertColumns = append(insertColumns, attribute.GetInsertColumns(values[valueIndex])...)
-		insertValues = append(insertValues, attribute.GetInsertValues(values[valueIndex])...)
+		// skip nil values (use database default)
+		if values[valueIndex] != nil {
+			insertColumns = append(insertColumns, attribute.GetInsertColumns(values[valueIndex])...)
+			insertValues = append(insertValues, attribute.GetInsertValues(values[valueIndex])...)
+		}
 		valueIndex += 1
 	}
 

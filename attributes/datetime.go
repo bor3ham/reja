@@ -14,6 +14,3 @@ func (dt Datetime) GetSelectDirectVariables() []interface{} {
 		&destination,
 	}
 }
-func (dt *Datetime) ValidateNew(val interface{}) (interface{}, error) {
-	return nil, nil
-}

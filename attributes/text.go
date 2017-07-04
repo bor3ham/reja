@@ -24,6 +24,7 @@ func (t Text) GetSelectDirectVariables() []interface{} {
 		&destination,
 	}
 }
+
 func (t *Text) DefaultFallback(val interface{}, instance interface{}) interface{} {
 	textVal := AssertText(val)
 	if !textVal.Provided {
@@ -32,15 +33,10 @@ func (t *Text) DefaultFallback(val interface{}, instance interface{}) interface{
 		}
 		return nil
 	}
-	return val
+	return textVal
 }
 func (t *Text) Validate(val interface{}) (interface{}, error) {
 	textVal := AssertText(val)
-
-	if !textVal.Provided {
-		return textVal, nil
-	}
-
 	if textVal.Value == nil {
 		if !t.Nullable {
 			return textVal, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", t.Key))
@@ -68,14 +64,6 @@ func (t *Text) Validate(val interface{}) (interface{}, error) {
 		}
 	}
 	return textVal, nil
-}
-func (t *Text) ValidateNew(val interface{}) (interface{}, error) {
-	return AssertText(val), nil
-	// textVal := AssertText(val)
-	// if !textVal.Provided && t.Default != nil {
-	// 	textVal.Value = t.Default
-	// }
-	// return t.validate(textVal)
 }
 
 func (t *Text) GetInsertColumns(val interface{}) []string {

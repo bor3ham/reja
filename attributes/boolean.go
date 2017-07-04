@@ -10,7 +10,7 @@ type Bool struct {
 	Key        string
 	ColumnName string
 	Nullable   bool
-	Default    *bool
+	Default func(interface{}) BoolValue
 }
 
 func (b Bool) GetSelectDirectColumns() []string {
@@ -22,20 +22,25 @@ func (b Bool) GetSelectDirectVariables() []interface{} {
 		&destination,
 	}
 }
-func (b *Bool) ValidateNew(val interface{}) (interface{}, error) {
+
+func (b *Bool) DefaultFallback(val interface{}, instance interface{}) interface{} {
 	boolVal := AssertBool(val)
-	if !boolVal.Provided && b.Default != nil {
-		boolVal.Value = b.Default
+	if !boolVal.Provided {
+		if b.Default != nil {
+			return b.Default(instance)
+		}
+		return nil
 	}
-	return b.validate(boolVal)
+	return boolVal
 }
-func (b *Bool) validate(val BoolValue) (interface{}, error) {
-	if val.Value == nil {
+func (b *Bool) Validate(val interface{}) (interface{}, error) {
+	boolVal := AssertBool(val)
+	if boolVal.Value == nil {
 		if !b.Nullable {
 			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", b.Key))
 		}
 	}
-	return val, nil
+	return boolVal, nil
 }
 
 func (b *Bool) GetInsertColumns(val interface{}) []string {

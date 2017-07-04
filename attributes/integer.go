@@ -10,7 +10,7 @@ type Integer struct {
 	Key        string
 	ColumnName string
 	Nullable   bool
-	Default    *int
+	Default func(interface{}) IntegerValue
 }
 
 func (i Integer) GetSelectDirectColumns() []string {
@@ -22,18 +22,23 @@ func (i Integer) GetSelectDirectVariables() []interface{} {
 		&destination,
 	}
 }
-func (i *Integer) ValidateNew(val interface{}) (interface{}, error) {
-	intVal := AssertInteger(val)
-	if !intVal.Provided && i.Default != nil {
-		intVal.Value = i.Default
+
+func (i *Integer) DefaultFallback(val interface{}, instance interface{}) interface{} {
+	iVal := AssertInteger(val)
+	if !iVal.Provided {
+		if i.Default != nil {
+			return i.Default(instance)
+		}
+		return nil
 	}
-	return i.validate(intVal)
+	return iVal
 }
-func (i *Integer) validate(val IntegerValue) (interface{}, error) {
-	if val.Value == nil {
+func (i *Integer) Validate(val interface{}) (interface{}, error) {
+	iVal := AssertInteger(val)
+	if iVal.Value == nil {
 		if !i.Nullable {
 			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", i.Key))
 		}
 	}
-	return val, nil
+	return iVal, nil
 }

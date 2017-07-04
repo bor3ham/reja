@@ -6,7 +6,6 @@ type Attribute interface {
 
 	DefaultFallback(interface{}, interface{}) interface{}
 	Validate(interface{}) (interface{}, error)
-	ValidateNew(interface{}) (interface{}, error)
 
 	GetInsertColumns(interface{}) []string
 	GetInsertValues(interface{}) []interface{}

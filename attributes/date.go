@@ -12,8 +12,8 @@ type Date struct {
 	AttributeStub
 	Key        string
 	ColumnName string
-	Default    *time.Time
 	Nullable   bool
+	Default func(interface{}) DateValue
 }
 
 func (d Date) GetSelectDirectColumns() []string {
@@ -25,28 +25,25 @@ func (d Date) GetSelectDirectVariables() []interface{} {
 		&destination,
 	}
 }
-func (d *Date) ValidateNew(val interface{}) (interface{}, error) {
+
+func (d *Date) DefaultFallback(val interface{}, instance interface{}) interface{} {
 	dVal := AssertDate(val)
-	if !dVal.Provided && d.Default != nil {
-		dVal.Value = d.Default
+	if !dVal.Provided {
+		if d.Default != nil {
+			return d.Default(instance)
+		}
+		return nil
 	}
-	return d.validate(dVal)
+	return dVal
 }
-func (d *Date) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
-	newDVal := AssertDate(newVal)
-	oldDVal := AssertDate(oldVal)
-	if !newDVal.Provided {
-		return oldDVal, nil
-	}
-	return d.validate(newDVal)
-}
-func (d *Date) validate(val DateValue) (interface{}, error) {
-	if val.Value == nil {
+func (d *Date) Validate(val interface{}) (interface{}, error) {
+	dVal := AssertDate(val)
+	if dVal.Value == nil {
 		if !d.Nullable {
 			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", d.Key))
 		}
 	}
-	return val, nil
+	return dVal, nil
 }
 
 func (d *Date) GetInsertColumns(val interface{}) []string {
