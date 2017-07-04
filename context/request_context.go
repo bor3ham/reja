@@ -55,7 +55,7 @@ func (rc *RequestContext) Begin() (*Transaction, error) {
 		return nil, err
 	}
 	return &Transaction{
-		c: rc,
+		c:  rc,
 		tx: tx,
 	}, nil
 }

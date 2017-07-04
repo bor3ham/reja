@@ -7,8 +7,9 @@ import (
 
 type Transaction struct {
 	tx *sql.Tx
-	c Context
+	c  Context
 }
+
 func (t *Transaction) QueryRow(query string, args ...interface{}) *sql.Row {
 	t.c.IncrementQueryCount()
 	return t.tx.QueryRow(query, args...)
