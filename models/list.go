@@ -140,6 +140,7 @@ func listPOST(
 	var newId string
 	err = tx.QueryRow(query, insertValues...).Scan(&newId)
 	if err != nil {
+		tx.Rollback()
 		panic(err)
 	}
 
@@ -156,6 +157,7 @@ func listPOST(
 	for _, query := range queries {
 		_, err := tx.Exec(query.Query, query.Args...)
 		if err != nil {
+			tx.Rollback()
 			panic(err)
 		}
 	}
