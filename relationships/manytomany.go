@@ -195,13 +195,8 @@ func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []databas
 		panic("Bad pointer set value")
 	}
 
-	var ids []string
-	for _, pointer := range m2mVal.Data {
-		ids = append(ids, *pointer.ID)
-	}
-
 	var queries []database.QueryBlob
-	for _, id := range ids {
+	for _, pointer := range m2mVal.Data {
 		queries = append(queries, database.QueryBlob{
 			Query: fmt.Sprintf(
 				`insert into %s (%s, %s) values ($1, $2);`,
@@ -211,7 +206,7 @@ func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []databas
 			),
 			Args: []interface{}{
 				newId,
-				id,
+				*pointer.ID,
 			},
 		})
 	}

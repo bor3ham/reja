@@ -7,6 +7,7 @@ import (
 	"github.com/bor3ham/reja/format"
 	"github.com/bor3ham/reja/instances"
 	"github.com/bor3ham/reja/models"
+	"github.com/bor3ham/reja/database"
 	"strings"
 )
 
@@ -202,6 +203,45 @@ func (gfkr *GenericForeignKeyReverse) validate(
 		))
 	}
 	return val, nil
+}
+
+func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
+	newId string,
+	val interface{},
+) (
+	[]database.QueryBlob,
+) {
+	gfkrVal, ok := val.(PointerSet)
+	if !ok {
+		panic("Bad pointer set value")
+	}
+
+	var ids []string
+	for _, pointer := range gfkrVal.Data {
+		ids = append(ids, *pointer.ID)
+	}
+
+	if len(ids) == 0 {
+		return []database.QueryBlob{}
+	}
+
+	query := fmt.Sprintf(
+		`update %s set (%s, %s) = ($1, $2) where %s in (%s);`,
+		gfkr.Table,
+		gfkr.OwnTypeColumn,
+		gfkr.OwnIDColumn,
+		gfkr.OtherIDColumn,
+		strings.Join(ids, ", "),
+	)
+	return []database.QueryBlob{
+		database.QueryBlob{
+			Query: query,
+			Args: []interface{}{
+				gfkr.OwnType,
+				newId,
+			},
+		},
+	}
 }
 
 func AssertGenericForeignKeyReverse(val interface{}) format.Page {

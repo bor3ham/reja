@@ -6,7 +6,7 @@ import (
 	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/format"
 	rejaHttp "github.com/bor3ham/reja/http"
-	"github.com/davecgh/go-spew/spew"
+	// "github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -145,7 +145,6 @@ func listPOST(
 		queries = append(queries, relationship.GetInsertQueries(newId, values[valueIndex])...)
 		valueIndex += 1
 	}
-	spew.Dump(queries)
 
 	// execute additional queries
 	for _, query := range queries {
