@@ -12,7 +12,7 @@ type Text struct {
 	Nullable   bool
 	MinLength  *int
 	MaxLength  *int
-	Default    *string
+	Default func(interface{}) TextValue
 }
 
 func (t Text) GetSelectDirectColumns() []string {
@@ -24,23 +24,29 @@ func (t Text) GetSelectDirectVariables() []interface{} {
 		&destination,
 	}
 }
-func (t *Text) ValidateNew(val interface{}) (interface{}, error) {
+func (t *Text) DefaultFallback(val interface{}, instance interface{}) interface{} {
 	textVal := AssertText(val)
-	if !textVal.Provided && t.Default != nil {
-		textVal.Value = t.Default
+	if !textVal.Provided {
+		if t.Default != nil {
+			return t.Default(instance)
+		}
+		return nil
 	}
-	return t.validate(textVal)
+	return val
 }
-func (t *Text) ValidateUpdate(val interface{}, oldVal interface{}) (interface{}, error) {
-	return nil, nil
-}
-func (t *Text) validate(val TextValue) (interface{}, error) {
-	if val.Value == nil {
+func (t *Text) Validate(val interface{}) (interface{}, error) {
+	textVal := AssertText(val)
+
+	if !textVal.Provided {
+		return textVal, nil
+	}
+
+	if textVal.Value == nil {
 		if !t.Nullable {
-			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", t.Key))
+			return textVal, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", t.Key))
 		}
 	} else {
-		if t.MinLength != nil && len(*val.Value) < *t.MinLength {
+		if t.MinLength != nil && len(*textVal.Value) < *t.MinLength {
 			if *t.MinLength == 1 {
 				return nil, errors.New(fmt.Sprintf(
 					"Attribute '%s' cannot be blank.",
@@ -53,7 +59,7 @@ func (t *Text) validate(val TextValue) (interface{}, error) {
 				*t.MinLength,
 			))
 		}
-		if t.MaxLength != nil && len(*val.Value) > *t.MaxLength {
+		if t.MaxLength != nil && len(*textVal.Value) > *t.MaxLength {
 			return nil, errors.New(fmt.Sprintf(
 				"Attribute '%s' must be fewer than %d characters long.",
 				t.Key,
@@ -61,7 +67,15 @@ func (t *Text) validate(val TextValue) (interface{}, error) {
 			))
 		}
 	}
-	return val, nil
+	return textVal, nil
+}
+func (t *Text) ValidateNew(val interface{}) (interface{}, error) {
+	return AssertText(val), nil
+	// textVal := AssertText(val)
+	// if !textVal.Provided && t.Default != nil {
+	// 	textVal.Value = t.Default
+	// }
+	// return t.validate(textVal)
 }
 
 func (t *Text) GetInsertColumns(val interface{}) []string {

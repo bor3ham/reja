@@ -87,11 +87,19 @@ func listPOST(
 		return
 	}
 
-	// validate values
+	// load defaults and validate values
 	values := instance.GetValues()
 	valueIndex := 0
 	for _, attribute := range m.Attributes {
-		values[valueIndex], err = attribute.ValidateNew(values[valueIndex])
+		// values[valueIndex], err = attribute.ValidateNew(values[valueIndex])
+		// if err != nil {
+		// 	rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
+		// 	return
+		// }
+		// valueIndex += 1
+
+		values[valueIndex] = attribute.DefaultFallback(values[valueIndex], instance)
+		values[valueIndex], err = attribute.Validate(values[valueIndex])
 		if err != nil {
 			rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
 			return
