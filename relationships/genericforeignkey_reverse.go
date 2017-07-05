@@ -20,7 +20,7 @@ type GenericForeignKeyReverse struct {
 	OwnIDColumn   string
 	OtherIDColumn string
 	OtherType     string
-	Default       func(interface{}) PointerSet
+	Default       func(context.Context, interface{}) PointerSet
 }
 
 func (gfkr GenericForeignKeyReverse) GetKey() string {
@@ -125,16 +125,19 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 }
 
 func (gfkr *GenericForeignKeyReverse) DefaultFallback(
+	c context.Context,
 	val interface{},
 	instance interface{},
-) interface{} {
+) (
+	interface{},
+) {
 	gfkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)
 	}
 	if !gfkrVal.Provided {
 		if gfkr.Default != nil {
-			return gfkr.Default(instance)
+			return gfkr.Default(c, instance)
 		}
 		return nil
 	}

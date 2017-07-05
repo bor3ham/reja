@@ -103,7 +103,7 @@ func listPOST(
 		valueIndex += 1
 	}
 	for _, relation := range m.Relationships {
-		values[valueIndex] = relation.DefaultFallback(values[valueIndex], instance)
+		values[valueIndex] = relation.DefaultFallback(rc, values[valueIndex], instance)
 		// nil values are ignored
 		if values[valueIndex] != nil {
 			values[valueIndex], err = relation.Validate(rc, values[valueIndex])

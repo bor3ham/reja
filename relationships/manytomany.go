@@ -18,7 +18,7 @@ type ManyToMany struct {
 	OwnIDColumn   string
 	OtherIDColumn string
 	OtherType     string
-	Default       func(interface{}) PointerSet
+	Default       func(context.Context, interface{}) PointerSet
 }
 
 func (m2m ManyToMany) GetKey() string {
@@ -121,16 +121,19 @@ func (m2m ManyToMany) GetValues(
 }
 
 func (m2m *ManyToMany) DefaultFallback(
+	c context.Context,
 	val interface{},
 	instance interface{},
-) interface{} {
+) (
+	interface{},
+) {
 	m2mVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)
 	}
 	if !m2mVal.Provided {
 		if m2m.Default != nil {
-			return m2m.Default(instance)
+			return m2m.Default(c, instance)
 		}
 		return nil
 	}

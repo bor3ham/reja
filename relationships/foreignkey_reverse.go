@@ -20,7 +20,7 @@ type ForeignKeyReverse struct {
 	SourceIDColumn string
 	ColumnName     string
 	Type           string
-	Default        func(interface{}) PointerSet
+	Default        func(context.Context, interface{}) PointerSet
 }
 
 func (fkr ForeignKeyReverse) GetKey() string {
@@ -122,14 +122,20 @@ func (fkr ForeignKeyReverse) GetValues(
 	return generalValues, maps
 }
 
-func (fkr *ForeignKeyReverse) DefaultFallback(val interface{}, instance interface{}) interface{} {
+func (fkr *ForeignKeyReverse) DefaultFallback(
+	c context.Context,
+	val interface{},
+	instance interface{},
+) (
+	interface{},
+) {
 	fkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)
 	}
 	if !fkrVal.Provided {
 		if fkr.Default != nil {
-			return fkr.Default(instance)
+			return fkr.Default(c, instance)
 		}
 		return nil
 	}

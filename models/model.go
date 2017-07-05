@@ -29,7 +29,7 @@ type Relationship interface {
 
 	GetInsertQueries(string, interface{}) []database.QueryBlob
 
-	DefaultFallback(interface{}, interface{}) interface{}
+	DefaultFallback(context.Context, interface{}, interface{}) interface{}
 	Validate(context.Context, interface{}) (interface{}, error)
 }
 
