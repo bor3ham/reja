@@ -95,18 +95,22 @@ func listPOST(
 		// nil values are not included in the insert statement (use db default)
 		if values[valueIndex] != nil {
 			values[valueIndex], err = attribute.Validate(values[valueIndex])
-		}
-		if err != nil {
-			rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
-			return
+			if err != nil {
+				rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
+				return
+			}
 		}
 		valueIndex += 1
 	}
 	for _, relation := range m.Relationships {
-		values[valueIndex], err = relation.ValidateNew(rc, values[valueIndex])
-		if err != nil {
-			rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
-			return
+		values[valueIndex] = relation.DefaultFallback(values[valueIndex], instance)
+		// nil values are ignored
+		if values[valueIndex] != nil {
+			values[valueIndex], err = relation.Validate(rc, values[valueIndex])
+			if err != nil {
+				rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
+				return
+			}
 		}
 		valueIndex += 1
 	}
@@ -156,7 +160,9 @@ func listPOST(
 	valueIndex = 0
 	valueIndex += len(m.Attributes)
 	for _, relationship := range m.Relationships {
-		queries = append(queries, relationship.GetInsertQueries(newId, values[valueIndex])...)
+		if values[valueIndex] != nil {
+			queries = append(queries, relationship.GetInsertQueries(newId, values[valueIndex])...)
+		}
 		valueIndex += 1
 	}
 

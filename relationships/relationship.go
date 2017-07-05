@@ -31,7 +31,10 @@ func (stub RelationshipStub) GetSelectExtraColumns() []string {
 func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
 	return []interface{}{}
 }
-func (stub RelationshipStub) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
+func (stub RelationshipStub) DefaultFallback(val interface{}, instance interface{}) interface{} {
+	return val
+}
+func (stub RelationshipStub) Validate(c context.Context, val interface{}) (interface{}, error) {
 	return val, nil
 }
 func (stub RelationshipStub) GetInsertColumns() []string {

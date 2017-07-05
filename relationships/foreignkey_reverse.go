@@ -20,6 +20,7 @@ type ForeignKeyReverse struct {
 	SourceIDColumn string
 	ColumnName     string
 	Type           string
+	Default        func(interface{}) PointerSet
 }
 
 func (fkr ForeignKeyReverse) GetKey() string {
@@ -121,26 +122,24 @@ func (fkr ForeignKeyReverse) GetValues(
 	return generalValues, maps
 }
 
-func (fkr *ForeignKeyReverse) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
-	var fkrVal PointerSet
-	if val == nil {
-		fkrVal = PointerSet{}
-	} else {
-		var err error
-		fkrVal, err = ParsePagePointerSet(val)
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf(
-				"Relationship '%s' invalid: %s",
-				fkr.Key,
-				err.Error(),
-			))
-		}
+func (fkr *ForeignKeyReverse) DefaultFallback(val interface{}, instance interface{}) interface{} {
+	fkrVal, err := ParsePagePointerSet(val)
+	if err != nil {
+		panic(err)
 	}
-	return fkr.validate(c, fkrVal)
+	if !fkrVal.Provided {
+		if fkr.Default != nil {
+			return fkr.Default(instance)
+		}
+		return nil
+	}
+	return fkrVal
 }
-func (fkr *ForeignKeyReverse) validate(c context.Context, val PointerSet) (interface{}, error) {
+func (fkr *ForeignKeyReverse) Validate(c context.Context, val interface{}) (interface{}, error) {
+	fkrVal := AssertPointerSet(val)
+
 	// validate the types are correct
-	for _, pointer := range val.Data {
+	for _, pointer := range fkrVal.Data {
 		if pointer.Type != fkr.Type {
 			return nil, errors.New(fmt.Sprintf(
 				"Relationship '%s' invalid: Incorrect type in set.",
@@ -150,7 +149,7 @@ func (fkr *ForeignKeyReverse) validate(c context.Context, val PointerSet) (inter
 	}
 	// find duplicates
 	ids := map[string]bool{}
-	for _, pointer := range val.Data {
+	for _, pointer := range fkrVal.Data {
 		_, exists := ids[*pointer.ID]
 		if exists {
 			return nil, errors.New(fmt.Sprintf(
@@ -162,7 +161,7 @@ func (fkr *ForeignKeyReverse) validate(c context.Context, val PointerSet) (inter
 	}
 	// extract ids
 	var instanceIds []string
-	for _, pointer := range val.Data {
+	for _, pointer := range fkrVal.Data {
 		instanceIds = append(instanceIds, *pointer.ID)
 	}
 
@@ -188,7 +187,7 @@ func (fkr *ForeignKeyReverse) validate(c context.Context, val PointerSet) (inter
 			fkr.Key,
 		))
 	}
-	return val, nil
+	return fkrVal, nil
 }
 
 func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {

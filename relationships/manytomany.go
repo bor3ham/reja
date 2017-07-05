@@ -18,6 +18,7 @@ type ManyToMany struct {
 	OwnIDColumn   string
 	OtherIDColumn string
 	OtherType     string
+	Default       func(interface{}) PointerSet
 }
 
 func (m2m ManyToMany) GetKey() string {
@@ -119,26 +120,29 @@ func (m2m ManyToMany) GetValues(
 	return generalValues, maps
 }
 
-func (m2m *ManyToMany) ValidateNew(c context.Context, val interface{}) (interface{}, error) {
-	var m2mVal PointerSet
-	if val == nil {
-		m2mVal = PointerSet{}
-	} else {
-		var err error
-		m2mVal, err = ParsePagePointerSet(val)
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf(
-				"Relationship '%s' invalid: %s",
-				m2m.Key,
-				err.Error(),
-			))
-		}
+func (m2m *ManyToMany) DefaultFallback(
+	val interface{},
+	instance interface{},
+) (
+	interface{},
+) {
+	m2mVal, err := ParsePagePointerSet(val)
+	if err != nil {
+		panic(err)
 	}
-	return m2m.validate(c, m2mVal)
+	if !m2mVal.Provided {
+		if m2m.Default != nil {
+			return m2m.Default(instance)
+		}
+		return nil
+	}
+	return m2mVal
 }
-func (m2m *ManyToMany) validate(c context.Context, val PointerSet) (interface{}, error) {
+func (m2m *ManyToMany) Validate(c context.Context, val interface{}) (interface{}, error) {
+	m2mVal := AssertPointerSet(val)
+
 	// validate the types are correct
-	for _, pointer := range val.Data {
+	for _, pointer := range m2mVal.Data {
 		if pointer.Type != m2m.OtherType {
 			return nil, errors.New(fmt.Sprintf(
 				"Relationship '%s' invalid: Incorrect type in set.",
@@ -148,7 +152,7 @@ func (m2m *ManyToMany) validate(c context.Context, val PointerSet) (interface{},
 	}
 	// find duplicates
 	ids := map[string]bool{}
-	for _, pointer := range val.Data {
+	for _, pointer := range m2mVal.Data {
 		_, exists := ids[*pointer.ID]
 		if exists {
 			return nil, errors.New(fmt.Sprintf(
@@ -160,7 +164,7 @@ func (m2m *ManyToMany) validate(c context.Context, val PointerSet) (interface{},
 	}
 	// extract ids
 	var instanceIds []string
-	for _, pointer := range val.Data {
+	for _, pointer := range m2mVal.Data {
 		instanceIds = append(instanceIds, *pointer.ID)
 	}
 
@@ -186,7 +190,7 @@ func (m2m *ManyToMany) validate(c context.Context, val PointerSet) (interface{},
 			m2m.Key,
 		))
 	}
-	return val, nil
+	return m2mVal, nil
 }
 
 func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {

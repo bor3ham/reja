@@ -29,7 +29,8 @@ type Relationship interface {
 
 	GetInsertQueries(string, interface{}) []database.QueryBlob
 
-	ValidateNew(context.Context, interface{}) (interface{}, error)
+	DefaultFallback(interface{}, interface{}) interface{}
+	Validate(context.Context, interface{}) (interface{}, error)
 }
 
 type Model struct {
