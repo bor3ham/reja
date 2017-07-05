@@ -18,22 +18,22 @@ func InitialiseDatabase(database *sql.DB) {
 	config.Database = database
 }
 
-func logQuery(query string) {
+func LogQuery(query string) {
 	log.Println(query)
 }
 
 func QueryRow(query string, args ...interface{}) *sql.Row {
-	logQuery(query)
+	LogQuery(query)
 	return config.Database.QueryRow(query, args...)
 }
 
 func Query(query string, args ...interface{}) (*sql.Rows, error) {
-	logQuery(query)
+	LogQuery(query)
 	return config.Database.Query(query, args...)
 }
 
 func Exec(query string, args ...interface{}) (sql.Result, error) {
-	logQuery(query)
+	LogQuery(query)
 	return config.Database.Exec(query, args...)
 }
 

@@ -3,6 +3,7 @@ package context
 import (
 	"database/sql"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/database"
 )
 
 type Transaction struct {
@@ -11,14 +12,17 @@ type Transaction struct {
 }
 
 func (t *Transaction) QueryRow(query string, args ...interface{}) *sql.Row {
+	database.LogQuery(query)
 	t.c.IncrementQueryCount()
 	return t.tx.QueryRow(query, args...)
 }
 func (t *Transaction) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	database.LogQuery(query)
 	t.c.IncrementQueryCount()
 	return t.tx.Query(query, args...)
 }
 func (t *Transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
+	database.LogQuery(query)
 	t.c.IncrementQueryCount()
 	return t.tx.Exec(query, args...)
 }
