@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"log"
+	// "log"
 )
 
 var config struct {
@@ -19,7 +19,7 @@ func InitialiseDatabase(database *sql.DB) {
 }
 
 func LogQuery(query string) {
-	log.Println(query)
+	// log.Println(query)
 }
 
 func QueryRow(query string, args ...interface{}) *sql.Row {

@@ -13,6 +13,7 @@ type Pointer struct {
 }
 
 type PointerSet struct {
+	Provided bool `json:"-"`
 	Data []instances.InstancePointer `json:"data"`
 }
 
@@ -56,7 +57,9 @@ func ParsePagePointerSet(val interface{}) (PointerSet, error) {
 	if !ok {
 		panic("Invalid pointer set")
 	}
-	pointersVal := PointerSet{}
+	pointersVal := PointerSet{
+		Provided: pageVal.Provided,
+	}
 	for _, stringPointer := range pageVal.Data {
 		pointer, ok := stringPointer.(map[string]interface{})
 		if !ok {
