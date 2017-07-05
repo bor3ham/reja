@@ -124,9 +124,7 @@ func (m2m *ManyToMany) DefaultFallback(
 	c context.Context,
 	val interface{},
 	instance interface{},
-) (
-	interface{},
-) {
+) interface{} {
 	m2mVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)

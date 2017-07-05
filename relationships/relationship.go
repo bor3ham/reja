@@ -35,9 +35,7 @@ func (stub RelationshipStub) DefaultFallback(
 	c context.Context,
 	val interface{},
 	instance interface{},
-) (
-	interface{},
-) {
+) interface{} {
 	return val
 }
 func (stub RelationshipStub) Validate(c context.Context, val interface{}) (interface{}, error) {

@@ -128,9 +128,7 @@ func (gfkr *GenericForeignKeyReverse) DefaultFallback(
 	c context.Context,
 	val interface{},
 	instance interface{},
-) (
-	interface{},
-) {
+) interface{} {
 	gfkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)

@@ -126,9 +126,7 @@ func (fkr *ForeignKeyReverse) DefaultFallback(
 	c context.Context,
 	val interface{},
 	instance interface{},
-) (
-	interface{},
-) {
+) interface{} {
 	fkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)
