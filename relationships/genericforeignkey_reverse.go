@@ -127,9 +127,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 func (gfkr *GenericForeignKeyReverse) DefaultFallback(
 	val interface{},
 	instance interface{},
-) (
-	interface{},
-) {
+) interface{} {
 	gfkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)

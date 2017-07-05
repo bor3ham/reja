@@ -12,7 +12,7 @@ type Text struct {
 	Nullable   bool
 	MinLength  *int
 	MaxLength  *int
-	Default func(interface{}) TextValue
+	Default    func(interface{}) TextValue
 }
 
 func (t Text) GetSelectDirectColumns() []string {

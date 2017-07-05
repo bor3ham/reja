@@ -13,8 +13,8 @@ type Pointer struct {
 }
 
 type PointerSet struct {
-	Provided bool `json:"-"`
-	Data []instances.InstancePointer `json:"data"`
+	Provided bool                        `json:"-"`
+	Data     []instances.InstancePointer `json:"data"`
 }
 
 type RelationshipStub struct{}

@@ -10,7 +10,7 @@ type Integer struct {
 	Key        string
 	ColumnName string
 	Nullable   bool
-	Default func(interface{}) IntegerValue
+	Default    func(interface{}) IntegerValue
 }
 
 func (i Integer) GetSelectDirectColumns() []string {

@@ -123,9 +123,7 @@ func (m2m ManyToMany) GetValues(
 func (m2m *ManyToMany) DefaultFallback(
 	val interface{},
 	instance interface{},
-) (
-	interface{},
-) {
+) interface{} {
 	m2mVal, err := ParsePagePointerSet(val)
 	if err != nil {
 		panic(err)

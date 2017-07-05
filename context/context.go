@@ -2,8 +2,8 @@ package context
 
 import (
 	"database/sql"
-	"github.com/bor3ham/reja/instances"
 	"github.com/bor3ham/reja/database"
+	"github.com/bor3ham/reja/instances"
 )
 
 type Transaction struct {

@@ -10,7 +10,7 @@ type Bool struct {
 	Key        string
 	ColumnName string
 	Nullable   bool
-	Default func(interface{}) BoolValue
+	Default    func(interface{}) BoolValue
 }
 
 func (b Bool) GetSelectDirectColumns() []string {

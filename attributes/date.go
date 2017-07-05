@@ -13,7 +13,7 @@ type Date struct {
 	Key        string
 	ColumnName string
 	Nullable   bool
-	Default func(interface{}) DateValue
+	Default    func(interface{}) DateValue
 }
 
 func (d Date) GetSelectDirectColumns() []string {

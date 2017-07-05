@@ -15,7 +15,7 @@ type Page struct {
 
 func (p *Page) UnmarshalJSON(data []byte) error {
 	p.Provided = true
-	var val struct{
+	var val struct {
 		Metadata map[string]interface{} `json:"meta"`
 		Links    map[string]*string     `json:"links"`
 		Data     []interface{}          `json:"data"`
