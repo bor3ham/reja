@@ -75,6 +75,7 @@ func (m2m ManyToMany) GetValues(
 		values[id] = value
 	}
 	// go through result data
+	pageSize := c.GetServer().GetIndirectPageSize()
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
@@ -100,7 +101,7 @@ func (m2m ManyToMany) GetValues(
 		maps[myID][m2m.OtherType] = append(maps[myID][m2m.OtherType], otherID)
 
 		total += 1
-		if total <= defaultPageSize {
+		if total <= pageSize {
 			count += 1
 			value.Data = append(value.Data, instances.InstancePointer{
 				ID:   &otherID,
@@ -168,7 +169,7 @@ func (m2m *ManyToMany) Validate(c context.Context, val interface{}) (interface{}
 	}
 
 	// check that the objects exist
-	model := models.GetModel(m2m.OtherType)
+	model := c.GetServer().GetModel(m2m.OtherType)
 	include := models.Include{
 		Children: map[string]*models.Include{},
 	}

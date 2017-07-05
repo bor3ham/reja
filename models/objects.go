@@ -231,7 +231,7 @@ func GetObjects(
 	includedResults := make(chan IncludeResult)
 	for attribute, modelTypes := range listRelations {
 		for modelType, ids := range modelTypes {
-			childModel := GetModel(modelType)
+			childModel := rc.GetServer().GetModel(modelType)
 			if childModel == nil {
 				panic(fmt.Sprintf("Could not find model for model: %s", modelType))
 			}

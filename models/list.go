@@ -13,9 +13,6 @@ import (
 	"strings"
 )
 
-const defaultPageSize = 5
-const maximumPageSize = 400
-
 func flattened(fields [][]interface{}) []interface{} {
 	var flatList []interface{}
 	for _, relation := range fields {
@@ -24,16 +21,19 @@ func flattened(fields [][]interface{}) []interface{} {
 	return flatList
 }
 
-func (m Model) ListHandler(w http.ResponseWriter, r *http.Request) {
+func (m Model) ListHandler(s context.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
-	rc := context.RequestContext{Request: r}
+	rc := context.RequestContext{
+		Server: s,
+		Request: r,
+	}
 	rc.InitCache()
 
 	// parse query strings
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	include, err := parseInclude(&m, queryStrings)
+	include, err := parseInclude(rc, &m, queryStrings)
 	if err != nil {
 		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
@@ -194,12 +194,12 @@ func listGET(
 	include *Include,
 ) {
 	minPageSize := 1
-	maxPageSize := maximumPageSize
+	maxPageSize := rc.GetServer().GetMaximumDirectPageSize()
 	pageSize, err := rejaHttp.GetIntParam(
 		queryStrings,
 		"page[size]",
 		"Page Size",
-		defaultPageSize,
+		rc.GetServer().GetDefaultDirectPageSize(),
 		&minPageSize,
 		&maxPageSize,
 	)

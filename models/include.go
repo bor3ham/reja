@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/http"
+	"github.com/bor3ham/reja/context"
 	"strings"
 )
 
@@ -11,7 +12,7 @@ type Include struct {
 	Children map[string]*Include
 }
 
-func validateInclude(model *Model, include *Include) error {
+func validateInclude(c context.Context, model *Model, include *Include) error {
 	// its valid without children
 	if len(include.Children) == 0 {
 		return nil
@@ -32,8 +33,8 @@ func validateInclude(model *Model, include *Include) error {
 			return errors.New(fmt.Sprintf("Relation %s not found on model %s", key, model.Type))
 		}
 		// recurse on its children
-		childModel := GetModel(relation.GetType())
-		err := validateInclude(childModel, child)
+		childModel := c.GetServer().GetModel(relation.GetType())
+		err := validateInclude(c, childModel, child)
 		if err != nil {
 			return err
 		}
@@ -41,7 +42,7 @@ func validateInclude(model *Model, include *Include) error {
 	return nil
 }
 
-func parseInclude(model *Model, params map[string][]string) (*Include, error) {
+func parseInclude(c context.Context, model *Model, params map[string][]string) (*Include, error) {
 	// extract from querystring
 	includeString, err := http.GetStringParam(
 		params,
@@ -77,7 +78,7 @@ func parseInclude(model *Model, params map[string][]string) (*Include, error) {
 	}
 
 	// validate the tree
-	err = validateInclude(model, &includeMap)
+	err = validateInclude(c, model, &includeMap)
 	if err != nil {
 		return nil, err
 	}

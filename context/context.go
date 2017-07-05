@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/models"
 )
 
 type Transaction struct {
@@ -38,6 +39,8 @@ type CachedInstance struct {
 	RelationMap map[string]map[string][]string
 }
 type Context interface {
+	GetServer() Server
+
 	IncrementQueryCount()
 	QueryRow(string, ...interface{}) *sql.Row
 	Query(string, ...interface{}) (*sql.Rows, error)
@@ -47,4 +50,14 @@ type Context interface {
 	InitCache()
 	CacheObject(instances.Instance, map[string]map[string][]string)
 	GetCachedObject(string, string) (instances.Instance, map[string]map[string][]string)
+}
+
+type Server interface {
+	GetDatabase() *sql.DB
+
+	GetDefaultDirectPageSize() int
+	GetMaximumDirectPageSize() int
+	GetIndirectPageSize() int
+
+	GetModel(string) *models.Model
 }

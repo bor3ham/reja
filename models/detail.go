@@ -8,16 +8,19 @@ import (
 	"net/http"
 )
 
-func (m Model) DetailHandler(w http.ResponseWriter, r *http.Request) {
+func (m Model) DetailHandler(s context.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
-	rc := context.RequestContext{Request: r}
+	rc := context.RequestContext{
+		Server: s,
+		Request: r,
+	}
 	rc.InitCache()
 
 	// parse query strings
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	include, err := parseInclude(&m, queryStrings)
+	include, err := parseInclude(rc, &m, queryStrings)
 	if err != nil {
 		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return

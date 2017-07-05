@@ -2,7 +2,6 @@ package context
 
 import (
 	"database/sql"
-	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/instances"
 	gorillaContext "github.com/gorilla/context"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 )
 
 type RequestContext struct {
+	Server Server
 	Request      *http.Request
 	gorillaMutex sync.Mutex
 
@@ -17,6 +17,10 @@ type RequestContext struct {
 		sync.Mutex
 		Instances map[string]map[string]CachedInstance
 	}
+}
+
+func (rc *RequestContext) GetServer() Server {
+	return rc.Server
 }
 
 func (rc *RequestContext) IncrementQueryCount() {
@@ -39,18 +43,18 @@ func (rc *RequestContext) GetQueryCount() int {
 }
 func (rc *RequestContext) QueryRow(query string, args ...interface{}) *sql.Row {
 	rc.IncrementQueryCount()
-	return database.QueryRow(query, args...)
+	return rc.Server.GetDatabase().QueryRow(query, args...)
 }
 func (rc *RequestContext) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	rc.IncrementQueryCount()
-	return database.Query(query, args...)
+	return rc.Server.GetDatabase().Query(query, args...)
 }
 func (rc *RequestContext) Exec(query string, args ...interface{}) (sql.Result, error) {
 	rc.IncrementQueryCount()
-	return database.Exec(query, args...)
+	return rc.Server.GetDatabase().Exec(query, args...)
 }
 func (rc *RequestContext) Begin() (*Transaction, error) {
-	tx, err := database.Begin()
+	tx, err := rc.Server.GetDatabase().Begin()
 	if err != nil {
 		return nil, err
 	}

@@ -80,6 +80,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
+	pageSize := c.GetServer().GetIndirectPageSize()
 	for rows.Next() {
 		var otherId, ownId string
 		rows.Scan(&otherId, &ownId)
@@ -96,7 +97,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 			panic("Bad count received")
 		}
 		total += 1
-		if total <= defaultPageSize {
+		if total <= pageSize {
 			count += 1
 			value.Data = append(value.Data, instances.InstancePointer{
 				ID:   &otherId,
@@ -178,7 +179,7 @@ func (gfkr *GenericForeignKeyReverse) Validate(
 	}
 
 	// check that the objects exist
-	model := models.GetModel(gfkr.OtherType)
+	model := c.GetServer().GetModel(gfkr.OtherType)
 	include := models.Include{
 		Children: map[string]*models.Include{},
 	}

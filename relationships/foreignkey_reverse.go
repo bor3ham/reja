@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-const defaultPageSize = 5
-
 type ForeignKeyReverse struct {
 	RelationshipStub
 	Key            string
@@ -78,6 +76,7 @@ func (fkr ForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
+	pageSize := c.GetServer().GetIndirectPageSize()
 	for rows.Next() {
 		var otherId, ownId string
 		rows.Scan(&otherId, &ownId)
@@ -94,7 +93,7 @@ func (fkr ForeignKeyReverse) GetValues(
 			panic("Bad count received")
 		}
 		total += 1
-		if total <= defaultPageSize {
+		if total <= pageSize {
 			count += 1
 			value.Data = append(value.Data, instances.InstancePointer{
 				ID:   &otherId,
@@ -170,7 +169,7 @@ func (fkr *ForeignKeyReverse) Validate(c context.Context, val interface{}) (inte
 	}
 
 	// check that the objects exist
-	model := models.GetModel(fkr.Type)
+	model := c.GetServer().GetModel(fkr.Type)
 	include := models.Include{
 		Children: map[string]*models.Include{},
 	}
