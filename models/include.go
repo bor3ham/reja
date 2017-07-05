@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/http"
-	"github.com/bor3ham/reja/context"
 	"strings"
 )
 
@@ -12,7 +11,7 @@ type Include struct {
 	Children map[string]*Include
 }
 
-func validateInclude(c context.Context, model *Model, include *Include) error {
+func validateInclude(c Context, model *Model, include *Include) error {
 	// its valid without children
 	if len(include.Children) == 0 {
 		return nil
@@ -42,7 +41,7 @@ func validateInclude(c context.Context, model *Model, include *Include) error {
 	return nil
 }
 
-func parseInclude(c context.Context, model *Model, params map[string][]string) (*Include, error) {
+func parseInclude(c Context, model *Model, params map[string][]string) (*Include, error) {
 	// extract from querystring
 	includeString, err := http.GetStringParam(
 		params,

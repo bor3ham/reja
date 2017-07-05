@@ -3,10 +3,20 @@ package context
 import (
 	"database/sql"
 	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/database"
 	gorillaContext "github.com/gorilla/context"
 	"net/http"
 	"sync"
 )
+
+type Server interface {
+	GetDatabase() *sql.DB
+}
+
+type CachedInstance struct {
+	Instance    instances.Instance
+	RelationMap map[string]map[string][]string
+}
 
 type RequestContext struct {
 	Server Server
@@ -53,13 +63,13 @@ func (rc *RequestContext) Exec(query string, args ...interface{}) (sql.Result, e
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().Exec(query, args...)
 }
-func (rc *RequestContext) Begin() (*Transaction, error) {
+func (rc *RequestContext) Begin() (database.Transaction, error) {
 	tx, err := rc.Server.GetDatabase().Begin()
 	if err != nil {
 		return nil, err
 	}
-	return &Transaction{
-		c:  rc,
+	return &ContextTransaction{
+		rc: rc,
 		tx: tx,
 	}, nil
 }

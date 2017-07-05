@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"github.com/bor3ham/reja/attributes"
-	"github.com/bor3ham/reja/context"
 	"github.com/bor3ham/reja/database"
 	"github.com/bor3ham/reja/managers"
 )
@@ -19,7 +18,7 @@ type Relationship interface {
 
 	GetDefaultValue() interface{}
 	GetValues(
-		context.Context,
+		Context,
 		[]string,
 		[][]interface{},
 	) (
@@ -29,8 +28,8 @@ type Relationship interface {
 
 	GetInsertQueries(string, interface{}) []database.QueryBlob
 
-	DefaultFallback(context.Context, interface{}, interface{}) interface{}
-	Validate(context.Context, interface{}) (interface{}, error)
+	DefaultFallback(Context, interface{}, interface{}) interface{}
+	Validate(Context, interface{}) (interface{}, error)
 }
 
 type Model struct {

@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-func (m Model) DetailHandler(s context.Server, w http.ResponseWriter, r *http.Request) {
+func (m Model) DetailHandler(s Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
-	rc := context.RequestContext{
+	rc := &context.RequestContext{
 		Server: s,
 		Request: r,
 	}
@@ -44,7 +44,7 @@ func (m Model) DetailHandler(s context.Server, w http.ResponseWriter, r *http.Re
 func detailPATCH(
 	w http.ResponseWriter,
 	r *http.Request,
-	rc context.Context,
+	c Context,
 	m Model,
 	id string,
 	include *Include,
@@ -55,12 +55,12 @@ func detailPATCH(
 func detailGET(
 	w http.ResponseWriter,
 	r *http.Request,
-	rc context.Context,
+	c Context,
 	m Model,
 	id string,
 	include *Include,
 ) {
-	instances, included, err := GetObjects(rc, m, []string{id}, 0, 0, include)
+	instances, included, err := GetObjects(c, m, []string{id}, 0, 0, include)
 	if err != nil {
 		panic(err)
 	}

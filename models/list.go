@@ -23,7 +23,7 @@ func flattened(fields [][]interface{}) []interface{} {
 
 func (m Model) ListHandler(s context.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
-	rc := context.RequestContext{
+	rc := &context.RequestContext{
 		Server: s,
 		Request: r,
 	}
@@ -52,7 +52,7 @@ func (m Model) ListHandler(s context.Server, w http.ResponseWriter, r *http.Requ
 func listPOST(
 	w http.ResponseWriter,
 	r *http.Request,
-	rc context.Context,
+	c Context,
 	m Model,
 	queryStrings map[string][]string,
 	include *Include,
@@ -103,10 +103,10 @@ func listPOST(
 		valueIndex += 1
 	}
 	for _, relation := range m.Relationships {
-		values[valueIndex] = relation.DefaultFallback(rc, values[valueIndex], instance)
+		values[valueIndex] = relation.DefaultFallback(c, values[valueIndex], instance)
 		// nil values are ignored
 		if values[valueIndex] != nil {
-			values[valueIndex], err = relation.Validate(rc, values[valueIndex])
+			values[valueIndex], err = relation.Validate(c, values[valueIndex])
 			if err != nil {
 				rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
 				return
@@ -142,7 +142,7 @@ func listPOST(
 	)
 
 	// start a transaction
-	tx, err := rc.Begin()
+	tx, err := c.Begin()
 	if err != nil {
 		panic(err)
 	}
@@ -182,24 +182,24 @@ func listPOST(
 	}
 
 	// return created object as though it were a GET
-	detailGET(w, r, rc, m, newId, include)
+	detailGET(w, r, c, m, newId, include)
 }
 
 func listGET(
 	w http.ResponseWriter,
 	r *http.Request,
-	rc context.Context,
+	c Context,
 	m Model,
 	queryStrings map[string][]string,
 	include *Include,
 ) {
 	minPageSize := 1
-	maxPageSize := rc.GetServer().GetMaximumDirectPageSize()
+	maxPageSize := c.GetServer().GetMaximumDirectPageSize()
 	pageSize, err := rejaHttp.GetIntParam(
 		queryStrings,
 		"page[size]",
 		"Page Size",
-		rc.GetServer().GetDefaultDirectPageSize(),
+		c.GetServer().GetDefaultDirectPageSize(),
 		&minPageSize,
 		&maxPageSize,
 	)
@@ -231,7 +231,7 @@ func listGET(
 		m.Table,
 	)
 	var count int
-	err = rc.QueryRow(countQuery).Scan(&count)
+	err = c.QueryRow(countQuery).Scan(&count)
 	if err != nil {
 		panic(err)
 	}
@@ -247,7 +247,7 @@ func listGET(
 		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
-	instances, included, err := GetObjects(rc, m, []string{}, offset, pageSize, include)
+	instances, included, err := GetObjects(c, m, []string{}, offset, pageSize, include)
 	if err != nil {
 		panic(err)
 	}

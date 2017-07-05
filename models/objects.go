@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/context"
 	rejaInstances "github.com/bor3ham/reja/instances"
 	"strings"
 	"sync"
@@ -47,7 +46,7 @@ func combineRelations(
 }
 
 func GetObjects(
-	rc context.Context,
+	c Context,
 	m Model,
 	objectIds []string,
 	offset int,
@@ -69,7 +68,7 @@ func GetObjects(
 		var newIds []string
 
 		for _, id := range objectIds {
-			instance, relationMap := rc.GetCachedObject(m.Type, id)
+			instance, relationMap := c.GetCachedObject(m.Type, id)
 			if instance != nil && USE_OBJECT_CACHE {
 				cacheHits = append(cacheHits, instance)
 				cacheMaps = append(cacheMaps, relationMap)
@@ -115,7 +114,7 @@ func GetObjects(
 	listRelations := map[string]map[string][]string{}
 
 	if len(query) > 0 {
-		rows, err := rc.Query(query)
+		rows, err := c.Query(query)
 		if err != nil {
 			return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
 		}
@@ -159,7 +158,7 @@ func GetObjects(
 					relationExtras = append(relationExtras, result[index])
 				}
 
-				values, maps := relation.GetValues(rc, ids, relationExtras)
+				values, maps := relation.GetValues(c, ids, relationExtras)
 				relationResults <- RelationResult{
 					Index:        index,
 					Key:          relation.GetKey(),
@@ -217,7 +216,7 @@ func GetObjects(
 			// add complete relation map to flat map
 			listRelations = combineRelations(listRelations, instanceRelations)
 			// add instance to cache
-			rc.CacheObject(instance, instanceRelations)
+			c.CacheObject(instance, instanceRelations)
 		}
 	}
 
@@ -231,7 +230,7 @@ func GetObjects(
 	includedResults := make(chan IncludeResult)
 	for attribute, modelTypes := range listRelations {
 		for modelType, ids := range modelTypes {
-			childModel := rc.GetServer().GetModel(modelType)
+			childModel := c.GetServer().GetModel(modelType)
 			if childModel == nil {
 				panic(fmt.Sprintf("Could not find model for model: %s", modelType))
 			}
@@ -239,7 +238,7 @@ func GetObjects(
 			wg.Add(1)
 			go func(
 				wg *sync.WaitGroup,
-				rc context.Context,
+				c Context,
 				include *Include,
 				model *Model,
 				attribute string,
@@ -249,7 +248,7 @@ func GetObjects(
 				childIncludes, exists := include.Children[attribute]
 				if exists {
 					childInstances, childIncluded, err := GetObjects(
-						rc,
+						c,
 						*model,
 						ids,
 						0,
@@ -269,7 +268,7 @@ func GetObjects(
 					}
 
 				}
-			}(&wg, rc, include, childModel, attribute)
+			}(&wg, c, include, childModel, attribute)
 		}
 	}
 	go func(wg *sync.WaitGroup) {
