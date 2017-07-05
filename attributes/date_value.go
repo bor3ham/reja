@@ -14,7 +14,7 @@ type DateValue struct {
 func (dv DateValue) MarshalJSON() ([]byte, error) {
 	var stamp string
 	if dv.Value == nil {
-		stamp = "\"null\""
+		stamp = "null"
 	} else {
 		stamp = fmt.Sprintf("\"%s\"", time.Time(*dv.Value).Format(DATE_LAYOUT))
 	}
