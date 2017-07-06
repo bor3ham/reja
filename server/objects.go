@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
-	"strings"
 	"github.com/bor3ham/reja/schema"
+	"strings"
 	"sync"
 )
 
@@ -44,7 +44,6 @@ func combineRelations(
 	}
 	return combinedMap
 }
-
 
 func (rc *RequestContext) GetObjects(
 	m schema.Model,

@@ -10,7 +10,7 @@ type Pointer struct {
 }
 
 type PointerSet struct {
-	Provided bool                        `json:"-"`
+	Provided bool                     `json:"-"`
 	Data     []schema.InstancePointer `json:"data"`
 }
 

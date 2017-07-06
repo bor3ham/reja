@@ -2,8 +2,8 @@ package server
 
 import (
 	"database/sql"
-	"github.com/gorilla/context"
 	"github.com/bor3ham/reja/schema"
+	"github.com/gorilla/context"
 	"net/http"
 	"sync"
 )
@@ -14,7 +14,7 @@ type CachedInstance struct {
 }
 
 type RequestContext struct {
-	Server schema.Server
+	Server       schema.Server
 	Request      *http.Request
 	gorillaMutex sync.Mutex
 

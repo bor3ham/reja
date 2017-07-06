@@ -1,19 +1,19 @@
 package server
 
 import (
-	"fmt"
 	"database/sql"
-	"github.com/gorilla/mux"
+	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 type Server struct {
-	db *sql.DB
+	db                    *sql.DB
 	defaultDirectPageSize int
 	maximumDirectPageSize int
-	indirectPageSize int
-	models map[string]schema.Model
+	indirectPageSize      int
+	models                map[string]schema.Model
 }
 
 func New(db *sql.DB) *Server {
@@ -21,8 +21,8 @@ func New(db *sql.DB) *Server {
 		db: db,
 		defaultDirectPageSize: 50,
 		maximumDirectPageSize: 100,
-		indirectPageSize: 10,
-		models: map[string]schema.Model{},
+		indirectPageSize:      10,
+		models:                map[string]schema.Model{},
 	}
 }
 
@@ -75,13 +75,13 @@ func (s *Server) Handle(router *mux.Router, modelType string, path string) {
 	router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		model.ListHandler(s, w, r)
 	})
-	router.HandleFunc(path + "/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+"/", func(w http.ResponseWriter, r *http.Request) {
 		model.ListHandler(s, w, r)
 	})
-	router.HandleFunc(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		model.DetailHandler(s, w, r)
 	})
-	router.HandleFunc(path + "/{id:[0-9]+}/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+"/{id:[0-9]+}/", func(w http.ResponseWriter, r *http.Request) {
 		model.DetailHandler(s, w, r)
 	})
 }

@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/bor3ham/reja/schema"
 	"io/ioutil"
 	"math"
 	"net/http"
-	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ func flattened(fields [][]interface{}) []interface{} {
 func (m Model) ListHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
 	rc := &RequestContext{
-		Server: s,
+		Server:  s,
 		Request: r,
 	}
 	rc.InitCache()

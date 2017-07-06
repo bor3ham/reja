@@ -2,15 +2,15 @@ package server
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/bor3ham/reja/schema"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func (m Model) DetailHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
 	rc := &RequestContext{
-		Server: s,
+		Server:  s,
 		Request: r,
 	}
 	rc.InitCache()
