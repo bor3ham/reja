@@ -1,17 +1,13 @@
-package models
+package server
 
 import (
 	"errors"
 	"fmt"
-	"github.com/bor3ham/reja/http"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
-type Include struct {
-	Children map[string]*Include
-}
-
-func validateInclude(c Context, model *Model, include *Include) error {
+func validateInclude(c schema.Context, model schema.Model, include *schema.Include) error {
 	// its valid without children
 	if len(include.Children) == 0 {
 		return nil
@@ -22,14 +18,14 @@ func validateInclude(c Context, model *Model, include *Include) error {
 	}
 	// go through children
 	for key, child := range include.Children {
-		var relation Relationship
-		for _, modelRelation := range model.Relationships {
+		var relation schema.Relationship
+		for _, modelRelation := range model.GetRelationships() {
 			if modelRelation.GetKey() == key {
 				relation = modelRelation
 			}
 		}
 		if relation == nil {
-			return errors.New(fmt.Sprintf("Relation %s not found on model %s", key, model.Type))
+			return errors.New(fmt.Sprintf("Relation %s not found on model %s", key, model.GetType()))
 		}
 		// recurse on its children
 		childModel := c.GetServer().GetModel(relation.GetType())
@@ -41,9 +37,9 @@ func validateInclude(c Context, model *Model, include *Include) error {
 	return nil
 }
 
-func parseInclude(c Context, model *Model, params map[string][]string) (*Include, error) {
+func parseInclude(c schema.Context, model schema.Model, params map[string][]string) (*schema.Include, error) {
 	// extract from querystring
-	includeString, err := http.GetStringParam(
+	includeString, err := GetStringParam(
 		params,
 		"include",
 		"Included Relations",
@@ -54,8 +50,8 @@ func parseInclude(c Context, model *Model, params map[string][]string) (*Include
 	}
 
 	// split out of querystring into tree
-	includeMap := Include{
-		Children: map[string]*Include{},
+	includeMap := schema.Include{
+		Children: map[string]*schema.Include{},
 	}
 	arguments := strings.Split(includeString, ",")
 	for _, argument := range arguments {
@@ -67,8 +63,8 @@ func parseInclude(c Context, model *Model, params map[string][]string) (*Include
 			}
 			_, exists := baseLevel[component]
 			if !exists {
-				newInclude := Include{
-					Children: map[string]*Include{},
+				newInclude := schema.Include{
+					Children: map[string]*schema.Include{},
 				}
 				baseLevel[component] = &newInclude
 			}

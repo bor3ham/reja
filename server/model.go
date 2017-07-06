@@ -1,44 +1,32 @@
-package models
+package server
 
 import (
-	"fmt"
-	"github.com/bor3ham/reja/attributes"
-	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/managers"
+	"github.com/bor3ham/reja/schema"
 )
-
-type Relationship interface {
-	GetKey() string
-	GetType() string
-
-	GetSelectDirectColumns() []string
-	GetSelectDirectVariables() []interface{}
-	GetSelectExtraColumns() []string
-	GetSelectExtraVariables() []interface{}
-
-	GetDefaultValue() interface{}
-	GetValues(
-		Context,
-		[]string,
-		[][]interface{},
-	) (
-		map[string]interface{},
-		map[string]map[string][]string,
-	)
-
-	GetInsertQueries(string, interface{}) []database.QueryBlob
-
-	DefaultFallback(Context, interface{}, interface{}) interface{}
-	Validate(Context, interface{}) (interface{}, error)
-}
 
 type Model struct {
 	Type          string
 	Table         string
 	IDColumn      string
-	Attributes    []attributes.Attribute
-	Relationships []Relationship
-	Manager       managers.Manager
+	Attributes    []schema.Attribute
+	Relationships []schema.Relationship
+	Manager       schema.Manager
+}
+
+func (m *Model) GetType() string {
+	return m.Type
+}
+func (m *Model) GetTable() string {
+	return m.Table
+}
+func (m *Model) GetIDColumn() string {
+	return m.IDColumn
+}
+func (m *Model) GetRelationships() []schema.Relationship {
+	return m.Relationships
+}
+func (m *Model) GetManager() schema.Manager {
+	return m.Manager
 }
 
 func (m Model) FieldColumns() []string {
@@ -75,8 +63,4 @@ func (m Model) ExtraVariables() [][]interface{} {
 		fields = append(fields, relationship.GetSelectExtraVariables())
 	}
 	return fields
-}
-
-func logQueryCount(count int) {
-	fmt.Println("Database queries:", count)
 }

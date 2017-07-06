@@ -2,19 +2,16 @@ package relationships
 
 import (
 	"errors"
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/format"
-	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/schema"
 )
 
 type Pointer struct {
-	Data *instances.InstancePointer `json:"data"`
+	Data *schema.InstancePointer `json:"data"`
 }
 
 type PointerSet struct {
 	Provided bool                        `json:"-"`
-	Data     []instances.InstancePointer `json:"data"`
+	Data     []schema.InstancePointer `json:"data"`
 }
 
 type RelationshipStub struct{}
@@ -32,13 +29,13 @@ func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
 	return []interface{}{}
 }
 func (stub RelationshipStub) DefaultFallback(
-	c context.Context,
+	c schema.Context,
 	val interface{},
 	instance interface{},
 ) interface{} {
 	return val
 }
-func (stub RelationshipStub) Validate(c context.Context, val interface{}) (interface{}, error) {
+func (stub RelationshipStub) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	return val, nil
 }
 func (stub RelationshipStub) GetInsertColumns() []string {
@@ -47,8 +44,8 @@ func (stub RelationshipStub) GetInsertColumns() []string {
 func (stub RelationshipStub) GetInsertValues() []interface{} {
 	return []interface{}{}
 }
-func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {
-	return []database.QueryBlob{}
+func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []schema.Query {
+	return []schema.Query{}
 }
 
 func AssertPointerSet(val interface{}) PointerSet {
@@ -60,7 +57,7 @@ func AssertPointerSet(val interface{}) PointerSet {
 }
 
 func ParsePagePointerSet(val interface{}) (PointerSet, error) {
-	pageVal, ok := val.(format.Page)
+	pageVal, ok := val.(schema.Page)
 	if !ok {
 		panic("Invalid pointer set")
 	}
@@ -94,7 +91,7 @@ func ParsePagePointerSet(val interface{}) (PointerSet, error) {
 		}
 
 		// valid pointer
-		pointersVal.Data = append(pointersVal.Data, instances.InstancePointer{
+		pointersVal.Data = append(pointersVal.Data, schema.InstancePointer{
 			Type: parsedType,
 			ID:   &parsedId,
 		})

@@ -1,16 +1,15 @@
-package models
+package server
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/context"
-	rejaHttp "github.com/bor3ham/reja/http"
 	"github.com/gorilla/mux"
+	"github.com/bor3ham/reja/schema"
 	"net/http"
 )
 
-func (m Model) DetailHandler(s Server, w http.ResponseWriter, r *http.Request) {
+func (m Model) DetailHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
-	rc := &context.RequestContext{
+	rc := &RequestContext{
 		Server: s,
 		Request: r,
 	}
@@ -22,7 +21,7 @@ func (m Model) DetailHandler(s Server, w http.ResponseWriter, r *http.Request) {
 	// extract included information
 	include, err := parseInclude(rc, &m, queryStrings)
 	if err != nil {
-		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
+		BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
 	}
 
@@ -32,9 +31,9 @@ func (m Model) DetailHandler(s Server, w http.ResponseWriter, r *http.Request) {
 
 	// handle request based on method
 	if r.Method == "PATCH" || r.Method == "PUT" {
-		detailPATCH(w, r, &rc, m, id, include)
+		detailPATCH(w, r, rc, m, id, include)
 	} else if r.Method == "GET" {
-		detailGET(w, r, &rc, m, id, include)
+		detailGET(w, r, rc, m, id, include)
 	}
 
 	// log request stats
@@ -44,10 +43,10 @@ func (m Model) DetailHandler(s Server, w http.ResponseWriter, r *http.Request) {
 func detailPATCH(
 	w http.ResponseWriter,
 	r *http.Request,
-	c Context,
+	c schema.Context,
 	m Model,
 	id string,
-	include *Include,
+	include *schema.Include,
 ) {
 
 }
@@ -55,12 +54,12 @@ func detailPATCH(
 func detailGET(
 	w http.ResponseWriter,
 	r *http.Request,
-	c Context,
+	c schema.Context,
 	m Model,
 	id string,
-	include *Include,
+	include *schema.Include,
 ) {
-	instances, included, err := GetObjects(c, m, []string{id}, 0, 0, include)
+	instances, included, err := c.GetObjects(&m, []string{id}, 0, 0, include)
 	if err != nil {
 		panic(err)
 	}
@@ -84,6 +83,6 @@ func detailGET(
 		}
 		responseBlob.Included = generalIncluded
 	}
-	responseBytes := rejaHttp.MustJSONMarshal(responseBlob)
+	responseBytes := MustJSONMarshal(responseBlob)
 	fmt.Fprintf(w, string(responseBytes))
 }

@@ -1,9 +1,9 @@
-package models
+package server
 
 import (
 	"fmt"
-	rejaInstances "github.com/bor3ham/reja/instances"
 	"strings"
+	"github.com/bor3ham/reja/schema"
 	"sync"
 )
 
@@ -18,8 +18,8 @@ type RelationResult struct {
 }
 
 type IncludeResult struct {
-	Instances []rejaInstances.Instance
-	Included  []rejaInstances.Instance
+	Instances []schema.Instance
+	Included  []schema.Instance
 	Error     error
 }
 
@@ -45,19 +45,19 @@ func combineRelations(
 	return combinedMap
 }
 
-func GetObjects(
-	c Context,
-	m Model,
+
+func (rc *RequestContext) GetObjects(
+	m schema.Model,
 	objectIds []string,
 	offset int,
 	limit int,
-	include *Include,
+	include *schema.Include,
 ) (
-	[]rejaInstances.Instance,
-	[]rejaInstances.Instance,
+	[]schema.Instance,
+	[]schema.Instance,
 	error,
 ) {
-	var cacheHits []rejaInstances.Instance
+	var cacheHits []schema.Instance
 	var cacheMaps []map[string]map[string][]string
 
 	var query string
@@ -68,7 +68,7 @@ func GetObjects(
 		var newIds []string
 
 		for _, id := range objectIds {
-			instance, relationMap := c.GetCachedObject(m.Type, id)
+			instance, relationMap := rc.GetCachedObject(m.GetType(), id)
 			if instance != nil && USE_OBJECT_CACHE {
 				cacheHits = append(cacheHits, instance)
 				cacheMaps = append(cacheMaps, relationMap)
@@ -86,10 +86,10 @@ func GetObjects(
 					from %s
 					where %s
 		    	`,
-				m.IDColumn,
+				m.GetIDColumn(),
 				strings.Join(columns, ","),
-				m.Table,
-				fmt.Sprintf("%s in (%s)", m.IDColumn, strings.Join(newIds, ", ")),
+				m.GetTable(),
+				fmt.Sprintf("%s in (%s)", m.GetIDColumn(), strings.Join(newIds, ", ")),
 			)
 		}
 	} else {
@@ -102,21 +102,21 @@ func GetObjects(
 				limit %d
 				offset %d
 	    	`,
-			m.IDColumn,
+			m.GetIDColumn(),
 			strings.Join(columns, ","),
-			m.Table,
+			m.GetTable(),
 			limit,
 			offset,
 		)
 	}
 
-	instances := []rejaInstances.Instance{}
+	instances := []schema.Instance{}
 	listRelations := map[string]map[string][]string{}
 
 	if len(query) > 0 {
-		rows, err := c.Query(query)
+		rows, err := rc.Query(query)
 		if err != nil {
-			return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
+			return []schema.Instance{}, []schema.Instance{}, err
 		}
 		defer rows.Close()
 
@@ -137,10 +137,10 @@ func GetObjects(
 			scanFields = append(scanFields, flatExtras...)
 			err := rows.Scan(scanFields...)
 			if err != nil {
-				return []rejaInstances.Instance{}, []rejaInstances.Instance{}, err
+				return []schema.Instance{}, []schema.Instance{}, err
 			}
 
-			instance := m.Manager.Create()
+			instance := m.GetManager().Create()
 			instance.SetID(id)
 			instances = append(instances, instance)
 
@@ -149,16 +149,17 @@ func GetObjects(
 
 		var wg sync.WaitGroup
 		relationResults := make(chan RelationResult)
-		wg.Add(len(m.Relationships))
-		for relationIndex, relationship := range m.Relationships {
-			go func(wg *sync.WaitGroup, index int, relation Relationship) {
+		relationships := m.GetRelationships()
+		wg.Add(len(relationships))
+		for relationIndex, relationship := range relationships {
+			go func(wg *sync.WaitGroup, index int, relation schema.Relationship) {
 				defer wg.Done()
 				var relationExtras [][]interface{}
 				for _, result := range extraFields {
 					relationExtras = append(relationExtras, result[index])
 				}
 
-				values, maps := relation.GetValues(c, ids, relationExtras)
+				values, maps := relation.GetValues(rc, ids, relationExtras)
 				relationResults <- RelationResult{
 					Index:        index,
 					Key:          relation.GetKey(),
@@ -173,9 +174,9 @@ func GetObjects(
 			close(relationResults)
 		}(&wg)
 
-		relationDefaults := make([]interface{}, len(m.Relationships))
-		relationValues := make([]map[string]interface{}, len(m.Relationships))
-		relationMaps := make([]map[string]map[string][]string, len(m.Relationships))
+		relationDefaults := make([]interface{}, len(relationships))
+		relationValues := make([]map[string]interface{}, len(relationships))
+		relationMaps := make([]map[string]map[string][]string, len(relationships))
 
 		for result := range relationResults {
 			// re order relation results
@@ -187,7 +188,7 @@ func GetObjects(
 		for index, instance := range instances {
 			instanceRelations := map[string]map[string][]string{}
 			for relationIndex, value := range relationValues {
-				key := m.Relationships[relationIndex].GetKey()
+				key := relationships[relationIndex].GetKey()
 				// get value or default
 				id := instance.GetID()
 				item, exists := value[id]
@@ -216,7 +217,7 @@ func GetObjects(
 			// add complete relation map to flat map
 			listRelations = combineRelations(listRelations, instanceRelations)
 			// add instance to cache
-			c.CacheObject(instance, instanceRelations)
+			rc.CacheObject(instance, instanceRelations)
 		}
 	}
 
@@ -230,7 +231,7 @@ func GetObjects(
 	includedResults := make(chan IncludeResult)
 	for attribute, modelTypes := range listRelations {
 		for modelType, ids := range modelTypes {
-			childModel := c.GetServer().GetModel(modelType)
+			childModel := rc.GetServer().GetModel(modelType)
 			if childModel == nil {
 				panic(fmt.Sprintf("Could not find model for model: %s", modelType))
 			}
@@ -238,18 +239,17 @@ func GetObjects(
 			wg.Add(1)
 			go func(
 				wg *sync.WaitGroup,
-				c Context,
-				include *Include,
-				model *Model,
+				rc *RequestContext,
+				include *schema.Include,
+				model schema.Model,
 				attribute string,
 			) {
 				defer wg.Done()
 
 				childIncludes, exists := include.Children[attribute]
 				if exists {
-					childInstances, childIncluded, err := GetObjects(
-						c,
-						*model,
+					childInstances, childIncluded, err := rc.GetObjects(
+						model,
 						ids,
 						0,
 						0,
@@ -268,17 +268,17 @@ func GetObjects(
 					}
 
 				}
-			}(&wg, c, include, childModel, attribute)
+			}(&wg, rc, include, childModel, attribute)
 		}
 	}
 	go func(wg *sync.WaitGroup) {
 		wg.Wait()
 		close(includedResults)
 	}(&wg)
-	var included []rejaInstances.Instance
+	var included []schema.Instance
 	for result := range includedResults {
 		if result.Error != nil {
-			return []rejaInstances.Instance{}, []rejaInstances.Instance{}, result.Error
+			return []schema.Instance{}, []schema.Instance{}, result.Error
 		}
 		included = append(included, result.Instances...)
 		included = append(included, result.Included...)
@@ -287,8 +287,8 @@ func GetObjects(
 	return instances, included, nil
 }
 
-func UniqueInstances(set []rejaInstances.Instance) []rejaInstances.Instance {
-	var unique []rejaInstances.Instance
+func UniqueInstances(set []schema.Instance) []schema.Instance {
+	var unique []schema.Instance
 	known := map[string]map[string]bool{}
 	for _, instance := range set {
 		instanceType := instance.GetType()

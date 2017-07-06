@@ -1,10 +1,10 @@
-package reja
+package server
 
 import (
 	"fmt"
 	"database/sql"
-	"github.com/bor3ham/reja/models"
 	"github.com/gorilla/mux"
+	"github.com/bor3ham/reja/schema"
 	"net/http"
 )
 
@@ -13,7 +13,7 @@ type Server struct {
 	defaultDirectPageSize int
 	maximumDirectPageSize int
 	indirectPageSize int
-	models map[string]*models.Model
+	models map[string]schema.Model
 }
 
 func New(db *sql.DB) *Server {
@@ -22,7 +22,7 @@ func New(db *sql.DB) *Server {
 		defaultDirectPageSize: 50,
 		maximumDirectPageSize: 100,
 		indirectPageSize: 10,
-		models: map[string]*models.Model{},
+		models: map[string]schema.Model{},
 	}
 }
 
@@ -51,14 +51,14 @@ func (s *Server) SetIndirectPageSize(size int) {
 	s.indirectPageSize = size
 }
 
-func (s *Server) RegisterModel(model *models.Model) {
-	_, exists := s.models[model.Type]
+func (s *Server) RegisterModel(model schema.Model) {
+	_, exists := s.models[model.GetType()]
 	if exists {
-		panic(fmt.Sprintf("Model %s already registered!", model.Type))
+		panic(fmt.Sprintf("Model %s already registered!", model.GetType()))
 	}
-	s.models[model.Type] = model
+	s.models[model.GetType()] = model
 }
-func (s *Server) GetModel(modelType string) *models.Model {
+func (s *Server) GetModel(modelType string) schema.Model {
 	mt, exists := s.models[modelType]
 	if !exists {
 		return nil

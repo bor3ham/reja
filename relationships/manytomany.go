@@ -3,11 +3,7 @@ package relationships
 import (
 	"errors"
 	"fmt"
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/format"
-	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/models"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
@@ -18,7 +14,7 @@ type ManyToMany struct {
 	OwnIDColumn   string
 	OtherIDColumn string
 	OtherType     string
-	Default       func(context.Context, interface{}) PointerSet
+	Default       func(schema.Context, interface{}) PointerSet
 }
 
 func (m2m ManyToMany) GetKey() string {
@@ -29,10 +25,10 @@ func (m2m ManyToMany) GetType() string {
 }
 
 func (m2m ManyToMany) GetDefaultValue() interface{} {
-	return format.Page{}
+	return schema.Page{}
 }
 func (m2m ManyToMany) GetValues(
-	c context.Context,
+	c schema.Context,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -61,11 +57,11 @@ func (m2m ManyToMany) GetValues(
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]format.Page{}
+	values := map[string]schema.Page{}
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		value := format.Page{
+		value := schema.Page{
 			Metadata: map[string]interface{}{},
 			Links:    map[string]*string{},
 			Data:     []interface{}{},
@@ -103,7 +99,7 @@ func (m2m ManyToMany) GetValues(
 		total += 1
 		if total <= pageSize {
 			count += 1
-			value.Data = append(value.Data, instances.InstancePointer{
+			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherID,
 				Type: m2m.OtherType,
 			})
@@ -122,7 +118,7 @@ func (m2m ManyToMany) GetValues(
 }
 
 func (m2m *ManyToMany) DefaultFallback(
-	c context.Context,
+	c schema.Context,
 	val interface{},
 	instance interface{},
 ) interface{} {
@@ -138,7 +134,7 @@ func (m2m *ManyToMany) DefaultFallback(
 	}
 	return m2mVal
 }
-func (m2m *ManyToMany) Validate(c context.Context, val interface{}) (interface{}, error) {
+func (m2m *ManyToMany) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	m2mVal := AssertPointerSet(val)
 
 	// validate the types are correct
@@ -170,12 +166,11 @@ func (m2m *ManyToMany) Validate(c context.Context, val interface{}) (interface{}
 
 	// check that the objects exist
 	model := c.GetServer().GetModel(m2m.OtherType)
-	include := models.Include{
-		Children: map[string]*models.Include{},
+	include := schema.Include{
+		Children: map[string]*schema.Include{},
 	}
-	instances, _, err := models.GetObjects(
-		c,
-		*model,
+	instances, _, err := c.GetObjects(
+		model,
 		instanceIds,
 		0,
 		0,
@@ -193,15 +188,15 @@ func (m2m *ManyToMany) Validate(c context.Context, val interface{}) (interface{}
 	return m2mVal, nil
 }
 
-func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {
+func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []schema.Query {
 	m2mVal, ok := val.(PointerSet)
 	if !ok {
 		panic("Bad pointer set value")
 	}
 
-	var queries []database.QueryBlob
+	var queries []schema.Query
 	for _, pointer := range m2mVal.Data {
-		queries = append(queries, database.QueryBlob{
+		queries = append(queries, schema.Query{
 			Query: fmt.Sprintf(
 				`insert into %s (%s, %s) values ($1, $2);`,
 				m2m.Table,
@@ -217,8 +212,8 @@ func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []databas
 	return queries
 }
 
-func AssertManyToMany(val interface{}) format.Page {
-	m2mVal, ok := val.(format.Page)
+func AssertManyToMany(val interface{}) schema.Page {
+	m2mVal, ok := val.(schema.Page)
 	if !ok {
 		panic("Bad many to many value")
 	}

@@ -1,15 +1,11 @@
-package models
+package server
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/format"
-	rejaHttp "github.com/bor3ham/reja/http"
-	// "github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"math"
 	"net/http"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
@@ -21,9 +17,9 @@ func flattened(fields [][]interface{}) []interface{} {
 	return flatList
 }
 
-func (m Model) ListHandler(s context.Server, w http.ResponseWriter, r *http.Request) {
+func (m Model) ListHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
-	rc := &context.RequestContext{
+	rc := &RequestContext{
 		Server: s,
 		Request: r,
 	}
@@ -35,15 +31,15 @@ func (m Model) ListHandler(s context.Server, w http.ResponseWriter, r *http.Requ
 	// extract included information
 	include, err := parseInclude(rc, &m, queryStrings)
 	if err != nil {
-		rejaHttp.BadRequest(w, "Bad Included Relations Parameter", err.Error())
+		BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
 	}
 
 	// handle request based on method
 	if r.Method == "POST" {
-		listPOST(w, r, &rc, m, queryStrings, include)
+		listPOST(w, r, rc, m, queryStrings, include)
 	} else if r.Method == "GET" {
-		listGET(w, r, &rc, m, queryStrings, include)
+		listGET(w, r, rc, m, queryStrings, include)
 	}
 
 	logQueryCount(rc.GetQueryCount())
@@ -52,10 +48,10 @@ func (m Model) ListHandler(s context.Server, w http.ResponseWriter, r *http.Requ
 func listPOST(
 	w http.ResponseWriter,
 	r *http.Request,
-	c Context,
+	c schema.Context,
 	m Model,
 	queryStrings map[string][]string,
-	include *Include,
+	include *schema.Include,
 ) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -69,21 +65,21 @@ func listPOST(
 	}{
 		Data: instance,
 	}
-	err = rejaHttp.JSONUnmarshal(body, &dataBlob)
+	err = JSONUnmarshal(body, &dataBlob)
 	if err != nil {
-		rejaHttp.BadRequest(w, "Unable to Parse JSON", err.Error())
+		BadRequest(w, "Unable to Parse JSON", err.Error())
 		return
 	}
 
 	// user cannot choose their own id
 	if len(instance.GetID()) != 0 {
-		rejaHttp.BadRequest(w, "Bad Object Value", "ID's are assigned not chosen.")
+		BadRequest(w, "Bad Object Value", "ID's are assigned not chosen.")
 		return
 	}
 	// type cannot be messed with
 	instanceType := instance.GetType()
 	if !(len(instanceType) == 0 || instanceType == m.Type) {
-		rejaHttp.BadRequest(w, "Bad Object Value", "Type does not match endpoint model.")
+		BadRequest(w, "Bad Object Value", "Type does not match endpoint model.")
 		return
 	}
 
@@ -96,7 +92,7 @@ func listPOST(
 		if values[valueIndex] != nil {
 			values[valueIndex], err = attribute.Validate(values[valueIndex])
 			if err != nil {
-				rejaHttp.BadRequest(w, "Bad Attribute Value", err.Error())
+				BadRequest(w, "Bad Attribute Value", err.Error())
 				return
 			}
 		}
@@ -108,7 +104,7 @@ func listPOST(
 		if values[valueIndex] != nil {
 			values[valueIndex], err = relation.Validate(c, values[valueIndex])
 			if err != nil {
-				rejaHttp.BadRequest(w, "Bad Relationship Value", err.Error())
+				BadRequest(w, "Bad Relationship Value", err.Error())
 				return
 			}
 		}
@@ -156,7 +152,7 @@ func listPOST(
 	}
 
 	// build additional queries
-	var queries []database.QueryBlob
+	var queries []schema.Query
 	valueIndex = 0
 	valueIndex += len(m.Attributes)
 	for _, relationship := range m.Relationships {
@@ -188,14 +184,14 @@ func listPOST(
 func listGET(
 	w http.ResponseWriter,
 	r *http.Request,
-	c Context,
+	c schema.Context,
 	m Model,
 	queryStrings map[string][]string,
-	include *Include,
+	include *schema.Include,
 ) {
 	minPageSize := 1
 	maxPageSize := c.GetServer().GetMaximumDirectPageSize()
-	pageSize, err := rejaHttp.GetIntParam(
+	pageSize, err := GetIntParam(
 		queryStrings,
 		"page[size]",
 		"Page Size",
@@ -204,11 +200,11 @@ func listGET(
 		&maxPageSize,
 	)
 	if err != nil {
-		rejaHttp.BadRequest(w, "Bad Page Size Parameter", err.Error())
+		BadRequest(w, "Bad Page Size Parameter", err.Error())
 		return
 	}
 	minPageOffset := 1
-	pageOffset, err := rejaHttp.GetIntParam(
+	pageOffset, err := GetIntParam(
 		queryStrings,
 		"page[offset]",
 		"Page Offset",
@@ -217,7 +213,7 @@ func listGET(
 		nil,
 	)
 	if err != nil {
-		rejaHttp.BadRequest(w, "Bad Page Offset Parameter", err.Error())
+		BadRequest(w, "Bad Page Offset Parameter", err.Error())
 		return
 	}
 	offset := (pageOffset - 1) * pageSize
@@ -247,7 +243,7 @@ func listGET(
 		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
 	}
 
-	instances, included, err := GetObjects(c, m, []string{}, offset, pageSize, include)
+	instances, included, err := c.GetObjects(&m, []string{}, offset, pageSize, include)
 	if err != nil {
 		panic(err)
 	}
@@ -274,7 +270,7 @@ func listGET(
 		generalInstances = append(generalInstances, instance)
 	}
 
-	responseBlob := format.Page{
+	responseBlob := schema.Page{
 		Links:    pageLinks,
 		Metadata: pageMeta,
 		Data:     generalInstances,
@@ -288,6 +284,6 @@ func listGET(
 		responseBlob.Included = &generalIncluded
 	}
 
-	responseBytes := rejaHttp.MustJSONMarshal(responseBlob)
+	responseBytes := MustJSONMarshal(responseBlob)
 	fmt.Fprintf(w, string(responseBytes))
 }

@@ -3,11 +3,7 @@ package relationships
 import (
 	"errors"
 	"fmt"
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/format"
-	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/models"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
@@ -20,7 +16,7 @@ type GenericForeignKeyReverse struct {
 	OwnIDColumn   string
 	OtherIDColumn string
 	OtherType     string
-	Default       func(context.Context, interface{}) PointerSet
+	Default       func(schema.Context, interface{}) PointerSet
 }
 
 func (gfkr GenericForeignKeyReverse) GetKey() string {
@@ -31,10 +27,10 @@ func (gfkr GenericForeignKeyReverse) GetType() string {
 }
 
 func (gfkr GenericForeignKeyReverse) GetDefaultValue() interface{} {
-	return format.Page{}
+	return schema.Page{}
 }
 func (gfkr GenericForeignKeyReverse) GetValues(
-	c context.Context,
+	c schema.Context,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -66,11 +62,11 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]format.Page{}
+	values := map[string]schema.Page{}
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		value := format.Page{
+		value := schema.Page{
 			Metadata: map[string]interface{}{},
 			Links:    map[string]*string{},
 			Data:     []interface{}{},
@@ -99,7 +95,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		total += 1
 		if total <= pageSize {
 			count += 1
-			value.Data = append(value.Data, instances.InstancePointer{
+			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherId,
 				Type: gfkr.OtherType,
 			})
@@ -126,7 +122,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 }
 
 func (gfkr *GenericForeignKeyReverse) DefaultFallback(
-	c context.Context,
+	c schema.Context,
 	val interface{},
 	instance interface{},
 ) interface{} {
@@ -143,7 +139,7 @@ func (gfkr *GenericForeignKeyReverse) DefaultFallback(
 	return gfkrVal
 }
 func (gfkr *GenericForeignKeyReverse) Validate(
-	c context.Context,
+	c schema.Context,
 	val interface{},
 ) (
 	interface{},
@@ -180,12 +176,11 @@ func (gfkr *GenericForeignKeyReverse) Validate(
 
 	// check that the objects exist
 	model := c.GetServer().GetModel(gfkr.OtherType)
-	include := models.Include{
-		Children: map[string]*models.Include{},
+	include := schema.Include{
+		Children: map[string]*schema.Include{},
 	}
-	instances, _, err := models.GetObjects(
-		c,
-		*model,
+	instances, _, err := c.GetObjects(
+		model,
 		instanceIds,
 		0,
 		0,
@@ -206,7 +201,7 @@ func (gfkr *GenericForeignKeyReverse) Validate(
 func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 	newId string,
 	val interface{},
-) []database.QueryBlob {
+) []schema.Query {
 	gfkrVal, ok := val.(PointerSet)
 	if !ok {
 		panic("Bad pointer set value")
@@ -218,7 +213,7 @@ func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 	}
 
 	if len(ids) == 0 {
-		return []database.QueryBlob{}
+		return []schema.Query{}
 	}
 
 	query := fmt.Sprintf(
@@ -229,8 +224,8 @@ func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 		gfkr.OtherIDColumn,
 		strings.Join(ids, ", "),
 	)
-	return []database.QueryBlob{
-		database.QueryBlob{
+	return []schema.Query{
+		schema.Query{
 			Query: query,
 			Args: []interface{}{
 				gfkr.OwnType,
@@ -240,8 +235,8 @@ func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 	}
 }
 
-func AssertGenericForeignKeyReverse(val interface{}) format.Page {
-	gfkrVal, ok := val.(format.Page)
+func AssertGenericForeignKeyReverse(val interface{}) schema.Page {
+	gfkrVal, ok := val.(schema.Page)
 	if !ok {
 		panic("Bad generic foreign key reverse value")
 	}

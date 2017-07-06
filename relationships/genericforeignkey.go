@@ -1,8 +1,7 @@
 package relationships
 
 import (
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/schema"
 )
 
 type GenericForeignKey struct {
@@ -38,7 +37,7 @@ func (gfk GenericForeignKey) GetDefaultValue() interface{} {
 	return &Pointer{}
 }
 func (gfk GenericForeignKey) GetValues(
-	c context.Context,
+	c schema.Context,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -88,7 +87,7 @@ func (gfk GenericForeignKey) GetValues(
 			newValue = Pointer{}
 		} else {
 			newValue = Pointer{
-				Data: &instances.InstancePointer{
+				Data: &schema.InstancePointer{
 					Type: **modelType,
 					ID:   *stringId,
 				},

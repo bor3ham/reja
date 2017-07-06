@@ -1,8 +1,7 @@
 package relationships
 
 import (
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/instances"
+	"github.com/bor3ham/reja/schema"
 )
 
 type ForeignKey struct {
@@ -33,7 +32,7 @@ func (fk ForeignKey) GetDefaultValue() interface{} {
 	return &Pointer{}
 }
 func (fk ForeignKey) GetValues(
-	c context.Context,
+	c schema.Context,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -79,7 +78,7 @@ func (fk ForeignKey) GetValues(
 			newValue = Pointer{}
 		} else {
 			newValue = Pointer{
-				Data: &instances.InstancePointer{
+				Data: &schema.InstancePointer{
 					Type: fk.Type,
 					ID:   *stringId,
 				},

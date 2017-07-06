@@ -1,12 +1,4 @@
-package instances
-
-type Instance interface {
-	GetID() string
-	SetID(string)
-	GetType() string
-	SetValues(values []interface{})
-	GetValues() []interface{}
-}
+package schema
 
 type InstancePointer struct {
 	ID   *string `json:"id"`

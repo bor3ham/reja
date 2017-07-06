@@ -3,11 +3,7 @@ package relationships
 import (
 	"errors"
 	"fmt"
-	"github.com/bor3ham/reja/context"
-	"github.com/bor3ham/reja/database"
-	"github.com/bor3ham/reja/format"
-	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/models"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
@@ -18,7 +14,7 @@ type ForeignKeyReverse struct {
 	SourceIDColumn string
 	ColumnName     string
 	Type           string
-	Default        func(context.Context, interface{}) PointerSet
+	Default        func(schema.Context, interface{}) PointerSet
 }
 
 func (fkr ForeignKeyReverse) GetKey() string {
@@ -29,10 +25,10 @@ func (fkr ForeignKeyReverse) GetType() string {
 }
 
 func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
-	return format.Page{}
+	return schema.Page{}
 }
 func (fkr ForeignKeyReverse) GetValues(
-	c context.Context,
+	c schema.Context,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -62,11 +58,11 @@ func (fkr ForeignKeyReverse) GetValues(
 		panic(err)
 	}
 	defer rows.Close()
-	values := map[string]format.Page{}
+	values := map[string]schema.Page{}
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		value := format.Page{
+		value := schema.Page{
 			Metadata: map[string]interface{}{},
 			Links:    map[string]*string{},
 			Data:     []interface{}{},
@@ -95,7 +91,7 @@ func (fkr ForeignKeyReverse) GetValues(
 		total += 1
 		if total <= pageSize {
 			count += 1
-			value.Data = append(value.Data, instances.InstancePointer{
+			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherId,
 				Type: fkr.Type,
 			})
@@ -122,7 +118,7 @@ func (fkr ForeignKeyReverse) GetValues(
 }
 
 func (fkr *ForeignKeyReverse) DefaultFallback(
-	c context.Context,
+	c schema.Context,
 	val interface{},
 	instance interface{},
 ) interface{} {
@@ -138,7 +134,7 @@ func (fkr *ForeignKeyReverse) DefaultFallback(
 	}
 	return fkrVal
 }
-func (fkr *ForeignKeyReverse) Validate(c context.Context, val interface{}) (interface{}, error) {
+func (fkr *ForeignKeyReverse) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	fkrVal := AssertPointerSet(val)
 
 	// validate the types are correct
@@ -170,12 +166,11 @@ func (fkr *ForeignKeyReverse) Validate(c context.Context, val interface{}) (inte
 
 	// check that the objects exist
 	model := c.GetServer().GetModel(fkr.Type)
-	include := models.Include{
-		Children: map[string]*models.Include{},
+	include := schema.Include{
+		Children: map[string]*schema.Include{},
 	}
-	instances, _, err := models.GetObjects(
-		c,
-		*model,
+	instances, _, err := c.GetObjects(
+		model,
 		instanceIds,
 		0,
 		0,
@@ -193,7 +188,7 @@ func (fkr *ForeignKeyReverse) Validate(c context.Context, val interface{}) (inte
 	return fkrVal, nil
 }
 
-func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []database.QueryBlob {
+func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []schema.Query {
 	fkrVal, ok := val.(PointerSet)
 	if !ok {
 		panic("Bad pointer set value")
@@ -205,7 +200,7 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 	}
 
 	if len(ids) == 0 {
-		return []database.QueryBlob{}
+		return []schema.Query{}
 	}
 
 	query := fmt.Sprintf(
@@ -215,8 +210,8 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 		fkr.SourceIDColumn,
 		strings.Join(ids, ", "),
 	)
-	return []database.QueryBlob{
-		database.QueryBlob{
+	return []schema.Query{
+		schema.Query{
 			Query: query,
 			Args: []interface{}{
 				newId,
@@ -225,8 +220,8 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 	}
 }
 
-func AssertForeignKeyReverse(val interface{}) format.Page {
-	fkrVal, ok := val.(format.Page)
+func AssertForeignKeyReverse(val interface{}) schema.Page {
+	fkrVal, ok := val.(schema.Page)
 	if !ok {
 		panic("Bad foreign key reverse value")
 	}

@@ -1,25 +1,20 @@
-package context
+package server
 
 import (
 	"database/sql"
-	"github.com/bor3ham/reja/instances"
-	"github.com/bor3ham/reja/database"
-	gorillaContext "github.com/gorilla/context"
+	"github.com/gorilla/context"
+	"github.com/bor3ham/reja/schema"
 	"net/http"
 	"sync"
 )
 
-type Server interface {
-	GetDatabase() *sql.DB
-}
-
 type CachedInstance struct {
-	Instance    instances.Instance
+	Instance    schema.Instance
 	RelationMap map[string]map[string][]string
 }
 
 type RequestContext struct {
-	Server Server
+	Server schema.Server
 	Request      *http.Request
 	gorillaMutex sync.Mutex
 
@@ -29,7 +24,7 @@ type RequestContext struct {
 	}
 }
 
-func (rc *RequestContext) GetServer() Server {
+func (rc *RequestContext) GetServer() schema.Server {
 	return rc.Server
 }
 
@@ -37,11 +32,11 @@ func (rc *RequestContext) IncrementQueryCount() {
 	rc.gorillaMutex.Lock()
 	queries := rc.GetQueryCount()
 	queries += 1
-	gorillaContext.Set(rc.Request, "queries", queries)
+	context.Set(rc.Request, "queries", queries)
 	rc.gorillaMutex.Unlock()
 }
 func (rc *RequestContext) GetQueryCount() int {
-	current := gorillaContext.Get(rc.Request, "queries")
+	current := context.Get(rc.Request, "queries")
 	if current != nil {
 		currentInt, ok := current.(int)
 		if !ok {
@@ -63,7 +58,7 @@ func (rc *RequestContext) Exec(query string, args ...interface{}) (sql.Result, e
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().Exec(query, args...)
 }
-func (rc *RequestContext) Begin() (database.Transaction, error) {
+func (rc *RequestContext) Begin() (schema.Transaction, error) {
 	tx, err := rc.Server.GetDatabase().Begin()
 	if err != nil {
 		return nil, err
@@ -79,7 +74,7 @@ func (rc *RequestContext) InitCache() {
 	rc.InstanceCache.Instances = map[string]map[string]CachedInstance{}
 	rc.InstanceCache.Unlock()
 }
-func (rc *RequestContext) CacheObject(object instances.Instance, relationMap map[string]map[string][]string) {
+func (rc *RequestContext) CacheObject(object schema.Instance, relationMap map[string]map[string][]string) {
 	rc.InstanceCache.Lock()
 	model := object.GetType()
 	id := object.GetID()
@@ -93,7 +88,7 @@ func (rc *RequestContext) CacheObject(object instances.Instance, relationMap map
 	}
 	rc.InstanceCache.Unlock()
 }
-func (rc *RequestContext) GetCachedObject(instanceType string, instanceId string) (instances.Instance, map[string]map[string][]string) {
+func (rc *RequestContext) GetCachedObject(instanceType string, instanceId string) (schema.Instance, map[string]map[string][]string) {
 	rc.InstanceCache.Lock()
 	defer rc.InstanceCache.Unlock()
 	models, modelExists := rc.InstanceCache.Instances[instanceType]
