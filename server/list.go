@@ -9,14 +9,6 @@ import (
 	"strings"
 )
 
-func flattened(fields [][]interface{}) []interface{} {
-	var flatList []interface{}
-	for _, relation := range fields {
-		flatList = append(flatList, relation...)
-	}
-	return flatList
-}
-
 func (m Model) ListHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
 	rc := &RequestContext{
@@ -236,11 +228,17 @@ func listGET(
 	var nextUrl, prevUrl string
 	if pageOffset < lastPage {
 		nextUrl = r.Host + r.URL.Path
-		nextUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset+1)
+		nextUrl += fmt.Sprintf(`?page[offset]=%d`, pageOffset+1)
+		if pageSize != c.GetServer().GetDefaultDirectPageSize() {
+			nextUrl += fmt.Sprintf("&page[size]=%d", pageSize)
+		}
 	}
 	if pageOffset > 1 {
 		prevUrl = r.Host + r.URL.Path
-		prevUrl += fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, pageOffset-1)
+		prevUrl += fmt.Sprintf(`?page[offset]=%d`, pageOffset-1)
+		if pageSize != c.GetServer().GetDefaultDirectPageSize() {
+			prevUrl += fmt.Sprintf("&page[size]=%d", pageSize)
+		}
 	}
 
 	instances, included, err := c.GetObjects(&m, []string{}, offset, pageSize, include)
@@ -251,7 +249,11 @@ func listGET(
 	pageLinks := map[string]*string{}
 	firstPageLink := r.Host + r.URL.Path
 	pageLinks["first"] = &firstPageLink
-	lastPageLink := r.Host + r.URL.Path + fmt.Sprintf(`?page[size]=%d&page[offset]=%d`, pageSize, lastPage)
+	lastPageLink := r.Host + r.URL.Path
+	lastPageLink += fmt.Sprintf(`?page[offset]=%d`, lastPage)
+	if pageSize != c.GetServer().GetDefaultDirectPageSize() {
+		lastPageLink += fmt.Sprintf(`&page[size]=%d`, pageSize)
+	}
 	pageLinks["last"] = &lastPageLink
 	pageLinks["prev"] = nil
 	if prevUrl != "" {

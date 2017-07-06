@@ -23,6 +23,14 @@ type IncludeResult struct {
 	Error     error
 }
 
+func flattened(fields [][]interface{}) []interface{} {
+	var flatList []interface{}
+	for _, relation := range fields {
+		flatList = append(flatList, relation...)
+	}
+	return flatList
+}
+
 func combineRelations(
 	maps ...map[string]map[string][]string,
 ) map[string]map[string][]string {
