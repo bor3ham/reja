@@ -66,11 +66,11 @@ func (fkr ForeignKeyReverse) GetValues(
 		relatedLink := fmt.Sprintf("%s/blob", c.GetRequest().Host)
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links:    map[string]*string{
-				"self": &selfLink,
+			Links: map[string]*string{
+				"self":    &selfLink,
 				"related": &relatedLink,
 			},
-			Data:     []interface{}{},
+			Data: []interface{}{},
 		}
 		value.Metadata["total"] = 0
 		value.Metadata["count"] = 0
