@@ -51,19 +51,19 @@ func (s *Server) SetIndirectPageSize(size int) {
 	s.indirectPageSize = size
 }
 
-func (s *Server) RegisterModel(model schema.Model) {
-	_, exists := s.models[model.GetType()]
+func (s *Server) RegisterModel(model *schema.Model) {
+	_, exists := s.models[model.Type]
 	if exists {
-		panic(fmt.Sprintf("Model %s already registered!", model.GetType()))
+		panic(fmt.Sprintf("Model %s already registered!", model.Type))
 	}
-	s.models[model.GetType()] = model
+	s.models[model.Type] = *model
 }
-func (s *Server) GetModel(modelType string) schema.Model {
+func (s *Server) GetModel(modelType string) *schema.Model {
 	mt, exists := s.models[modelType]
 	if !exists {
 		return nil
 	}
-	return mt
+	return &mt
 }
 
 func (s *Server) Handle(router *mux.Router, modelType string, path string) {
@@ -73,15 +73,15 @@ func (s *Server) Handle(router *mux.Router, modelType string, path string) {
 	}
 
 	router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		model.ListHandler(s, w, r)
+		ListHandler(s, &model, w, r)
 	})
 	router.HandleFunc(path+"/", func(w http.ResponseWriter, r *http.Request) {
-		model.ListHandler(s, w, r)
+		ListHandler(s, &model, w, r)
 	})
 	router.HandleFunc(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
-		model.DetailHandler(s, w, r)
+		DetailHandler(s, &model, w, r)
 	})
 	router.HandleFunc(path+"/{id:[0-9]+}/", func(w http.ResponseWriter, r *http.Request) {
-		model.DetailHandler(s, w, r)
+		DetailHandler(s, &model, w, r)
 	})
 }

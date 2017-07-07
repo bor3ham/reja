@@ -54,7 +54,7 @@ func combineRelations(
 }
 
 func (rc *RequestContext) GetObjects(
-	m schema.Model,
+	m *schema.Model,
 	objectIds []string,
 	offset int,
 	limit int,
@@ -75,7 +75,7 @@ func (rc *RequestContext) GetObjects(
 		var newIds []string
 
 		for _, id := range objectIds {
-			instance, relationMap := rc.GetCachedObject(m.GetType(), id)
+			instance, relationMap := rc.GetCachedObject(m.Type, id)
 			if instance != nil && USE_OBJECT_CACHE {
 				cacheHits = append(cacheHits, instance)
 				cacheMaps = append(cacheMaps, relationMap)
@@ -93,10 +93,10 @@ func (rc *RequestContext) GetObjects(
 					from %s
 					where %s
 		    	`,
-				m.GetIDColumn(),
+				m.IDColumn,
 				strings.Join(columns, ","),
-				m.GetTable(),
-				fmt.Sprintf("%s in (%s)", m.GetIDColumn(), strings.Join(newIds, ", ")),
+				m.Table,
+				fmt.Sprintf("%s in (%s)", m.IDColumn, strings.Join(newIds, ", ")),
 			)
 		}
 	} else {
@@ -109,9 +109,9 @@ func (rc *RequestContext) GetObjects(
 				limit %d
 				offset %d
 	    	`,
-			m.GetIDColumn(),
+			m.IDColumn,
 			strings.Join(columns, ","),
-			m.GetTable(),
+			m.Table,
 			limit,
 			offset,
 		)
@@ -147,7 +147,7 @@ func (rc *RequestContext) GetObjects(
 				return []schema.Instance{}, []schema.Instance{}, err
 			}
 
-			instance := m.GetManager().Create()
+			instance := m.Manager.Create()
 			instance.SetID(id)
 			instances = append(instances, instance)
 
@@ -156,7 +156,7 @@ func (rc *RequestContext) GetObjects(
 
 		var wg sync.WaitGroup
 		relationResults := make(chan RelationResult)
-		relationships := m.GetRelationships()
+		relationships := m.Relationships
 		wg.Add(len(relationships))
 		for relationIndex, relationship := range relationships {
 			go func(wg *sync.WaitGroup, index int, relation schema.Relationship) {
@@ -248,7 +248,7 @@ func (rc *RequestContext) GetObjects(
 				wg *sync.WaitGroup,
 				rc *RequestContext,
 				include *schema.Include,
-				model schema.Model,
+				model *schema.Model,
 				attribute string,
 			) {
 				defer wg.Done()

@@ -11,5 +11,5 @@ type Server interface {
 	GetMaximumDirectPageSize() int
 	GetIndirectPageSize() int
 
-	GetModel(string) Model
+	GetModel(string) *Model
 }

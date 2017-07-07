@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func validateInclude(c schema.Context, model schema.Model, include *schema.Include) error {
+func validateInclude(c schema.Context, model *schema.Model, include *schema.Include) error {
 	// its valid without children
 	if len(include.Children) == 0 {
 		return nil
@@ -19,13 +19,13 @@ func validateInclude(c schema.Context, model schema.Model, include *schema.Inclu
 	// go through children
 	for key, child := range include.Children {
 		var relation schema.Relationship
-		for _, modelRelation := range model.GetRelationships() {
+		for _, modelRelation := range model.Relationships {
 			if modelRelation.GetKey() == key {
 				relation = modelRelation
 			}
 		}
 		if relation == nil {
-			return errors.New(fmt.Sprintf("Relation %s not found on model %s", key, model.GetType()))
+			return errors.New(fmt.Sprintf("Relation %s not found on model %s", key, model.Type))
 		}
 		// recurse on its children
 		childModel := c.GetServer().GetModel(relation.GetType())
@@ -37,7 +37,14 @@ func validateInclude(c schema.Context, model schema.Model, include *schema.Inclu
 	return nil
 }
 
-func parseInclude(c schema.Context, model schema.Model, params map[string][]string) (*schema.Include, error) {
+func parseInclude(
+	c schema.Context,
+	model *schema.Model,
+	params map[string][]string,
+) (
+	*schema.Include,
+	error,
+) {
 	// extract from querystring
 	includeString, err := GetStringParam(
 		params,

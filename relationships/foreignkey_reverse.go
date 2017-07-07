@@ -62,9 +62,14 @@ func (fkr ForeignKeyReverse) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
+		selfLink := fmt.Sprintf("%s/blah", c.GetRequest().Host)
+		relatedLink := fmt.Sprintf("%s/blob", c.GetRequest().Host)
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links:    map[string]*string{},
+			Links:    map[string]*string{
+				"self": &selfLink,
+				"related": &relatedLink,
+			},
 			Data:     []interface{}{},
 		}
 		value.Metadata["total"] = 0

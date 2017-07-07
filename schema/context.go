@@ -2,10 +2,12 @@ package schema
 
 import (
 	"database/sql"
+	"net/http"
 )
 
 type Context interface {
 	GetServer() Server
+	GetRequest() *http.Request
 
 	IncrementQueryCount()
 	QueryRow(string, ...interface{}) *sql.Row
@@ -16,5 +18,5 @@ type Context interface {
 	InitCache()
 	CacheObject(Instance, map[string]map[string][]string)
 	GetCachedObject(string, string) (Instance, map[string]map[string][]string)
-	GetObjects(Model, []string, int, int, *Include) ([]Instance, []Instance, error)
+	GetObjects(*Model, []string, int, int, *Include) ([]Instance, []Instance, error)
 }

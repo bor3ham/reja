@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (m Model) ListHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
+func ListHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
 	rc := &RequestContext{
 		Server:  s,
@@ -21,7 +21,7 @@ func (m Model) ListHandler(s schema.Server, w http.ResponseWriter, r *http.Reque
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	include, err := parseInclude(rc, &m, queryStrings)
+	include, err := parseInclude(rc, m, queryStrings)
 	if err != nil {
 		BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
@@ -41,7 +41,7 @@ func listPOST(
 	w http.ResponseWriter,
 	r *http.Request,
 	c schema.Context,
-	m Model,
+	m *schema.Model,
 	queryStrings map[string][]string,
 	include *schema.Include,
 ) {
@@ -177,7 +177,7 @@ func listGET(
 	w http.ResponseWriter,
 	r *http.Request,
 	c schema.Context,
-	m Model,
+	m *schema.Model,
 	queryStrings map[string][]string,
 	include *schema.Include,
 ) {
@@ -241,7 +241,7 @@ func listGET(
 		}
 	}
 
-	instances, included, err := c.GetObjects(&m, []string{}, offset, pageSize, include)
+	instances, included, err := c.GetObjects(m, []string{}, offset, pageSize, include)
 	if err != nil {
 		panic(err)
 	}

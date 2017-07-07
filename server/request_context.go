@@ -24,6 +24,9 @@ type RequestContext struct {
 	}
 }
 
+func (rc *RequestContext) GetRequest() *http.Request {
+	return rc.Request
+}
 func (rc *RequestContext) GetServer() schema.Server {
 	return rc.Server
 }

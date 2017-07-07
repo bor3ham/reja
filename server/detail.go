@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (m Model) DetailHandler(s schema.Server, w http.ResponseWriter, r *http.Request) {
+func DetailHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *http.Request) {
 	// initialise request context
 	rc := &RequestContext{
 		Server:  s,
@@ -19,7 +19,7 @@ func (m Model) DetailHandler(s schema.Server, w http.ResponseWriter, r *http.Req
 	queryStrings := r.URL.Query()
 
 	// extract included information
-	include, err := parseInclude(rc, &m, queryStrings)
+	include, err := parseInclude(rc, m, queryStrings)
 	if err != nil {
 		BadRequest(w, "Bad Included Relations Parameter", err.Error())
 		return
@@ -44,7 +44,7 @@ func detailPATCH(
 	w http.ResponseWriter,
 	r *http.Request,
 	c schema.Context,
-	m Model,
+	m *schema.Model,
 	id string,
 	include *schema.Include,
 ) {
@@ -55,11 +55,11 @@ func detailGET(
 	w http.ResponseWriter,
 	r *http.Request,
 	c schema.Context,
-	m Model,
+	m *schema.Model,
 	id string,
 	include *schema.Include,
 ) {
-	instances, included, err := c.GetObjects(&m, []string{id}, 0, 0, include)
+	instances, included, err := c.GetObjects(m, []string{id}, 0, 0, include)
 	if err != nil {
 		panic(err)
 	}
