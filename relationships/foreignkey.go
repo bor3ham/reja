@@ -33,6 +33,7 @@ func (fk ForeignKey) GetDefaultValue() interface{} {
 }
 func (fk ForeignKey) GetValues(
 	c schema.Context,
+	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
 ) (

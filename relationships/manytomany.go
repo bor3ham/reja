@@ -29,6 +29,7 @@ func (m2m ManyToMany) GetDefaultValue() interface{} {
 }
 func (m2m ManyToMany) GetValues(
 	c schema.Context,
+	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -61,9 +62,15 @@ func (m2m ManyToMany) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
+		selfLink := relationLink(c, m.Type, id, m2m.Key)
+		relatedLink := relatedLink(c, m.Type, id, m2m.Key)
+
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links:    map[string]*string{},
+			Links: map[string]*string{
+				"self":    &selfLink,
+				"related": &relatedLink,
+			},
 			Data:     []interface{}{},
 		}
 		value.Metadata["total"] = 0

@@ -12,6 +12,7 @@ type Relationship interface {
 	GetDefaultValue() interface{}
 	GetValues(
 		Context,
+		*Model,
 		[]string,
 		[][]interface{},
 	) (

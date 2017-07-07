@@ -31,6 +31,7 @@ func (gfkr GenericForeignKeyReverse) GetDefaultValue() interface{} {
 }
 func (gfkr GenericForeignKeyReverse) GetValues(
 	c schema.Context,
+	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -66,9 +67,15 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
+		selfLink := relationLink(c, m.Type, id, gfkr.Key)
+		relatedLink := relatedLink(c, m.Type, id, gfkr.Key)
+
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links:    map[string]*string{},
+			Links: map[string]*string{
+				"self":    &selfLink,
+				"related": &relatedLink,
+			},
 			Data:     []interface{}{},
 		}
 		value.Metadata["total"] = 0

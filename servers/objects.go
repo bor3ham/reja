@@ -166,7 +166,7 @@ func (rc *RequestContext) GetObjects(
 					relationExtras = append(relationExtras, result[index])
 				}
 
-				values, maps := relation.GetValues(rc, ids, relationExtras)
+				values, maps := relation.GetValues(rc, m, ids, relationExtras)
 				relationResults <- RelationResult{
 					Index:        index,
 					Key:          relation.GetKey(),

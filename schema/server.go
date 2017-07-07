@@ -12,4 +12,5 @@ type Server interface {
 	GetIndirectPageSize() int
 
 	GetModel(string) *Model
+	GetRoute(string) string
 }

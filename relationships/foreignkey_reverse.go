@@ -29,6 +29,7 @@ func (fkr ForeignKeyReverse) GetDefaultValue() interface{} {
 }
 func (fkr ForeignKeyReverse) GetValues(
 	c schema.Context,
+	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
 ) (
@@ -62,8 +63,9 @@ func (fkr ForeignKeyReverse) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		selfLink := fmt.Sprintf("%s/blah", c.GetRequest().Host)
-		relatedLink := fmt.Sprintf("%s/blob", c.GetRequest().Host)
+		selfLink := relationLink(c, m.Type, id, fkr.Key)
+		relatedLink := relatedLink(c, m.Type, id, fkr.Key)
+
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
 			Links: map[string]*string{
@@ -77,7 +79,8 @@ func (fkr ForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	pageSize := c.GetServer().GetIndirectPageSize()
+	server := c.GetServer()
+	pageSize := server.GetIndirectPageSize()
 	for rows.Next() {
 		var otherId, ownId string
 		rows.Scan(&otherId, &ownId)

@@ -38,6 +38,7 @@ func (gfk GenericForeignKey) GetDefaultValue() interface{} {
 }
 func (gfk GenericForeignKey) GetValues(
 	c schema.Context,
+	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
 ) (
