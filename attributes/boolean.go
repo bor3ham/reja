@@ -23,15 +23,15 @@ func (b Bool) GetSelectDirectVariables() []interface{} {
 	}
 }
 
-func (b *Bool) DefaultFallback(val interface{}, instance interface{}) interface{} {
+func (b *Bool) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	boolVal := AssertBool(val)
 	if !boolVal.Provided {
 		if b.Default != nil {
-			return b.Default(instance)
+			return b.Default(instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return boolVal
+	return boolVal, nil
 }
 func (b *Bool) Validate(val interface{}) (interface{}, error) {
 	boolVal := AssertBool(val)

@@ -25,14 +25,14 @@ func (t Text) GetSelectDirectVariables() []interface{} {
 	}
 }
 
-func (t *Text) DefaultFallback(val interface{}, instance interface{}) interface{} {
+func (t *Text) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	if val == nil || !AssertText(val).Provided {
 		if t.Default != nil {
-			return t.Default(instance)
+			return t.Default(instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return val
+	return val, nil
 }
 func (t *Text) Validate(val interface{}) (interface{}, error) {
 	textVal := AssertText(val)

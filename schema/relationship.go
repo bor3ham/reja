@@ -22,6 +22,6 @@ type Relationship interface {
 
 	GetInsertQueries(string, interface{}) []Query
 
-	DefaultFallback(Context, interface{}, interface{}) interface{}
+	DefaultFallback(Context, interface{}, interface{}) (interface{}, error)
 	Validate(Context, interface{}) (interface{}, error)
 }

@@ -26,15 +26,15 @@ func (d Date) GetSelectDirectVariables() []interface{} {
 	}
 }
 
-func (d *Date) DefaultFallback(val interface{}, instance interface{}) interface{} {
+func (d *Date) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	dVal := AssertDate(val)
 	if !dVal.Provided {
 		if d.Default != nil {
-			return d.Default(instance)
+			return d.Default(instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return dVal
+	return dVal, nil
 }
 func (d *Date) Validate(val interface{}) (interface{}, error) {
 	dVal := AssertDate(val)

@@ -132,18 +132,21 @@ func (gfkr *GenericForeignKeyReverse) DefaultFallback(
 	c schema.Context,
 	val interface{},
 	instance interface{},
-) interface{} {
+) (
+	interface{},
+	error,
+) {
 	gfkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if !gfkrVal.Provided {
 		if gfkr.Default != nil {
-			return gfkr.Default(c, instance)
+			return gfkr.Default(c, instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return gfkrVal
+	return gfkrVal, nil
 }
 func (gfkr *GenericForeignKeyReverse) Validate(
 	c schema.Context,

@@ -128,18 +128,21 @@ func (m2m *ManyToMany) DefaultFallback(
 	c schema.Context,
 	val interface{},
 	instance interface{},
-) interface{} {
+) (
+	interface{},
+	error,
+) {
 	m2mVal, err := ParsePagePointerSet(val)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if !m2mVal.Provided {
 		if m2m.Default != nil {
-			return m2m.Default(c, instance)
+			return m2m.Default(c, instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return m2mVal
+	return m2mVal, nil
 }
 func (m2m *ManyToMany) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	m2mVal := AssertPointerSet(val)

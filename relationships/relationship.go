@@ -33,8 +33,11 @@ func (stub RelationshipStub) DefaultFallback(
 	c schema.Context,
 	val interface{},
 	instance interface{},
-) interface{} {
-	return val
+) (
+	interface{},
+	error,
+) {
+	return val, nil
 }
 func (stub RelationshipStub) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	return val, nil

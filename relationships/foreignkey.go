@@ -114,18 +114,19 @@ func (fk *ForeignKey) DefaultFallback(
 	instance interface{},
 ) (
 	interface{},
+	error,
 ) {
 	fkVal, err := ParseResultPointer(val)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if !fkVal.Provided {
 		if fk.Default != nil {
-			return fk.Default(c, instance)
+			return fk.Default(c, instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return fkVal
+	return fkVal, nil
 }
 func (fk *ForeignKey) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	fkVal := AssertPointer(val)

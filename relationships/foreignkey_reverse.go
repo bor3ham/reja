@@ -129,18 +129,21 @@ func (fkr *ForeignKeyReverse) DefaultFallback(
 	c schema.Context,
 	val interface{},
 	instance interface{},
-) interface{} {
+) (
+	interface{},
+	error,
+) {
 	fkrVal, err := ParsePagePointerSet(val)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if !fkrVal.Provided {
 		if fkr.Default != nil {
-			return fkr.Default(c, instance)
+			return fkr.Default(c, instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return fkrVal
+	return fkrVal, nil
 }
 func (fkr *ForeignKeyReverse) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	fkrVal := AssertPointerSet(val)

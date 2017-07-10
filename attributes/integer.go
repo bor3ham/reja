@@ -23,15 +23,15 @@ func (i Integer) GetSelectDirectVariables() []interface{} {
 	}
 }
 
-func (i *Integer) DefaultFallback(val interface{}, instance interface{}) interface{} {
+func (i *Integer) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	iVal := AssertInteger(val)
 	if !iVal.Provided {
 		if i.Default != nil {
-			return i.Default(instance)
+			return i.Default(instance), nil
 		}
-		return nil
+		return nil, nil
 	}
-	return iVal
+	return iVal, nil
 }
 func (i *Integer) Validate(val interface{}) (interface{}, error) {
 	iVal := AssertInteger(val)

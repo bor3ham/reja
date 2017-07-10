@@ -79,7 +79,11 @@ func listPOST(
 	values := instance.GetValues()
 	valueIndex := 0
 	for _, attribute := range m.Attributes {
-		values[valueIndex] = attribute.DefaultFallback(values[valueIndex], instance)
+		values[valueIndex], err = attribute.DefaultFallback(values[valueIndex], instance)
+		if err != nil {
+			BadRequest(w, "Bad Attribute Value", err.Error())
+			return
+		}
 		// nil values are not included in the insert statement (use db default)
 		if values[valueIndex] != nil {
 			values[valueIndex], err = attribute.Validate(values[valueIndex])
@@ -91,7 +95,11 @@ func listPOST(
 		valueIndex += 1
 	}
 	for _, relation := range m.Relationships {
-		values[valueIndex] = relation.DefaultFallback(c, values[valueIndex], instance)
+		values[valueIndex], err = relation.DefaultFallback(c, values[valueIndex], instance)
+		if err != nil {
+			BadRequest(w, "Bad Relationship Value", err.Error())
+			return
+		}
 		// nil values are ignored
 		if values[valueIndex] != nil {
 			values[valueIndex], err = relation.Validate(c, values[valueIndex])
