@@ -1,9 +1,9 @@
 package relationships
 
 import (
-	"github.com/bor3ham/reja/schema"
 	"errors"
 	"fmt"
+	"github.com/bor3ham/reja/schema"
 )
 
 type GenericForeignKey struct {
@@ -11,8 +11,8 @@ type GenericForeignKey struct {
 	Key            string
 	TypeColumnName string
 	IDColumnName   string
-	Nullable   bool
-	Default    func(schema.Context, interface{}) Pointer
+	Nullable       bool
+	Default        func(schema.Context, interface{}) Pointer
 }
 
 func (gfk GenericForeignKey) GetKey() string {

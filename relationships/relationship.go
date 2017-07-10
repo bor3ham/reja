@@ -6,8 +6,8 @@ import (
 )
 
 type Pointer struct {
-	Provided bool `json:"-"`
-	Data *schema.InstancePointer `json:"data"`
+	Provided bool                    `json:"-"`
+	Data     *schema.InstancePointer `json:"data"`
 }
 
 type PointerSet struct {
@@ -96,7 +96,7 @@ func ParseStringInstancePointer(stringPointer interface{}) (schema.InstancePoint
 
 	return schema.InstancePointer{
 		Type: parsedType,
-		ID: &parsedId,
+		ID:   &parsedId,
 	}, nil
 }
 
@@ -110,7 +110,7 @@ func ParseResultPointer(val interface{}) (Pointer, error) {
 		if resultVal.Data == nil {
 			return Pointer{
 				Provided: true,
-				Data: nil,
+				Data:     nil,
 			}, nil
 		} else {
 			pointer, err := ParseStringInstancePointer(resultVal.Data)
@@ -119,14 +119,14 @@ func ParseResultPointer(val interface{}) (Pointer, error) {
 			}
 			return Pointer{
 				Provided: true,
-				Data: &pointer,
+				Data:     &pointer,
 			}, nil
 		}
 	}
 
 	return Pointer{
 		Provided: false,
-		Data: nil,
+		Data:     nil,
 	}, nil
 }
 

@@ -1,10 +1,10 @@
 package servers
 
 import (
+	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/gorilla/mux"
 	"net/http"
-	"fmt"
 	"strings"
 )
 

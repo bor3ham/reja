@@ -9,14 +9,14 @@ import (
 )
 
 type Server struct {
-	db                    *sql.DB
+	db *sql.DB
 
 	defaultDirectPageSize int
 	maximumDirectPageSize int
 	indirectPageSize      int
 
-	models                map[string]schema.Model
-	routes                map[string]string
+	models map[string]schema.Model
+	routes map[string]string
 }
 
 func New(db *sql.DB) *Server {
@@ -27,8 +27,8 @@ func New(db *sql.DB) *Server {
 		maximumDirectPageSize: 100,
 		indirectPageSize:      10,
 
-		models:                map[string]schema.Model{},
-		routes:                map[string]string{},
+		models: map[string]schema.Model{},
+		routes: map[string]string{},
 	}
 }
 

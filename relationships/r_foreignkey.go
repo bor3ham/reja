@@ -1,9 +1,9 @@
 package relationships
 
 import (
-	"github.com/bor3ham/reja/schema"
 	"errors"
 	"fmt"
+	"github.com/bor3ham/reja/schema"
 )
 
 type ForeignKey struct {

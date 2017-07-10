@@ -71,7 +71,7 @@ func (m2m ManyToMany) GetValues(
 				"self":    &selfLink,
 				"related": &relatedLink,
 			},
-			Data:     []interface{}{},
+			Data: []interface{}{},
 		}
 		value.Metadata["total"] = 0
 		value.Metadata["count"] = 0
