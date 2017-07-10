@@ -42,10 +42,10 @@ func (stub RelationshipStub) DefaultFallback(
 func (stub RelationshipStub) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	return val, nil
 }
-func (stub RelationshipStub) GetInsertColumns() []string {
+func (stub RelationshipStub) GetInsertColumns(val interface{}) []string {
 	return []string{}
 }
-func (stub RelationshipStub) GetInsertValues() []interface{} {
+func (stub RelationshipStub) GetInsertValues(val interface{}) []interface{} {
 	return []interface{}{}
 }
 func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []schema.Query {

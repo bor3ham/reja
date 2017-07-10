@@ -184,6 +184,23 @@ func (fk *ForeignKey) Validate(c schema.Context, val interface{}) (interface{}, 
 	return fkVal, nil
 }
 
+func (fk *ForeignKey) GetInsertColumns(val interface{}) []string {
+	return []string{
+		fk.ColumnName,
+	}
+}
+func (fk *ForeignKey) GetInsertValues(val interface{}) []interface{} {
+	resultVal := AssertPointer(val)
+	if resultVal.Data == nil {
+		return []interface{}{
+			nil,
+		}
+	}
+	return []interface{}{
+		resultVal.Data.ID,
+	}
+}
+
 func AssertForeignKey(val interface{}) schema.Result {
 	fkVal, ok := val.(schema.Result)
 	if !ok {

@@ -20,6 +20,8 @@ type Relationship interface {
 		map[string]map[string][]string,
 	)
 
+	GetInsertColumns(interface{}) []string
+	GetInsertValues(interface{}) []interface{}
 	GetInsertQueries(string, interface{}) []Query
 
 	DefaultFallback(Context, interface{}, interface{}) (interface{}, error)
