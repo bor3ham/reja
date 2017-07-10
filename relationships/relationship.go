@@ -6,6 +6,7 @@ import (
 )
 
 type Pointer struct {
+	Provided bool `json:"-"`
 	Data *schema.InstancePointer `json:"data"`
 }
 
@@ -48,53 +49,98 @@ func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []s
 	return []schema.Query{}
 }
 
+func AssertPointer(val interface{}) Pointer {
+	pointerVal, ok := val.(Pointer)
+	if !ok {
+		panic("Bad pointer value")
+	}
+	return pointerVal
+}
+
 func AssertPointerSet(val interface{}) PointerSet {
 	pageVal, ok := val.(PointerSet)
 	if !ok {
-		panic("Bad pointer page value")
+		panic("Bad pointer set value")
 	}
 	return pageVal
+}
+
+func ParseStringInstancePointer(stringPointer interface{}) (schema.InstancePointer, error) {
+	pointer, ok := stringPointer.(map[string]interface{})
+	if !ok {
+		return schema.InstancePointer{}, errors.New("Invalid pointer.")
+	}
+
+	// parse the id
+	pointerId, exists := pointer["id"]
+	if !exists {
+		return schema.InstancePointer{}, errors.New("Invalid pointer (missing ID).")
+	}
+	parsedId, ok := pointerId.(string)
+	if !ok {
+		return schema.InstancePointer{}, errors.New("Invalid pointer (bad ID).")
+	}
+
+	// parse the type
+	pointerType, exists := pointer["type"]
+	if !exists {
+		return schema.InstancePointer{}, errors.New("Invalid pointer (missing Type).")
+	}
+	parsedType, ok := pointerType.(string)
+	if !ok {
+		return schema.InstancePointer{}, errors.New("Invalid pointer (bad Type).")
+	}
+
+	return schema.InstancePointer{
+		Type: parsedType,
+		ID: &parsedId,
+	}, nil
+}
+
+func ParseResultPointer(val interface{}) (Pointer, error) {
+	resultVal, ok := val.(schema.Result)
+	if !ok {
+		panic("Invalid result")
+	}
+
+	if resultVal.Provided {
+		if resultVal.Data == nil {
+			return Pointer{
+				Provided: true,
+				Data: nil,
+			}, nil
+		} else {
+			pointer, err := ParseStringInstancePointer(resultVal.Data)
+			if err != nil {
+				return Pointer{}, err
+			}
+			return Pointer{
+				Provided: true,
+				Data: &pointer,
+			}, nil
+		}
+	}
+
+	return Pointer{
+		Provided: false,
+		Data: nil,
+	}, nil
 }
 
 func ParsePagePointerSet(val interface{}) (PointerSet, error) {
 	pageVal, ok := val.(schema.Page)
 	if !ok {
-		panic("Invalid pointer set")
+		panic("Invalid page")
 	}
 	pointersVal := PointerSet{
 		Provided: pageVal.Provided,
 	}
 	for _, stringPointer := range pageVal.Data {
-		pointer, ok := stringPointer.(map[string]interface{})
-		if !ok {
-			return PointerSet{}, errors.New("Invalid pointer in pointer set.")
+		pointer, err := ParseStringInstancePointer(stringPointer)
+		if err != nil {
+			return PointerSet{}, err
 		}
-
-		// parse the id
-		pointerId, exists := pointer["id"]
-		if !exists {
-			return PointerSet{}, errors.New("Invalid pointer in pointer set (missing ID).")
-		}
-		parsedId, ok := pointerId.(string)
-		if !ok {
-			return PointerSet{}, errors.New("Invalid pointer in pointer set (bad ID).")
-		}
-
-		// parse the type
-		pointerType, exists := pointer["type"]
-		if !exists {
-			return PointerSet{}, errors.New("Invalid pointer in pointer set (missing Type).")
-		}
-		parsedType, ok := pointerType.(string)
-		if !ok {
-			return PointerSet{}, errors.New("Invalid pointer in pointer set (bad Type).")
-		}
-
-		// valid pointer
-		pointersVal.Data = append(pointersVal.Data, schema.InstancePointer{
-			Type: parsedType,
-			ID:   &parsedId,
-		})
+		pointersVal.Data = append(pointersVal.Data, pointer)
 	}
 	return pointersVal, nil
 }

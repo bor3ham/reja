@@ -3,19 +3,50 @@ package attributes
 import (
 	"fmt"
 	"time"
+	"strings"
 )
 
-type DatetimeValue time.Time
-
-func (dtv DatetimeValue) MarshalJSON() ([]byte, error) {
-	stamp := fmt.Sprintf("\"%s\"", time.Time(dtv).Format(time.RFC3339))
-	return []byte(stamp), nil
+type DatetimeValue struct {
+	Value    *time.Time
+	Provided bool
 }
 
-func AssertDatetime(val interface{}) *DatetimeValue {
-	dtVal, ok := val.(**DatetimeValue)
-	if !ok {
-		panic("Bad datetime value")
+func (dtv DatetimeValue) MarshalJSON() ([]byte, error) {
+	var stamp string
+	if dtv.Value == nil {
+		stamp = "null"
+	} else {
+		stamp = fmt.Sprintf("\"%s\"", time.Time(*dtv.Value).Format(time.RFC3339))
 	}
-	return *dtVal
+	return []byte(stamp), nil
+}
+func (dtv *DatetimeValue) UnmarshalJSON(data []byte) error {
+	dtv.Provided = true
+
+	strData := string(data)
+	if strData == "null" {
+		return nil
+	}
+
+	val, err := time.Parse(time.RFC3339, strings.Trim(strData, "\""))
+	if err != nil {
+		return err
+	}
+	dtv.Value = &val
+	return nil
+}
+
+func AssertDatetime(val interface{}) DatetimeValue {
+	dtVal, ok := val.(DatetimeValue)
+	if !ok {
+		plainVal, ok := val.(**time.Time)
+		if !ok {
+			panic("Bad datetime value")
+		}
+		return DatetimeValue{
+			Value:    *plainVal,
+			Provided: true,
+		}
+	}
+	return dtVal
 }

@@ -34,7 +34,7 @@ func (gfk GenericForeignKey) GetSelectExtraVariables() []interface{} {
 }
 
 func (gfk GenericForeignKey) GetDefaultValue() interface{} {
-	return &Pointer{}
+	return schema.Result{}
 }
 func (gfk GenericForeignKey) GetValues(
 	c schema.Context,
@@ -83,19 +83,19 @@ func (gfk GenericForeignKey) GetValues(
 			continue
 		}
 
-		var newValue Pointer
+		var newValue schema.Result
 		if *stringId == nil {
-			newValue = Pointer{}
+			newValue = schema.Result{}
 		} else {
-			newValue = Pointer{
-				Data: &schema.InstancePointer{
+			newValue = schema.Result{
+				Data: schema.InstancePointer{
 					Type: **modelType,
 					ID:   *stringId,
 				},
 			}
 		}
 		// update the value
-		values[myId] = &newValue
+		values[myId] = newValue
 
 		// add to relation map
 		if *stringId != nil {
@@ -114,8 +114,8 @@ func (gfk GenericForeignKey) GetValues(
 	return values, maps
 }
 
-func AssertGenericForeignKey(val interface{}) *Pointer {
-	gfkVal, ok := val.(*Pointer)
+func AssertGenericForeignKey(val interface{}) schema.Result {
+	gfkVal, ok := val.(schema.Result)
 	if !ok {
 		panic("Bad generic foreign key value")
 	}

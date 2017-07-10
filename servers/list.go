@@ -121,13 +121,22 @@ func listPOST(
 	for index, _ := range insertValues {
 		valuePlaces = append(valuePlaces, fmt.Sprintf("$%d", index+1))
 	}
-	query := fmt.Sprintf(
-		`insert into %s (%s) values (%s) returning %s;`,
-		m.Table,
-		strings.Join(insertColumns, ", "),
-		strings.Join(valuePlaces, ", "),
-		m.IDColumn,
-	)
+	var query string
+	if len(insertColumns) > 0 {
+		query = fmt.Sprintf(
+			`insert into %s (%s) values (%s) returning %s;`,
+			m.Table,
+			strings.Join(insertColumns, ", "),
+			strings.Join(valuePlaces, ", "),
+			m.IDColumn,
+		)
+	} else {
+		query = fmt.Sprintf(
+			`insert into %s default values returning %s;`,
+			m.Table,
+			m.IDColumn,
+		)
+	}
 
 	// start a transaction
 	tx, err := c.Begin()

@@ -2,6 +2,8 @@ package relationships
 
 import (
 	"github.com/bor3ham/reja/schema"
+	"errors"
+	"fmt"
 )
 
 type ForeignKey struct {
@@ -9,6 +11,8 @@ type ForeignKey struct {
 	Key        string
 	ColumnName string
 	Type       string
+	Nullable   bool
+	Default    func(schema.Context, interface{}) Pointer
 }
 
 func (fk ForeignKey) GetKey() string {
@@ -29,7 +33,7 @@ func (fk ForeignKey) GetSelectExtraVariables() []interface{} {
 }
 
 func (fk ForeignKey) GetDefaultValue() interface{} {
-	return &Pointer{}
+	return schema.Result{}
 }
 func (fk ForeignKey) GetValues(
 	c schema.Context,
@@ -74,18 +78,18 @@ func (fk ForeignKey) GetValues(
 			continue
 		}
 
-		var newValue Pointer
+		var newValue schema.Result
 		if *stringId == nil {
-			newValue = Pointer{}
+			newValue = schema.Result{}
 		} else {
-			newValue = Pointer{
-				Data: &schema.InstancePointer{
+			newValue = schema.Result{
+				Data: schema.InstancePointer{
 					Type: fk.Type,
 					ID:   *stringId,
 				},
 			}
 		}
-		values[myId] = &newValue
+		values[myId] = newValue
 
 		// add to relation map
 		if *stringId != nil {
@@ -104,8 +108,83 @@ func (fk ForeignKey) GetValues(
 	return values, maps
 }
 
-func AssertForeignKey(val interface{}) *Pointer {
-	fkVal, ok := val.(*Pointer)
+func (fk *ForeignKey) DefaultFallback(
+	c schema.Context,
+	val interface{},
+	instance interface{},
+) (
+	interface{},
+) {
+	fkVal, err := ParseResultPointer(val)
+	if err != nil {
+		panic(err)
+	}
+	if !fkVal.Provided {
+		if fk.Default != nil {
+			return fk.Default(c, instance)
+		}
+		return nil
+	}
+	return fkVal
+}
+func (fk *ForeignKey) Validate(c schema.Context, val interface{}) (interface{}, error) {
+	fkVal := AssertPointer(val)
+
+	if fkVal.Data == nil {
+		if !fk.Nullable {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Cannot be null.",
+				fk.Key,
+			))
+		}
+		return fkVal, nil
+	}
+
+	valType := fkVal.Data.Type
+	if fkVal.Data.ID == nil {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: Missing ID.",
+			fk.Key,
+		))
+	}
+	valID := *fkVal.Data.ID
+
+	// validate the type is correct
+	if valType != fk.Type {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: Incorrect type.",
+			fk.Key,
+		))
+	}
+
+	// check that the object exists
+	model := c.GetServer().GetModel(fk.Type)
+	include := schema.Include{
+		Children: map[string]*schema.Include{},
+	}
+	instances, _, err := c.GetObjects(
+		model,
+		[]string{valID},
+		0,
+		0,
+		&include,
+	)
+	if err != nil {
+		panic(err)
+	}
+	if len(instances) != 1 {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: %s ID '%s' does not exist.",
+			fk.Key,
+			fk.Type,
+			valID,
+		))
+	}
+	return fkVal, nil
+}
+
+func AssertForeignKey(val interface{}) schema.Result {
+	fkVal, ok := val.(schema.Result)
 	if !ok {
 		panic("Bad foreign key value")
 	}
