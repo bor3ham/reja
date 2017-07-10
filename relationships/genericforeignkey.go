@@ -2,6 +2,8 @@ package relationships
 
 import (
 	"github.com/bor3ham/reja/schema"
+	"errors"
+	"fmt"
 )
 
 type GenericForeignKey struct {
@@ -9,6 +11,8 @@ type GenericForeignKey struct {
 	Key            string
 	TypeColumnName string
 	IDColumnName   string
+	Nullable   bool
+	Default    func(schema.Context, interface{}) Pointer
 }
 
 func (gfk GenericForeignKey) GetKey() string {
@@ -112,6 +116,101 @@ func (gfk GenericForeignKey) GetValues(
 	}
 
 	return values, maps
+}
+
+func (gfk *GenericForeignKey) DefaultFallback(
+	c schema.Context,
+	val interface{},
+	instance interface{},
+) (
+	interface{},
+	error,
+) {
+	gfkVal, err := ParseResultPointer(val)
+	if err != nil {
+		return nil, err
+	}
+	if !gfkVal.Provided {
+		if gfk.Default != nil {
+			return gfk.Default(c, instance), nil
+		}
+		return nil, nil
+	}
+	return gfkVal, nil
+}
+func (gfk *GenericForeignKey) Validate(c schema.Context, val interface{}) (interface{}, error) {
+	gfkVal := AssertPointer(val)
+
+	if gfkVal.Data == nil {
+		if !gfk.Nullable {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Cannot be null.",
+				gfk.Key,
+			))
+		}
+		return gfkVal, nil
+	}
+
+	valType := gfkVal.Data.Type
+	if gfkVal.Data.ID == nil {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: Missing ID.",
+			gfk.Key,
+		))
+	}
+	valID := *gfkVal.Data.ID
+
+	// check that the object exists
+	model := c.GetServer().GetModel(valType)
+	// validate the type exists
+	if model == nil {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: Non existent type.",
+			gfk.Key,
+		))
+	}
+	include := schema.Include{
+		Children: map[string]*schema.Include{},
+	}
+	instances, _, err := c.GetObjects(
+		model,
+		[]string{valID},
+		0,
+		0,
+		&include,
+	)
+	if err != nil {
+		panic(err)
+	}
+	if len(instances) == 0 {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: %s ID '%s' does not exist.",
+			gfk.Key,
+			valType,
+			valID,
+		))
+	}
+	return gfkVal, nil
+}
+
+func (gfk *GenericForeignKey) GetInsertColumns(val interface{}) []string {
+	return []string{
+		gfk.TypeColumnName,
+		gfk.IDColumnName,
+	}
+}
+func (gfk *GenericForeignKey) GetInsertValues(val interface{}) []interface{} {
+	resultVal := AssertPointer(val)
+	if resultVal.Data == nil {
+		return []interface{}{
+			nil,
+			nil,
+		}
+	}
+	return []interface{}{
+		resultVal.Data.Type,
+		resultVal.Data.ID,
+	}
 }
 
 func AssertGenericForeignKey(val interface{}) schema.Result {

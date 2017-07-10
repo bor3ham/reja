@@ -189,7 +189,7 @@ func (m2m *ManyToMany) Validate(c schema.Context, val interface{}) (interface{},
 	if err != nil {
 		panic(err)
 	}
-	if len(instances) != len(ids) {
+	if len(instances) < len(ids) {
 		return nil, errors.New(fmt.Sprintf(
 			"Relationship '%s' invalid: Not all objects in set exist",
 			m2m.Key,

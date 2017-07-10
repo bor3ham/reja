@@ -173,7 +173,7 @@ func (fk *ForeignKey) Validate(c schema.Context, val interface{}) (interface{}, 
 	if err != nil {
 		panic(err)
 	}
-	if len(instances) != 1 {
+	if len(instances) == 0 {
 		return nil, errors.New(fmt.Sprintf(
 			"Relationship '%s' invalid: %s ID '%s' does not exist.",
 			fk.Key,
