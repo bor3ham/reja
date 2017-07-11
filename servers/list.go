@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"strings"
 )
@@ -251,46 +250,20 @@ func listGET(
 	if err != nil {
 		panic(err)
 	}
-	lastPage := int(math.Ceil(float64(count) / float64(pageSize)))
-
-	var nextUrl, prevUrl string
-	if pageOffset < lastPage {
-		nextUrl = r.Host + r.URL.Path
-		nextUrl += fmt.Sprintf(`?page[offset]=%d`, pageOffset+1)
-		if pageSize != c.GetServer().GetDefaultDirectPageSize() {
-			nextUrl += fmt.Sprintf("&page[size]=%d", pageSize)
-		}
-	}
-	if pageOffset > 1 {
-		prevUrl = r.Host + r.URL.Path
-		prevUrl += fmt.Sprintf(`?page[offset]=%d`, pageOffset-1)
-		if pageSize != c.GetServer().GetDefaultDirectPageSize() {
-			prevUrl += fmt.Sprintf("&page[size]=%d", pageSize)
-		}
-	}
 
 	instances, included, err := c.GetObjects(m, []string{}, offset, pageSize, include)
 	if err != nil {
 		panic(err)
 	}
 
-	pageLinks := map[string]*string{}
-	firstPageLink := r.Host + r.URL.Path
-	pageLinks["first"] = &firstPageLink
-	lastPageLink := r.Host + r.URL.Path
-	lastPageLink += fmt.Sprintf(`?page[offset]=%d`, lastPage)
-	if pageSize != c.GetServer().GetDefaultDirectPageSize() {
-		lastPageLink += fmt.Sprintf(`&page[size]=%d`, pageSize)
-	}
-	pageLinks["last"] = &lastPageLink
-	pageLinks["prev"] = nil
-	if prevUrl != "" {
-		pageLinks["prev"] = &prevUrl
-	}
-	pageLinks["next"] = nil
-	if nextUrl != "" {
-		pageLinks["next"] = &nextUrl
-	}
+	pageLinks := getPaginationLinks(
+		r.Host + r.URL.Path,
+		pageOffset,
+		pageSize,
+		c.GetServer().GetDefaultDirectPageSize(),
+		count,
+	)
+
 	pageMeta := map[string]interface{}{}
 	pageMeta["total"] = count
 	pageMeta["count"] = len(instances)
