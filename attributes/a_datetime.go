@@ -6,7 +6,7 @@ import (
 
 type Datetime struct {
 	AttributeStub
-	Key string
+	Key        string
 	ColumnName string
 }
 

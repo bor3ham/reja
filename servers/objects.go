@@ -35,9 +35,7 @@ func valuesFromMap(
 	valueMap map[string]interface{},
 	attributes []schema.Attribute,
 	relationships []schema.Relationship,
-) (
-	[]interface{},
-) {
+) []interface{} {
 	var values []interface{}
 	for _, attribute := range attributes {
 		value, exists := valueMap[attribute.GetKey()]
@@ -62,9 +60,7 @@ func mapFromValues(
 	values []interface{},
 	attributes []schema.Attribute,
 	relationships []schema.Relationship,
-) (
-	map[string]interface{},
-) {
+) map[string]interface{} {
 	valueIndex := 0
 	valueMap := map[string]interface{}{}
 	for _, attribute := range attributes {
