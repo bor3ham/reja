@@ -2,24 +2,32 @@ package servers
 
 import (
 	"math"
-	"github.com/google/go-querystring/query"
+	"strconv"
+	"net/url"
 )
 
-type PageArgs struct {
-	Offset *int `url:"page[offset],omitempty"`
-	Size *int `url:"page[size],omitempty"`
-}
+// // lazy encoded
+// const PAGE_SIZE = "page[size]"
+// const PAGE_OFFSET = "page[offset]"
 
-func mustJoinQueries(baseUrl string, args PageArgs) string {
-	values, err := query.Values(args)
-	if err != nil {
-		panic(err)
+// RFC 3986 compliant
+const PAGE_SIZE = "page%%5Bsize%%5D"
+const PAGE_OFFSET = "page%%5Boffset%%5D"
+
+func joinQueries(baseUrl string, queries map[string]string) string {
+	fullUrl := baseUrl
+	first := true
+	for key, query := range queries {
+		if first {
+			fullUrl += "?"
+			first = false
+		} else {
+			fullUrl += "&"
+		}
+		fullUrl += key
+		fullUrl += "=" + url.QueryEscape(query)
 	}
-	encoded := values.Encode()
-	if len(encoded) > 0 {
-		return baseUrl + "?" + encoded
-	}
-	return baseUrl
+	return fullUrl
 }
 
 func getPaginationLinks(
@@ -36,58 +44,56 @@ func getPaginationLinks(
 	// calculate what the last page would be
 	lastPage := int(math.Ceil(float64(totalItems) / float64(pageSize)))
 
-	var linkPageSize *int
-	if pageSize != defaultPageSize {
-		linkPageSize = &pageSize
-	}
-
 	// link to this page
-	selfArgs := PageArgs{
-		Size: linkPageSize,
+	selfArgs := map[string]string{}
+	if pageSize != defaultPageSize {
+		selfArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 	}
 	if currentPage != 1 {
-		selfArgs.Offset = &currentPage
+		selfArgs[PAGE_OFFSET] = strconv.Itoa(currentPage)
 	}
-	selfLink := mustJoinQueries(baseUrl, selfArgs)
+	selfLink := joinQueries(baseUrl, selfArgs)
 	links["self"] = &selfLink
 
 	// link to the first page
-	firstArgs := PageArgs{
-		Size: linkPageSize,
+	firstArgs := map[string]string{}
+	if pageSize != defaultPageSize {
+		firstArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 	}
-	firstLink := mustJoinQueries(baseUrl, firstArgs)
+	firstLink := joinQueries(baseUrl, firstArgs)
 	links["first"] = &firstLink
 
 	// link to the last page
-	lastArgs := PageArgs{
-		Size: linkPageSize,
+	lastArgs := map[string]string{}
+	if pageSize != defaultPageSize {
+		lastArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 	}
 	if lastPage != 1 {
-		lastArgs.Offset = &lastPage
+		lastArgs[PAGE_OFFSET] = strconv.Itoa(lastPage)
 	}
-	lastLink := mustJoinQueries(baseUrl, lastArgs)
+	lastLink := joinQueries(baseUrl, lastArgs)
 	links["last"] = &lastLink
+
+	// link to the previous page
+	if currentPage > 1 {
+		prevArgs := map[string]string{}
+		if pageSize != defaultPageSize {
+			prevArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
+		}
+		prevArgs[PAGE_OFFSET] = strconv.Itoa(currentPage - 1)
+		prevLink := joinQueries(baseUrl, prevArgs)
+		links["prev"] = &prevLink
+	}
 
 	// link to the next page
 	if currentPage < lastPage {
-		nextPage := currentPage + 1
-		nextArgs := PageArgs{
-			Size: linkPageSize,
-			Offset: &nextPage,
+		nextArgs := map[string]string{}
+		if pageSize != defaultPageSize {
+			nextArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 		}
-		nextLink := mustJoinQueries(baseUrl, nextArgs)
+		nextArgs[PAGE_OFFSET] = strconv.Itoa(currentPage + 1)
+		nextLink := joinQueries(baseUrl, nextArgs)
 		links["next"] = &nextLink
-	}
-
-	// link to the previous page
-	if currentPage > 0 {
-		prevPage := currentPage - 1
-		prevArgs := PageArgs{
-			Size: linkPageSize,
-			Offset: &prevPage,
-		}
-		prevLink := mustJoinQueries(baseUrl, prevArgs)
-		links["prev"] = &prevLink
 	}
 
 	return links
