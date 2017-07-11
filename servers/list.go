@@ -76,7 +76,8 @@ func listPOST(
 	}
 
 	// load defaults and validate values
-	values := instance.GetValues()
+	mapValues := instance.GetValues()
+	values := valuesFromMap(mapValues, m.Attributes, m.Relationships)
 	valueIndex := 0
 	for _, attribute := range m.Attributes {
 		values[valueIndex], err = attribute.DefaultFallback(values[valueIndex], instance)

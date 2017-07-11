@@ -4,6 +4,6 @@ type Instance interface {
 	GetID() string
 	SetID(string)
 	GetType() string
-	SetValues(values []interface{})
-	GetValues() []interface{}
+	SetValues(values map[string]interface{})
+	GetValues() map[string]interface{}
 }

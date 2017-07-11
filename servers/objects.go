@@ -31,6 +31,53 @@ func flattened(fields [][]interface{}) []interface{} {
 	return flatList
 }
 
+func valuesFromMap(
+	valueMap map[string]interface{},
+	attributes []schema.Attribute,
+	relationships []schema.Relationship,
+) (
+	[]interface{},
+) {
+	var values []interface{}
+	for _, attribute := range attributes {
+		value, exists := valueMap[attribute.GetKey()]
+		if exists {
+			values = append(values, value)
+		} else {
+			values = append(values, nil)
+		}
+	}
+	for _, relationship := range relationships {
+		value, exists := valueMap[relationship.GetKey()]
+		if exists {
+			values = append(values, value)
+		} else {
+			values = append(values, nil)
+		}
+	}
+	return values
+}
+
+func mapFromValues(
+	values []interface{},
+	attributes []schema.Attribute,
+	relationships []schema.Relationship,
+) (
+	map[string]interface{},
+) {
+	valueIndex := 0
+	valueMap := map[string]interface{}{}
+	for _, attribute := range attributes {
+		valueMap[attribute.GetKey()] = values[valueIndex]
+		valueIndex += 1
+	}
+	for _, relationship := range relationships {
+		valueMap[relationship.GetKey()] = values[valueIndex]
+		valueIndex += 1
+	}
+	return valueMap
+}
+
 func combineRelations(
 	maps ...map[string]map[string][]string,
 ) map[string]map[string][]string {
@@ -220,7 +267,7 @@ func (rc *RequestContext) GetObjects(
 					}
 				}
 			}
-			instance.SetValues(instanceFields[index])
+			instance.SetValues(mapFromValues(instanceFields[index], m.Attributes, m.Relationships))
 			// add complete relation map to flat map
 			listRelations = combineRelations(listRelations, instanceRelations)
 			// add instance to cache
