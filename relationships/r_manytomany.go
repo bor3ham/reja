@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/utils"
 	"strings"
 )
 
@@ -62,15 +63,8 @@ func (m2m ManyToMany) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		selfLink := relationLink(c, m.Type, id, m2m.Key)
-		relatedLink := relatedLink(c, m.Type, id, m2m.Key)
-
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links: map[string]*string{
-				"self":    &selfLink,
-				"related": &relatedLink,
-			},
 			Data: []interface{}{},
 		}
 		value.Metadata["total"] = 0
@@ -78,7 +72,8 @@ func (m2m ManyToMany) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	pageSize := c.GetServer().GetIndirectPageSize()
+	server := c.GetServer()
+	pageSize := server.GetIndirectPageSize()
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
@@ -115,6 +110,21 @@ func (m2m ManyToMany) GetValues(
 		value.Metadata["total"] = total
 		// update the value
 		values[myID] = value
+	}
+	// create the links
+	for id, value := range values {
+		total, ok := value.Metadata["total"].(int)
+		if !ok {
+			panic("Bad total received")
+		}
+		value.Links = utils.GetPaginationLinks(
+			relationLink(c, m.Type, id, m2m.Key),
+			1,
+			pageSize,
+			server.GetDefaultDirectPageSize(),
+			total,
+		)
+		values[id] = value
 	}
 	// generalise values
 	generalValues := map[string]interface{}{}

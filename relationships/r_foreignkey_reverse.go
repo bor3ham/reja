@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/utils"
 	"strings"
 )
 
@@ -63,15 +64,8 @@ func (fkr ForeignKeyReverse) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		selfLink := relationLink(c, m.Type, id, fkr.Key)
-		relatedLink := relatedLink(c, m.Type, id, fkr.Key)
-
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links: map[string]*string{
-				"self":    &selfLink,
-				"related": &relatedLink,
-			},
 			Data: []interface{}{},
 		}
 		value.Metadata["total"] = 0
@@ -116,6 +110,21 @@ func (fkr ForeignKeyReverse) GetValues(
 		maps[ownId][fkr.Type] = append(maps[ownId][fkr.Type], otherId)
 		// update value
 		values[ownId] = value
+	}
+	// create the links
+	for id, value := range values {
+		total, ok := value.Metadata["total"].(int)
+		if !ok {
+			panic("Bad total received")
+		}
+		value.Links = utils.GetPaginationLinks(
+			relationLink(c, m.Type, id, fkr.Key),
+			1,
+			pageSize,
+			server.GetDefaultDirectPageSize(),
+			total,
+		)
+		values[id] = value
 	}
 	// generalise values
 	generalValues := map[string]interface{}{}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/utils"
 	"strings"
 )
 
@@ -67,15 +68,8 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	maps := map[string]map[string][]string{}
 	// fill in initial page data
 	for _, id := range ids {
-		selfLink := relationLink(c, m.Type, id, gfkr.Key)
-		relatedLink := relatedLink(c, m.Type, id, gfkr.Key)
-
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Links: map[string]*string{
-				"self":    &selfLink,
-				"related": &relatedLink,
-			},
 			Data: []interface{}{},
 		}
 		value.Metadata["total"] = 0
@@ -83,7 +77,8 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	pageSize := c.GetServer().GetIndirectPageSize()
+	server := c.GetServer()
+	pageSize := server.GetIndirectPageSize()
 	for rows.Next() {
 		var otherId, ownId string
 		rows.Scan(&otherId, &ownId)
@@ -119,6 +114,21 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 			maps[ownId][gfkr.OtherType] = []string{}
 		}
 		maps[ownId][gfkr.OtherType] = append(maps[ownId][gfkr.OtherType], otherId)
+	}
+	// create the links
+	for id, value := range values {
+		total, ok := value.Metadata["total"].(int)
+		if !ok {
+			panic("Bad total received")
+		}
+		value.Links = utils.GetPaginationLinks(
+			relationLink(c, m.Type, id, gfkr.Key),
+			1,
+			pageSize,
+			server.GetDefaultDirectPageSize(),
+			total,
+		)
+		values[id] = value
 	}
 	// generalise values
 	generalValues := map[string]interface{}{}

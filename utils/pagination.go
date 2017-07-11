@@ -1,4 +1,4 @@
-package servers
+package utils
 
 import (
 	"math"
@@ -30,7 +30,7 @@ func joinQueries(baseUrl string, queries map[string]string) string {
 	return fullUrl
 }
 
-func getPaginationLinks(
+func GetPaginationLinks(
 	baseUrl string,
 	currentPage int,
 	pageSize int,
@@ -75,6 +75,7 @@ func getPaginationLinks(
 	links["last"] = &lastLink
 
 	// link to the previous page
+	links["prev"] = nil
 	if currentPage > 1 {
 		prevArgs := map[string]string{}
 		if pageSize != defaultPageSize {
@@ -86,6 +87,7 @@ func getPaginationLinks(
 	}
 
 	// link to the next page
+	links["next"] = nil
 	if currentPage < lastPage {
 		nextArgs := map[string]string{}
 		if pageSize != defaultPageSize {
