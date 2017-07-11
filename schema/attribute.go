@@ -1,6 +1,8 @@
 package schema
 
 type Attribute interface {
+	GetKey() string
+
 	GetSelectDirectColumns() []string
 	GetSelectDirectVariables() []interface{}
 

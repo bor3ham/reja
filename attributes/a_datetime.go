@@ -6,7 +6,12 @@ import (
 
 type Datetime struct {
 	AttributeStub
+	Key string
 	ColumnName string
+}
+
+func (dt Datetime) GetKey() string {
+	return dt.Key
 }
 
 func (dt Datetime) GetSelectDirectColumns() []string {

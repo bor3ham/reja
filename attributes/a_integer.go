@@ -13,6 +13,10 @@ type Integer struct {
 	Default    func(interface{}) IntegerValue
 }
 
+func (i Integer) GetKey() string {
+	return i.Key
+}
+
 func (i Integer) GetSelectDirectColumns() []string {
 	return []string{i.ColumnName}
 }

@@ -15,6 +15,10 @@ type Text struct {
 	Default    func(interface{}) TextValue
 }
 
+func (t Text) GetKey() string {
+	return t.Key
+}
+
 func (t Text) GetSelectDirectColumns() []string {
 	return []string{t.ColumnName}
 }

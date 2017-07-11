@@ -16,6 +16,10 @@ type Date struct {
 	Default    func(interface{}) DateValue
 }
 
+func (d Date) GetKey() string {
+	return d.Key
+}
+
 func (d Date) GetSelectDirectColumns() []string {
 	return []string{d.ColumnName}
 }

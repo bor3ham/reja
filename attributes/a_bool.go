@@ -13,6 +13,10 @@ type Bool struct {
 	Default    func(interface{}) BoolValue
 }
 
+func (b Bool) GetKey() string {
+	return b.Key
+}
+
 func (b Bool) GetSelectDirectColumns() []string {
 	return []string{b.ColumnName}
 }
