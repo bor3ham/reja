@@ -85,7 +85,7 @@ func (fk ForeignKey) GetValues(
 			},
 		}
 		if *stringId != nil {
-			newValue.Data =  schema.InstancePointer{
+			newValue.Data = schema.InstancePointer{
 				Type: fk.Type,
 				ID:   *stringId,
 			}

@@ -66,7 +66,7 @@ func (fkr ForeignKeyReverse) GetValues(
 	for _, id := range ids {
 		value := schema.Page{
 			Metadata: map[string]interface{}{},
-			Data: []interface{}{},
+			Data:     []interface{}{},
 		}
 		value.Metadata["total"] = 0
 		value.Metadata["count"] = 0

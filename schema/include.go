@@ -8,9 +8,9 @@ func (i *Include) endNodes(prefix string) []string {
 	var nodes []string
 	for key, child := range i.Children {
 		if len(child.Children) > 0 {
-			nodes = append(nodes, child.endNodes(prefix + key + ".")...)
+			nodes = append(nodes, child.endNodes(prefix+key+".")...)
 		} else {
-			nodes = append(nodes, prefix + key)
+			nodes = append(nodes, prefix+key)
 		}
 	}
 	return nodes

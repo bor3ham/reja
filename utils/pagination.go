@@ -2,8 +2,8 @@ package utils
 
 import (
 	"math"
-	"strconv"
 	"net/url"
+	"strconv"
 )
 
 // lazy encoded
@@ -35,9 +35,7 @@ func GetPaginationLinks(
 	defaultPageSize int,
 	totalItems int,
 	extraQueries map[string]string,
-) (
-	map[string]*string,
-) {
+) map[string]*string {
 	links := map[string]*string{}
 
 	// calculate what the last page would be
