@@ -5,6 +5,7 @@ import (
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
 	"net/http"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func listGET(
@@ -43,6 +44,18 @@ func listGET(
 		return
 	}
 	offset := (pageOffset - 1) * pageSize
+
+	// extract filters
+	var validFilters []map[string][]string
+	for _, attribute := range m.Attributes {
+		filters, err := attribute.ValidateFilters(queryStrings)
+		if err != nil {
+			BadRequest(w, "Bad Filter Parameter", err.Error())
+			return
+		}
+		validFilters = append(validFilters, filters)
+	}
+	spew.Dump(validFilters)
 
 	countQuery := fmt.Sprintf(
 		`

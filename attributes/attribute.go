@@ -2,6 +2,16 @@ package attributes
 
 type AttributeStub struct{}
 
+func (stub AttributeStub) ValidateFilters(map[string][]string) (map[string][]string, error) {
+	return map[string][]string{}, nil
+}
+func (stub AttributeStub) GetFilterWhere(map[string]string) string {
+	return ""
+}
+func (stub AttributeStub) GetFilterAnnotate(map[string]string) string {
+	return ""
+}
+
 func (stub AttributeStub) DefaultFallback(
 	val interface{},
 	instance interface{},
