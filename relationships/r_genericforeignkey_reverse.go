@@ -127,6 +127,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 			pageSize,
 			server.GetDefaultDirectPageSize(),
 			total,
+			map[string]string{},
 		)
 		values[id] = value
 	}

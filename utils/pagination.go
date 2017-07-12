@@ -6,26 +6,24 @@ import (
 	"net/url"
 )
 
-// // lazy encoded
-// const PAGE_SIZE = "page[size]"
-// const PAGE_OFFSET = "page[offset]"
+// lazy encoded
+const PAGE_SIZE = "page[size]"
+const PAGE_OFFSET = "page[offset]"
 
-// RFC 3986 compliant
-const PAGE_SIZE = "page%%5Bsize%%5D"
-const PAGE_OFFSET = "page%%5Boffset%%5D"
-
-func joinQueries(baseUrl string, queries map[string]string) string {
+func joinQueries(baseUrl string, queries ...map[string]string) string {
 	fullUrl := baseUrl
 	first := true
-	for key, query := range queries {
-		if first {
-			fullUrl += "?"
-			first = false
-		} else {
-			fullUrl += "&"
+	for _, queryset := range queries {
+		for key, query := range queryset {
+			if first {
+				fullUrl += "?"
+				first = false
+			} else {
+				fullUrl += "&"
+			}
+			fullUrl += url.QueryEscape(key)
+			fullUrl += "=" + url.QueryEscape(query)
 		}
-		fullUrl += key
-		fullUrl += "=" + url.QueryEscape(query)
 	}
 	return fullUrl
 }
@@ -36,6 +34,7 @@ func GetPaginationLinks(
 	pageSize int,
 	defaultPageSize int,
 	totalItems int,
+	extraQueries map[string]string,
 ) (
 	map[string]*string,
 ) {
@@ -52,7 +51,7 @@ func GetPaginationLinks(
 	if currentPage != 1 {
 		selfArgs[PAGE_OFFSET] = strconv.Itoa(currentPage)
 	}
-	selfLink := joinQueries(baseUrl, selfArgs)
+	selfLink := joinQueries(baseUrl, selfArgs, extraQueries)
 	links["self"] = &selfLink
 
 	// link to the first page
@@ -60,7 +59,7 @@ func GetPaginationLinks(
 	if pageSize != defaultPageSize {
 		firstArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 	}
-	firstLink := joinQueries(baseUrl, firstArgs)
+	firstLink := joinQueries(baseUrl, firstArgs, extraQueries)
 	links["first"] = &firstLink
 
 	// link to the last page
@@ -71,7 +70,7 @@ func GetPaginationLinks(
 	if lastPage != 1 {
 		lastArgs[PAGE_OFFSET] = strconv.Itoa(lastPage)
 	}
-	lastLink := joinQueries(baseUrl, lastArgs)
+	lastLink := joinQueries(baseUrl, lastArgs, extraQueries)
 	links["last"] = &lastLink
 
 	// link to the previous page
@@ -82,7 +81,7 @@ func GetPaginationLinks(
 			prevArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 		}
 		prevArgs[PAGE_OFFSET] = strconv.Itoa(currentPage - 1)
-		prevLink := joinQueries(baseUrl, prevArgs)
+		prevLink := joinQueries(baseUrl, prevArgs, extraQueries)
 		links["prev"] = &prevLink
 	}
 
@@ -94,7 +93,7 @@ func GetPaginationLinks(
 			nextArgs[PAGE_SIZE] = strconv.Itoa(pageSize)
 		}
 		nextArgs[PAGE_OFFSET] = strconv.Itoa(currentPage + 1)
-		nextLink := joinQueries(baseUrl, nextArgs)
+		nextLink := joinQueries(baseUrl, nextArgs, extraQueries)
 		links["next"] = &nextLink
 	}
 

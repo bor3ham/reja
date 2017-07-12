@@ -67,5 +67,5 @@ func RelationHandler(
 		responseBlob = defaultValue
 	}
 	responseBytes := MustJSONMarshal(responseBlob)
-	fmt.Fprintf(w, string(responseBytes))
+	fmt.Fprint(w, string(responseBytes))
 }

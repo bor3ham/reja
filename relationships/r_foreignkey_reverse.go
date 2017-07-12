@@ -123,6 +123,7 @@ func (fkr ForeignKeyReverse) GetValues(
 			pageSize,
 			server.GetDefaultDirectPageSize(),
 			total,
+			map[string]string{},
 		)
 		values[id] = value
 	}

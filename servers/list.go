@@ -257,12 +257,19 @@ func listGET(
 		panic(err)
 	}
 
+	validQueries := map[string]string{}
+	validIncludeQuery := include.AsString()
+	if len(validIncludeQuery) > 0 {
+		validQueries["include"] = validIncludeQuery
+	}
+
 	pageLinks := utils.GetPaginationLinks(
 		r.Host + r.URL.Path,
 		pageOffset,
 		pageSize,
 		c.GetServer().GetDefaultDirectPageSize(),
 		count,
+		validQueries,
 	)
 
 	pageMeta := map[string]interface{}{}
@@ -289,5 +296,5 @@ func listGET(
 	}
 
 	responseBytes := MustJSONMarshal(responseBlob)
-	fmt.Fprintf(w, string(responseBytes))
+	fmt.Fprint(w, string(responseBytes))
 }
