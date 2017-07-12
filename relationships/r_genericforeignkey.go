@@ -87,15 +87,16 @@ func (gfk GenericForeignKey) GetValues(
 			continue
 		}
 
-		var newValue schema.Result
-		if *stringId == nil {
-			newValue = schema.Result{}
-		} else {
-			newValue = schema.Result{
-				Data: schema.InstancePointer{
-					Type: **modelType,
-					ID:   *stringId,
-				},
+		selfLink := relationLink(c, m.Type, myId, gfk.Key)
+		newValue := schema.Result{
+			Links: map[string]*string{
+				"self": &selfLink,
+			},
+		}
+		if *stringId != nil {
+			newValue.Data = schema.InstancePointer{
+				Type: **modelType,
+				ID:   *stringId,
 			}
 		}
 		// update the value

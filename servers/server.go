@@ -106,13 +106,13 @@ func (s *Server) Handle(router *mux.Router, modelType string, path string) {
 	for _, relationship := range model.Relationships {
 		relation := relationship
 		router.HandleFunc(
-			path+"/{id:[0-9]+}/"+relation.GetKey(),
+			path+"/{id:[0-9]+}/relationships/"+relation.GetKey(),
 			func(w http.ResponseWriter, r *http.Request) {
 				RelationHandler(s, &model, relation, w, r)
 			},
 		)
 		router.HandleFunc(
-			path+"/{id:[0-9]+}/"+relation.GetKey()+"/",
+			path+"/{id:[0-9]+}/relationships/"+relation.GetKey()+"/",
 			func(w http.ResponseWriter, r *http.Request) {
 				RelationHandler(s, &model, relation, w, r)
 			},
