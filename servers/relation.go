@@ -30,7 +30,7 @@ func RelationHandler(
 	id := vars["id"]
 
 	// get parent object
-	instances, _, err := rc.GetObjects(m, []string{id}, 0, 0, &schema.Include{})
+	instances, _, err := rc.GetObjectsByIDs(m, []string{id}, &schema.Include{})
 	if err != nil {
 		panic(err)
 	}

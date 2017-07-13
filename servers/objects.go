@@ -96,11 +96,44 @@ func combineRelations(
 	return combinedMap
 }
 
-func (rc *RequestContext) GetObjects(
+func (rc *RequestContext) GetObjectsByIDs(
 	m *schema.Model,
 	objectIds []string,
+	include *schema.Include,
+) (
+	[]schema.Instance,
+	[]schema.Instance,
+	error,
+) {
+	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, 0, 0, include)
+}
+
+func (rc *RequestContext) GetObjectsByFilter(
+	m *schema.Model,
+	whereQueries []string,
+	whereArgs []interface{},
 	offset int,
 	limit int,
+	include *schema.Include,
+) (
+	[]schema.Instance,
+	[]schema.Instance,
+	error,
+) {
+	return rc.getObjects(m, []string{}, whereQueries, whereArgs, offset, limit, include)
+}
+
+func (rc *RequestContext) getObjects(
+	m *schema.Model,
+
+	// either by ids
+	objectIds []string,
+	// or if no ids provided, by filters
+	whereQueries []string,
+	whereArgs []interface{},
+	offset int,
+	limit int,
+
 	include *schema.Include,
 ) (
 	[]schema.Instance,
@@ -111,6 +144,7 @@ func (rc *RequestContext) GetObjects(
 	var cacheMaps []map[string]map[string][]string
 
 	var query string
+	var args []interface{}
 	columns := m.FieldColumns()
 	columns = append(m.FieldColumns(), m.ExtraColumns()...)
 	if len(objectIds) > 0 {
@@ -143,18 +177,26 @@ func (rc *RequestContext) GetObjects(
 			)
 		}
 	} else {
+		whereClause := ""
+		if len(whereQueries) > 0 {
+			whereClause = fmt.Sprintf("where %s", strings.Join(whereQueries, " and "))
+			args = append(args, whereArgs...)
+		}
+
 		query = fmt.Sprintf(
 			`
 				select
 					%s,
 					%s
 				from %s
+				%s
 				limit %d
 				offset %d
 	    	`,
 			m.IDColumn,
 			strings.Join(columns, ","),
 			m.Table,
+			whereClause,
 			limit,
 			offset,
 		)
@@ -164,7 +206,7 @@ func (rc *RequestContext) GetObjects(
 	listRelations := map[string]map[string][]string{}
 
 	if len(query) > 0 {
-		rows, err := rc.Query(query)
+		rows, err := rc.Query(query, args...)
 		if err != nil {
 			return []schema.Instance{}, []schema.Instance{}, err
 		}
@@ -298,11 +340,9 @@ func (rc *RequestContext) GetObjects(
 
 				childIncludes, exists := include.Children[attribute]
 				if exists {
-					childInstances, childIncluded, err := rc.GetObjects(
+					childInstances, childIncluded, err := rc.GetObjectsByIDs(
 						model,
 						ids,
-						0,
-						0,
 						childIncludes,
 					)
 					if err != nil {

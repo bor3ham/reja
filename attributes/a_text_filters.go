@@ -140,3 +140,15 @@ func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string,
 
 	return valids, nil
 }
+func (t Text) GetFilterWhere(nextArg int, filters map[string][]string) ([]string, []interface{}) {
+	queries := []string{}
+	args := []interface{}{}
+
+	_, filter := filters["exact"]; if filter {
+		queries = append(queries, fmt.Sprintf("%s = $%d", t.ColumnName, nextArg))
+		args = append(args, filters["exact"][0])
+		nextArg += 1
+	}
+
+	return queries, args
+}

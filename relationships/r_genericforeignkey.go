@@ -173,13 +173,7 @@ func (gfk *GenericForeignKey) Validate(c schema.Context, val interface{}) (inter
 	include := schema.Include{
 		Children: map[string]*schema.Include{},
 	}
-	instances, _, err := c.GetObjects(
-		model,
-		[]string{valID},
-		0,
-		0,
-		&include,
-	)
+	instances, _, err := c.GetObjectsByIDs(model, []string{valID}, &include)
 	if err != nil {
 		panic(err)
 	}

@@ -2,10 +2,11 @@ package servers
 
 import (
 	"fmt"
+	"strings"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
 	"net/http"
-	"github.com/davecgh/go-spew/spew"
+	// "github.com/davecgh/go-spew/spew"
 )
 
 func listGET(
@@ -55,23 +56,44 @@ func listGET(
 		}
 		validFilters = append(validFilters, filters)
 	}
-	spew.Dump(validFilters)
+
+	// create where queries from filters
+	whereQueries := []string{}
+	whereArgs := []interface{}{}
+	for attrIndex, attribute := range m.Attributes {
+		queries, args := attribute.GetFilterWhere(len(whereArgs) + 1, validFilters[attrIndex])
+		whereQueries = append(whereQueries, queries...)
+		whereArgs = append(whereArgs, args...)
+	}
+	whereClause := ""
+	if len(whereQueries) > 0 {
+		whereClause = fmt.Sprintf("where %s", strings.Join(whereQueries, " and "))
+	}
 
 	countQuery := fmt.Sprintf(
 		`
 			select
 				count(*)
 			from %s
+			%s
         `,
 		m.Table,
+		whereClause,
 	)
 	var count int
-	err = c.QueryRow(countQuery).Scan(&count)
+	err = c.QueryRow(countQuery, whereArgs...).Scan(&count)
 	if err != nil {
 		panic(err)
 	}
 
-	instances, included, err := c.GetObjects(m, []string{}, offset, pageSize, include)
+	instances, included, err := c.GetObjectsByFilter(
+		m,
+		whereQueries,
+		whereArgs,
+		offset,
+		pageSize,
+		include,
+	)
 	if err != nil {
 		panic(err)
 	}

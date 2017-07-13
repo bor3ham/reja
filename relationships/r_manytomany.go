@@ -190,13 +190,7 @@ func (m2m *ManyToMany) Validate(c schema.Context, val interface{}) (interface{},
 	include := schema.Include{
 		Children: map[string]*schema.Include{},
 	}
-	instances, _, err := c.GetObjects(
-		model,
-		instanceIds,
-		0,
-		0,
-		&include,
-	)
+	instances, _, err := c.GetObjectsByIDs(model, instanceIds, &include)
 	if err != nil {
 		panic(err)
 	}

@@ -18,5 +18,17 @@ type Context interface {
 	InitCache()
 	CacheObject(Instance, map[string]map[string][]string)
 	GetCachedObject(string, string) (Instance, map[string]map[string][]string)
-	GetObjects(*Model, []string, int, int, *Include) ([]Instance, []Instance, error)
+	GetObjectsByIDs(*Model, []string, *Include) ([]Instance, []Instance, error)
+	GetObjectsByFilter(
+		*Model,
+		[]string,
+		[]interface{},
+		int,
+		int,
+		*Include,
+	) (
+		[]Instance,
+		[]Instance,
+		error,
+	)
 }

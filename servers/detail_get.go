@@ -14,7 +14,7 @@ func detailGET(
 	id string,
 	include *schema.Include,
 ) {
-	instances, included, err := c.GetObjects(m, []string{id}, 0, 0, include)
+	instances, included, err := c.GetObjectsByIDs(m, []string{id}, include)
 	if err != nil {
 		panic(err)
 	}

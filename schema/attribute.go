@@ -7,7 +7,7 @@ type Attribute interface {
 	GetSelectDirectVariables() []interface{}
 
 	ValidateFilters(map[string][]string) (map[string][]string, error)
-	GetFilterWhere(map[string]string) string
+	GetFilterWhere(int, map[string][]string) ([]string, []interface{})
 	GetFilterAnnotate(map[string]string) string
 
 	DefaultFallback(interface{}, interface{}) (interface{}, error)
