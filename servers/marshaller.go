@@ -6,7 +6,8 @@ import (
 )
 
 func MustJSONMarshal(v interface{}) []byte {
-	b, err := json.MarshalIndent(v, "", "    ")
+	// b, err := json.MarshalIndent(v, "", "    ")
+	b, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
 	}

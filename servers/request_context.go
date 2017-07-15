@@ -50,14 +50,17 @@ func (rc *RequestContext) GetQueryCount() int {
 	return 0
 }
 func (rc *RequestContext) QueryRow(query string, args ...interface{}) *sql.Row {
+	LogQuery(query)
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().QueryRow(query, args...)
 }
 func (rc *RequestContext) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	LogQuery(query)
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().Query(query, args...)
 }
 func (rc *RequestContext) Exec(query string, args ...interface{}) (sql.Result, error) {
+	LogQuery(query)
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().Exec(query, args...)
 }

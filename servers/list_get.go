@@ -6,6 +6,7 @@ import (
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
 	"net/http"
+	"encoding/json"
 	// "github.com/davecgh/go-spew/spew"
 )
 
@@ -136,6 +137,6 @@ func listGET(
 		responseBlob.Included = &generalIncluded
 	}
 
-	responseBytes := MustJSONMarshal(responseBlob)
-	fmt.Fprint(w, string(responseBytes))
+	encoder := json.NewEncoder(w)
+	encoder.Encode(responseBlob)
 }

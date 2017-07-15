@@ -5,7 +5,7 @@ import (
 )
 
 func LogQuery(query string) {
-	log.Println(query)
+	// log.Println(query)
 }
 
 func logQueryCount(count int) {
