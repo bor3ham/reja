@@ -1,0 +1,8 @@
+version: '2'
+services:
+  web:
+    build: ./web
+    entrypoint: /entrypoint.sh
+    command: reja
+    volumes:
+      - .:/go/src/github.com/bor3ham/reja
