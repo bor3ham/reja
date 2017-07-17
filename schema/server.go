@@ -1,11 +1,7 @@
 package schema
 
-import (
-	"database/sql"
-)
-
 type Server interface {
-	GetDatabase() *sql.DB
+	GetDatabase() Database
 
 	GetDefaultDirectPageSize() int
 	GetMaximumDirectPageSize() int

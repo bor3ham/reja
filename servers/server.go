@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/gorilla/mux"
@@ -9,7 +8,7 @@ import (
 )
 
 type Server struct {
-	db *sql.DB
+	db schema.Database
 
 	defaultDirectPageSize int
 	maximumDirectPageSize int
@@ -19,7 +18,7 @@ type Server struct {
 	routes map[string]string
 }
 
-func New(db *sql.DB) *Server {
+func New(db schema.Database) *Server {
 	return &Server{
 		db: db,
 
@@ -32,7 +31,7 @@ func New(db *sql.DB) *Server {
 	}
 }
 
-func (s *Server) GetDatabase() *sql.DB {
+func (s *Server) GetDatabase() schema.Database {
 	return s.db
 }
 
