@@ -20,7 +20,7 @@ func DetailHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *h
 	// extract included information
 	include, err := parseInclude(rc, m, queryStrings)
 	if err != nil {
-		BadRequest(w, "Bad Included Relations Parameter", err.Error())
+		BadRequest(rc, w, "Bad Included Relations Parameter", err.Error())
 		return
 	}
 

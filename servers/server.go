@@ -16,6 +16,8 @@ type Server struct {
 
 	models map[string]schema.Model
 	routes map[string]string
+
+	whitespace bool
 }
 
 func New(db schema.Database) *Server {
@@ -28,7 +30,19 @@ func New(db schema.Database) *Server {
 
 		models: map[string]schema.Model{},
 		routes: map[string]string{},
+
+		whitespace: false,
 	}
+}
+
+func (s *Server) EnableWhitespace() {
+	s.whitespace = true
+}
+func (s *Server) DisableWhitespace() {
+	s.whitespace = false
+}
+func (s *Server) Whitespace() bool {
+	return s.whitespace
 }
 
 func (s *Server) GetDatabase() schema.Database {

@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
+	"encoding/json"
 )
 
 func RelationHandler(
@@ -66,6 +67,13 @@ func RelationHandler(
 	if !exists {
 		responseBlob = defaultValue
 	}
-	responseBytes := MustJSONMarshal(responseBlob)
-	fmt.Fprint(w, string(responseBytes))
+
+	encoder := json.NewEncoder(w)
+	if rc.GetServer().Whitespace() {
+		encoder.SetIndent("", "    ")
+	}
+	err = encoder.Encode(responseBlob)
+	if err != nil {
+		panic(err)
+	}
 }

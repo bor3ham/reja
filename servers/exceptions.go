@@ -1,11 +1,12 @@
 package servers
 
 import (
-	"fmt"
 	"net/http"
+	"encoding/json"
+	"github.com/bor3ham/reja/schema"
 )
 
-func BadRequest(w http.ResponseWriter, title string, detail string) {
+func BadRequest(c schema.Context, w http.ResponseWriter, title string, detail string) {
 	errorBlob := struct {
 		Exceptions []interface{} `json:"errors"`
 	}{}
@@ -16,6 +17,9 @@ func BadRequest(w http.ResponseWriter, title string, detail string) {
 		Title:  title,
 		Detail: detail,
 	})
-	errorBytes := MustJSONMarshal(errorBlob)
-	fmt.Fprintf(w, string(errorBytes))
+	encoder := json.NewEncoder(w)
+	if c.GetServer().Whitespace() {
+		encoder.SetIndent("", "    ")
+	}
+	encoder.Encode(errorBlob)
 }

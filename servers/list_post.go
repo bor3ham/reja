@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"encoding/json"
 )
 
 func listPOST(
@@ -28,21 +29,22 @@ func listPOST(
 	}{
 		Data: instance,
 	}
-	err = JSONUnmarshal(body, &dataBlob)
+
+	err = json.Unmarshal(body, &dataBlob)
 	if err != nil {
-		BadRequest(w, "Unable to Parse JSON", err.Error())
+		BadRequest(c, w, "Unable to Parse JSON", err.Error())
 		return
 	}
 
 	// user cannot choose their own id
 	if len(instance.GetID()) != 0 {
-		BadRequest(w, "Bad Object Value", "ID's are assigned not chosen.")
+		BadRequest(c, w, "Bad Object Value", "ID's are assigned not chosen.")
 		return
 	}
 	// type cannot be messed with
 	instanceType := instance.GetType()
 	if !(len(instanceType) == 0 || instanceType == m.Type) {
-		BadRequest(w, "Bad Object Value", "Type does not match endpoint model.")
+		BadRequest(c, w, "Bad Object Value", "Type does not match endpoint model.")
 		return
 	}
 
@@ -53,14 +55,14 @@ func listPOST(
 	for _, attribute := range m.Attributes {
 		values[valueIndex], err = attribute.DefaultFallback(values[valueIndex], instance)
 		if err != nil {
-			BadRequest(w, "Bad Attribute Value", err.Error())
+			BadRequest(c, w, "Bad Attribute Value", err.Error())
 			return
 		}
 		// nil values are not included in the insert statement (use db default)
 		if values[valueIndex] != nil {
 			values[valueIndex], err = attribute.Validate(values[valueIndex])
 			if err != nil {
-				BadRequest(w, "Bad Attribute Value", err.Error())
+				BadRequest(c, w, "Bad Attribute Value", err.Error())
 				return
 			}
 		}
@@ -69,14 +71,14 @@ func listPOST(
 	for _, relation := range m.Relationships {
 		values[valueIndex], err = relation.DefaultFallback(c, values[valueIndex], instance)
 		if err != nil {
-			BadRequest(w, "Bad Relationship Value", err.Error())
+			BadRequest(c, w, "Bad Relationship Value", err.Error())
 			return
 		}
 		// nil values are ignored
 		if values[valueIndex] != nil {
 			values[valueIndex], err = relation.Validate(c, values[valueIndex])
 			if err != nil {
-				BadRequest(w, "Bad Relationship Value", err.Error())
+				BadRequest(c, w, "Bad Relationship Value", err.Error())
 				return
 			}
 		}

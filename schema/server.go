@@ -9,4 +9,6 @@ type Server interface {
 
 	GetModel(string) *Model
 	GetRoute(string) string
+
+	Whitespace() bool
 }

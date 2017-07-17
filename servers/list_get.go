@@ -29,7 +29,7 @@ func listGET(
 		&maxPageSize,
 	)
 	if err != nil {
-		BadRequest(w, "Bad Page Size Parameter", err.Error())
+		BadRequest(c, w, "Bad Page Size Parameter", err.Error())
 		return
 	}
 	minPageOffset := 1
@@ -42,7 +42,7 @@ func listGET(
 		nil,
 	)
 	if err != nil {
-		BadRequest(w, "Bad Page Offset Parameter", err.Error())
+		BadRequest(c, w, "Bad Page Offset Parameter", err.Error())
 		return
 	}
 	offset := (pageOffset - 1) * pageSize
@@ -52,7 +52,7 @@ func listGET(
 	for _, attribute := range m.Attributes {
 		filters, err := attribute.ValidateFilters(queryStrings)
 		if err != nil {
-			BadRequest(w, "Bad Filter Parameter", err.Error())
+			BadRequest(c, w, "Bad Filter Parameter", err.Error())
 			return
 		}
 		validFilters = append(validFilters, filters)
@@ -138,5 +138,11 @@ func listGET(
 	}
 
 	encoder := json.NewEncoder(w)
-	encoder.Encode(responseBlob)
+	if c.GetServer().Whitespace() {
+		encoder.SetIndent("", "    ")
+	}
+	err = encoder.Encode(responseBlob)
+	if err != nil {
+		panic(err)
+	}
 }

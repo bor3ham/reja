@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
+	"encoding/json"
 )
 
 func detailGET(
@@ -38,6 +39,13 @@ func detailGET(
 		}
 		responseBlob.Included = generalIncluded
 	}
-	responseBytes := MustJSONMarshal(responseBlob)
-	fmt.Fprint(w, string(responseBytes))
+
+	encoder := json.NewEncoder(w)
+	if c.GetServer().Whitespace() {
+		encoder.SetIndent("", "    ")
+	}
+	err = encoder.Encode(responseBlob)
+	if err != nil {
+		panic(err)
+	}
 }
