@@ -18,6 +18,7 @@ type Server struct {
 	routes map[string]string
 
 	whitespace bool
+	easyJSON bool
 }
 
 func New(db schema.Database) *Server {
@@ -32,7 +33,18 @@ func New(db schema.Database) *Server {
 		routes: map[string]string{},
 
 		whitespace: false,
+		easyJSON: false,
 	}
+}
+
+func (s *Server) EnableEasyJSON() {
+	s.easyJSON = true
+}
+func (s *Server) DisableEasyJSON() {
+	s.easyJSON = false
+}
+func (s *Server) UseEasyJSON() bool {
+	return s.easyJSON
 }
 
 func (s *Server) EnableWhitespace() {

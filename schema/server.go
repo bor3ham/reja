@@ -11,4 +11,5 @@ type Server interface {
 	GetRoute(string) string
 
 	Whitespace() bool
+	UseEasyJSON() bool
 }

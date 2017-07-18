@@ -192,14 +192,12 @@ func easyjsonD3b49167EncodeGithubComBor3hamRejaSchema(out *jwriter.Writer, in Re
 	out.RawByte('}')
 }
 
-// MarshalJSON supports json.Marshaler interface
-func (v Result) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonD3b49167EncodeGithubComBor3hamRejaSchema(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Result) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjsonD3b49167EncodeGithubComBor3hamRejaSchema(w, v)
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Result) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD3b49167DecodeGithubComBor3hamRejaSchema(l, v)
 }

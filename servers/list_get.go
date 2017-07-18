@@ -7,6 +7,7 @@ import (
 	"github.com/bor3ham/reja/utils"
 	"net/http"
 	"encoding/json"
+	"github.com/mailru/easyjson"
 	// "github.com/davecgh/go-spew/spew"
 )
 
@@ -137,11 +138,15 @@ func listGET(
 		responseBlob.Included = &generalIncluded
 	}
 
-	encoder := json.NewEncoder(w)
-	if c.GetServer().Whitespace() {
-		encoder.SetIndent("", "    ")
+	if c.GetServer().UseEasyJSON() {
+		_, _, err = easyjson.MarshalToHTTPResponseWriter(responseBlob, w)
+	} else {
+		encoder := json.NewEncoder(w)
+		if c.GetServer().Whitespace() {
+			encoder.SetIndent("", "    ")
+		}
+		err = encoder.Encode(responseBlob)
 	}
-	err = encoder.Encode(responseBlob)
 	if err != nil {
 		panic(err)
 	}
