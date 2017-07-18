@@ -1,23 +1,118 @@
 package attributes
 
 import (
-	"errors"
 	"fmt"
+	"strings"
 	"strconv"
+	"github.com/bor3ham/reja/schema"
 )
 
-func filterException(text string, args ...interface{}) (map[string][]string, error) {
-	return map[string][]string{}, errors.New(fmt.Sprintf(text, args...))
+type TextExactFilter struct {
+	*BaseFilter
+	matching string
+	column string
+}
+func (f TextExactFilter) GetWhereQueries(nextArg int) []string {
+	return []string{
+		fmt.Sprintf("%s = $%d", f.column, nextArg),
+	}
+}
+func (f TextExactFilter) GetWhereArgs() []interface{} {
+	return []interface{}{
+		f.matching,
+	}
 }
 
-func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string, error) {
-	valids := map[string][]string{}
+type TextContainsFilter struct {
+	*BaseFilter
+	contains []string
+	column string
+}
+func (f TextContainsFilter) GetWhereQueries(nextArg int) []string {
+	where := "("
+	for matchIndex, _ := range f.contains {
+		if matchIndex > 0 {
+			where += " or "
+		}
+		where += fmt.Sprintf(
+			`%s ilike '%%' || $%d || '%%'`,
+			f.column,
+			nextArg,
+		)
+		nextArg += 1
+	}
+	where += ")"
+	return []string{
+		where,
+	}
+}
+func (f TextContainsFilter) GetWhereArgs() []interface{} {
+	args := []interface{}{}
+	for _, match := range f.contains {
+		args = append(args, strings.Replace(match, "%%", "\\%%", -1))
+	}
+	return args
+}
+
+type TextLengthExactFilter struct {
+	*BaseFilter
+	length int
+	column string
+}
+func (f TextLengthExactFilter) GetWhereQueries(nextArg int) []string {
+	return []string{
+		fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
+	}
+}
+func (f TextLengthExactFilter) GetWhereArgs() []interface{} {
+	return []interface{}{
+		f.length,
+	}
+}
+
+type TextLengthLesserFilter struct {
+	*BaseFilter
+	length int
+	column string
+}
+func (f TextLengthLesserFilter) GetWhereQueries(nextArg int) []string {
+	return []string{
+		fmt.Sprintf("char_length(%s) < $%d", f.column, nextArg),
+	}
+}
+func (f TextLengthLesserFilter) GetWhereArgs() []interface{} {
+	return []interface{}{
+		f.length,
+	}
+}
+
+type TextLengthGreaterFilter struct {
+	*BaseFilter
+	length int
+	column string
+}
+func (f TextLengthGreaterFilter) GetWhereQueries(nextArg int) []string {
+	return []string{
+		fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
+	}
+}
+func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
+	return []interface{}{
+		f.length,
+	}
+}
+
+func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
+	valids := []schema.Filter{}
 
 	// exact match
 	matchingExact := false
+	exactMatch := ""
+
 	exacts, exists := queries[t.Key]
 	if exists {
 		matchingExact = true
+		exactMatch = exacts[0]
 
 		if len(exacts) != 1 {
 			return filterException(
@@ -25,7 +120,15 @@ func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string,
 				t.Key,
 			)
 		}
-		valids["exact"] = exacts
+
+		valids = append(valids, TextExactFilter{
+			BaseFilter: &BaseFilter{
+				QArgKey: t.Key,
+				QArgValues: exacts,
+			},
+			matching: exactMatch,
+			column: t.ColumnName,
+		})
 	}
 
 	// length match
@@ -50,14 +153,21 @@ func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string,
 			)
 		}
 
-		if matchingExact && len(valids["exact"][0]) != lengthInt {
+		if matchingExact && len(exactMatch) != lengthInt {
 			return filterException(
 				"Cannot exact match attribute '%s' and also match different length.",
 				t.Key,
 			)
 		}
 
-		valids["length"] = lengths
+		valids = append(valids, TextLengthExactFilter{
+			BaseFilter: &BaseFilter{
+				QArgKey: t.Key+"__length",
+				QArgValues: []string{strconv.Itoa(lengthInt)},
+			},
+			length: lengthInt,
+			column: t.ColumnName,
+		})
 	}
 
 	contains, exists := queries[t.Key+"__contains"]
@@ -68,7 +178,20 @@ func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string,
 				t.Key,
 			)
 		}
-		valids["contains"] = contains
+
+		lowerContains := []string{}
+		for _, match := range contains {
+			lowerContains = append(lowerContains, strings.ToLower(match))
+		}
+
+		valids = append(valids, TextContainsFilter{
+			BaseFilter: &BaseFilter{
+				QArgKey: t.Key+"__contains",
+				QArgValues: lowerContains,
+			},
+			contains: lowerContains,
+			column: t.ColumnName,
+		})
 	}
 
 	lts, exists := queries[t.Key+"__length__lt"]
@@ -101,7 +224,14 @@ func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string,
 				t.Key,
 			)
 		}
-		valids["lt"] = lts
+		valids = append(valids, TextLengthLesserFilter{
+			BaseFilter: &BaseFilter{
+				QArgKey: t.Key+"__length__lt",
+				QArgValues: []string{strconv.Itoa(ltInt)},
+			},
+			length: ltInt,
+			column: t.ColumnName,
+		})
 	}
 
 	gts, exists := queries[t.Key+"__length__gt"]
@@ -128,27 +258,21 @@ func (t Text) ValidateFilters(queries map[string][]string) (map[string][]string,
 
 		gt := gts[0]
 		gtInt, err := strconv.Atoi(gt)
-		_ = gtInt
 		if err != nil {
 			return filterException(
 				"Invalid length comparison specified on attribute '%s'.",
 				t.Key,
 			)
 		}
-		valids["gt"] = gts
+		valids = append(valids, TextLengthGreaterFilter{
+			BaseFilter: &BaseFilter{
+				QArgKey: t.Key+"__length__gt",
+				QArgValues: []string{strconv.Itoa(gtInt)},
+			},
+			length: gtInt,
+			column: t.ColumnName,
+		})
 	}
 
 	return valids, nil
-}
-func (t Text) GetFilterWhere(nextArg int, filters map[string][]string) ([]string, []interface{}) {
-	queries := []string{}
-	args := []interface{}{}
-
-	_, filter := filters["exact"]; if filter {
-		queries = append(queries, fmt.Sprintf("%s = $%d", t.ColumnName, nextArg))
-		args = append(args, filters["exact"][0])
-		nextArg += 1
-	}
-
-	return queries, args
 }

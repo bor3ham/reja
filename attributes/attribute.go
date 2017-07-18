@@ -1,15 +1,16 @@
 package attributes
 
+import (
+	"github.com/bor3ham/reja/schema"
+)
+
 type AttributeStub struct{}
 
-func (stub AttributeStub) ValidateFilters(map[string][]string) (map[string][]string, error) {
-	return map[string][]string{}, nil
+func (stub AttributeStub) ValidateFilters(map[string][]string) ([]schema.Filter, error) {
+	return []schema.Filter{}, nil
 }
 func (stub AttributeStub) GetFilterWhere(int, map[string][]string) ([]string, []interface{}) {
 	return []string{}, []interface{}{}
-}
-func (stub AttributeStub) GetFilterAnnotate(map[string]string) string {
-	return ""
 }
 
 func (stub AttributeStub) DefaultFallback(

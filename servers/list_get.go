@@ -49,23 +49,22 @@ func listGET(
 	offset := (pageOffset - 1) * pageSize
 
 	// extract filters
-	var validFilters []map[string][]string
+	var validFilters []schema.Filter
 	for _, attribute := range m.Attributes {
 		filters, err := attribute.ValidateFilters(queryStrings)
 		if err != nil {
 			BadRequest(c, w, "Bad Filter Parameter", err.Error())
 			return
 		}
-		validFilters = append(validFilters, filters)
+		validFilters = append(validFilters, filters...)
 	}
 
-	// create where queries from filters
+	// create where clause from filters
 	whereQueries := []string{}
 	whereArgs := []interface{}{}
-	for attrIndex, attribute := range m.Attributes {
-		queries, args := attribute.GetFilterWhere(len(whereArgs) + 1, validFilters[attrIndex])
-		whereQueries = append(whereQueries, queries...)
-		whereArgs = append(whereArgs, args...)
+	for _, filter := range validFilters {
+		whereQueries = append(whereQueries, filter.GetWhereQueries(len(whereArgs) + 1)...)
+		whereArgs = append(whereArgs, filter.GetWhereArgs()...)
 	}
 	whereClause := ""
 	if len(whereQueries) > 0 {
@@ -100,10 +99,15 @@ func listGET(
 		panic(err)
 	}
 
-	validQueries := map[string]string{}
+	validQueries := map[string][]string{}
 	validIncludeQuery := include.AsString()
 	if len(validIncludeQuery) > 0 {
-		validQueries["include"] = validIncludeQuery
+		validQueries["include"] = []string{validIncludeQuery}
+	}
+	for _, filter := range validFilters {
+		key := filter.GetQArgKey()
+		values := filter.GetQArgValues()
+		validQueries[key] = values
 	}
 
 	pageLinks := utils.GetPaginationLinks(
@@ -145,6 +149,7 @@ func listGET(
 		if c.GetServer().Whitespace() {
 			encoder.SetIndent("", "    ")
 		}
+		encoder.SetEscapeHTML(false)
 		err = encoder.Encode(responseBlob)
 	}
 	if err != nil {
