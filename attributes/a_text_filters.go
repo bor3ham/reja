@@ -7,6 +7,26 @@ import (
 	"github.com/bor3ham/reja/schema"
 )
 
+type TextNullFilter struct {
+	*BaseFilter
+	null bool
+	column string
+}
+func (f TextNullFilter) GetWhereQueries(nextArg int) []string {
+	if f.null {
+		return []string{
+			fmt.Sprintf("%s is null", f.column),
+		}
+	} else {
+		return []string{
+			fmt.Sprintf("%s is not null", f.column),
+		}
+	}
+}
+func (f TextNullFilter) GetWhereArgs() []interface{} {
+	return []interface{}{}
+}
+
 type TextExactFilter struct {
 	*BaseFilter
 	matching string
@@ -105,6 +125,49 @@ func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
 func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
+	// null check
+	nullsOnly := false
+	nonNullsOnly := false
+
+	nullKey := t.Key+"__is_null"
+	nullStrings, exists := queries[nullKey]
+	if exists {
+		if len(nullStrings) != 1 {
+			return filterException(
+				"Cannot null check attribute '%s' against more than one value.",
+				t.Key,
+			)
+		}
+		isNullString := strings.ToLower(nullStrings[0])
+		if isNullString == "true" {
+			nullsOnly = true
+			valids = append(valids, TextNullFilter{
+				BaseFilter: &BaseFilter{
+					QArgKey: nullKey,
+					QArgValues: []string{"true"},
+				},
+				null: true,
+				column: t.ColumnName,
+			})
+		} else if isNullString == "false" {
+			nonNullsOnly = true
+			_ = nonNullsOnly
+			valids = append(valids, TextNullFilter{
+				BaseFilter: &BaseFilter{
+					QArgKey: nullKey,
+					QArgValues: []string{"false"},
+				},
+				null: false,
+				column: t.ColumnName,
+			})
+		} else {
+			return filterException(
+				"Invalid null check value on attribute '%s'.",
+				t.Key,
+			)
+		}
+	}
+
 	// exact match
 	matchingExact := false
 	exactMatch := ""
@@ -117,6 +180,13 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if len(exacts) != 1 {
 			return filterException(
 				"Cannot exact match attribute '%s' to more than one value.",
+				t.Key,
+			)
+		}
+
+		if nullsOnly {
+			return filterException(
+				"Cannot match attribute '%s' to an exact value and null.",
 				t.Key,
 			)
 		}
@@ -153,6 +223,12 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			)
 		}
 
+		if nullsOnly {
+			return filterException(
+				"Cannot match attribute '%s' to an exact length and null.",
+				t.Key,
+			)
+		}
 		if matchingExact && len(exactMatch) != lengthInt {
 			return filterException(
 				"Cannot exact match attribute '%s' and also match different length.",
@@ -172,6 +248,12 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 	contains, exists := queries[t.Key+"__contains"]
 	if exists {
+		if nullsOnly {
+			return filterException(
+				"Cannot match attribute '%s' to a contained value and null.",
+				t.Key,
+			)
+		}
 		if matchingExact {
 			return filterException(
 				"Cannot exact match attribute '%s' and also look for contained value.",
@@ -196,6 +278,12 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 	lts, exists := queries[t.Key+"__length__lt"]
 	if exists {
+		if nullsOnly {
+			return filterException(
+				"Cannot match attribute '%s' to null and compare length.",
+				t.Key,
+			)
+		}
 		if matchingExact {
 			return filterException(
 				"Cannot exact match attribute '%s' and also compare length.",
@@ -236,6 +324,12 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 	gts, exists := queries[t.Key+"__length__gt"]
 	if exists {
+		if nullsOnly {
+			return filterException(
+				"Cannot match attribute '%s' to null and compare length.",
+				t.Key,
+			)
+		}
 		if matchingExact {
 			return filterException(
 				"Cannot exact match attribute '%s' and also compare length.",
