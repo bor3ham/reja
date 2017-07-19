@@ -170,6 +170,7 @@ func listPOST(
 		panic(err)
 	}
 
+	w.WriteHeader(http.StatusCreated)
 	// return created object as though it were a GET
 	detailGET(w, r, c, m, newId, include)
 }
