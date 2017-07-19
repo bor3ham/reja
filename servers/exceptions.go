@@ -1,9 +1,9 @@
 package servers
 
 import (
-	"net/http"
 	"encoding/json"
 	"github.com/bor3ham/reja/schema"
+	"net/http"
 )
 
 func BadRequest(c schema.Context, w http.ResponseWriter, title string, detail string) {

@@ -13,7 +13,7 @@ const LT_SUFFIX = "__lt"
 const CONTAINS_SUFFIX = "__contains"
 
 type BaseFilter struct {
-	QArgKey string
+	QArgKey    string
 	QArgValues []string
 }
 

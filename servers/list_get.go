@@ -1,13 +1,13 @@
 package servers
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
-	"net/http"
-	"encoding/json"
 	"github.com/mailru/easyjson"
+	"net/http"
+	"strings"
 	// "github.com/davecgh/go-spew/spew"
 )
 
@@ -63,7 +63,7 @@ func listGET(
 	whereQueries := []string{}
 	whereArgs := []interface{}{}
 	for _, filter := range validFilters {
-		whereQueries = append(whereQueries, filter.GetWhereQueries(len(whereArgs) + 1)...)
+		whereQueries = append(whereQueries, filter.GetWhereQueries(len(whereArgs)+1)...)
 		whereArgs = append(whereArgs, filter.GetWhereArgs()...)
 	}
 	whereClause := ""

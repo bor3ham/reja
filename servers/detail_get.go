@@ -1,10 +1,10 @@
 package servers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
-	"encoding/json"
 )
 
 func detailGET(

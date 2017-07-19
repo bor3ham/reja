@@ -1,12 +1,12 @@
 package servers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"encoding/json"
 )
 
 func listPOST(

@@ -2,16 +2,17 @@ package attributes
 
 import (
 	"fmt"
-	"strings"
-	"strconv"
 	"github.com/bor3ham/reja/schema"
+	"strconv"
+	"strings"
 )
 
 type TextNullFilter struct {
 	*BaseFilter
-	null bool
+	null   bool
 	column string
 }
+
 func (f TextNullFilter) GetWhereQueries(nextArg int) []string {
 	if f.null {
 		return []string{
@@ -30,8 +31,9 @@ func (f TextNullFilter) GetWhereArgs() []interface{} {
 type TextExactFilter struct {
 	*BaseFilter
 	matching string
-	column string
+	column   string
 }
+
 func (f TextExactFilter) GetWhereQueries(nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
@@ -46,8 +48,9 @@ func (f TextExactFilter) GetWhereArgs() []interface{} {
 type TextContainsFilter struct {
 	*BaseFilter
 	contains []string
-	column string
+	column   string
 }
+
 func (f TextContainsFilter) GetWhereQueries(nextArg int) []string {
 	where := "("
 	for matchIndex, _ := range f.contains {
@@ -79,6 +82,7 @@ type TextLengthExactFilter struct {
 	length int
 	column string
 }
+
 func (f TextLengthExactFilter) GetWhereQueries(nextArg int) []string {
 	return []string{
 		fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
@@ -95,6 +99,7 @@ type TextLengthLesserFilter struct {
 	length int
 	column string
 }
+
 func (f TextLengthLesserFilter) GetWhereQueries(nextArg int) []string {
 	return []string{
 		fmt.Sprintf("char_length(%s) < $%d", f.column, nextArg),
@@ -111,6 +116,7 @@ type TextLengthGreaterFilter struct {
 	length int
 	column string
 }
+
 func (f TextLengthGreaterFilter) GetWhereQueries(nextArg int) []string {
 	return []string{
 		fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
@@ -153,10 +159,10 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			nullsOnly = true
 			valids = append(valids, TextNullFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey: nullKey,
+					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
-				null: true,
+				null:   true,
 				column: t.ColumnName,
 			})
 		} else if isNullString == "false" {
@@ -164,10 +170,10 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			_ = nonNullsOnly
 			valids = append(valids, TextNullFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey: nullKey,
+					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
-				null: false,
+				null:   false,
 				column: t.ColumnName,
 			})
 		} else {
@@ -204,11 +210,11 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 		valids = append(valids, TextExactFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: exactKey,
+				QArgKey:    exactKey,
 				QArgValues: exacts,
 			},
 			matching: exactMatch,
-			column: t.ColumnName,
+			column:   t.ColumnName,
 		})
 	}
 
@@ -250,7 +256,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 		valids = append(valids, TextLengthExactFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: lengthKey,
+				QArgKey:    lengthKey,
 				QArgValues: []string{strconv.Itoa(lengthInt)},
 			},
 			length: lengthInt,
@@ -281,11 +287,11 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 		valids = append(valids, TextContainsFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: containsKey,
+				QArgKey:    containsKey,
 				QArgValues: lowerContains,
 			},
 			contains: lowerContains,
-			column: t.ColumnName,
+			column:   t.ColumnName,
 		})
 	}
 
@@ -328,7 +334,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		valids = append(valids, TextLengthLesserFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: lesserKey,
+				QArgKey:    lesserKey,
 				QArgValues: []string{strconv.Itoa(ltInt)},
 			},
 			length: ltInt,
@@ -375,7 +381,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		valids = append(valids, TextLengthGreaterFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: greaterKey,
+				QArgKey:    greaterKey,
 				QArgValues: []string{strconv.Itoa(gtInt)},
 			},
 			length: gtInt,

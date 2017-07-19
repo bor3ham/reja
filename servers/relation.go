@@ -1,12 +1,12 @@
 package servers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
-	"encoding/json"
 )
 
 func RelationHandler(

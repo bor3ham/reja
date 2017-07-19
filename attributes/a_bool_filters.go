@@ -2,15 +2,16 @@ package attributes
 
 import (
 	"fmt"
-	"strings"
 	"github.com/bor3ham/reja/schema"
+	"strings"
 )
 
 type BoolNullFilter struct {
 	*BaseFilter
-	null bool
+	null   bool
 	column string
 }
+
 func (f BoolNullFilter) GetWhereQueries(nextArg int) []string {
 	if f.null {
 		return []string{
@@ -28,9 +29,10 @@ func (f BoolNullFilter) GetWhereArgs() []interface{} {
 
 type BoolExactFilter struct {
 	*BaseFilter
-	value bool
+	value  bool
 	column string
 }
+
 func (f BoolExactFilter) GetWhereQueries(nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
@@ -69,10 +71,10 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			nullsOnly = true
 			valids = append(valids, BoolNullFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey: nullKey,
+					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
-				null: true,
+				null:   true,
 				column: b.ColumnName,
 			})
 		} else if isNullString == "false" {
@@ -80,10 +82,10 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			_ = nonNullsOnly
 			valids = append(valids, BoolNullFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey: nullKey,
+					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
-				null: false,
+				null:   false,
 				column: b.ColumnName,
 			})
 		} else {
@@ -115,19 +117,19 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if compareValue == "true" {
 			valids = append(valids, BoolExactFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey: exactKey,
+					QArgKey:    exactKey,
 					QArgValues: []string{"true"},
 				},
-				value: true,
+				value:  true,
 				column: b.ColumnName,
 			})
 		} else if compareValue == "false" {
 			valids = append(valids, BoolExactFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey: exactKey,
+					QArgKey:    exactKey,
 					QArgValues: []string{"false"},
 				},
-				value: false,
+				value:  false,
 				column: b.ColumnName,
 			})
 		} else {
