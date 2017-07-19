@@ -118,7 +118,7 @@ func (fk *ForeignKey) DefaultFallback(
 	error,
 ) {
 	var fkVal Pointer
-	if val != nil {
+	if val == nil {
 		fkVal = Pointer{Provided: false}
 	} else {
 		var err error
