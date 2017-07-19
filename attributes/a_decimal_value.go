@@ -32,19 +32,6 @@ func (dv *DecimalValue) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *Decimal) GetInsertColumns(val interface{}) []string {
-	var columns []string
-	columns = append(columns, d.ColumnName)
-	return columns
-}
-func (d *Decimal) GetInsertValues(val interface{}) []interface{} {
-	dVal := AssertDecimal(val, d.DecimalPlaces)
-
-	var values []interface{}
-	values = append(values, dVal.Value)
-	return values
-}
-
 func AssertDecimal(val interface{}, decimalPlaces int32) DecimalValue {
 	dVal, ok := val.(DecimalValue)
 	if !ok {

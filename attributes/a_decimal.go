@@ -48,3 +48,16 @@ func (d *Decimal) Validate(val interface{}) (interface{}, error) {
 	}
 	return dVal, nil
 }
+
+func (d *Decimal) GetInsertColumns(val interface{}) []string {
+	var columns []string
+	columns = append(columns, d.ColumnName)
+	return columns
+}
+func (d *Decimal) GetInsertValues(val interface{}) []interface{} {
+	dVal := AssertDecimal(val, d.DecimalPlaces)
+
+	var values []interface{}
+	values = append(values, dVal.Value)
+	return values
+}
