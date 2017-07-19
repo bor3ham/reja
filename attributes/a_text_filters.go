@@ -130,8 +130,8 @@ func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
 
 func (t Text) AvailableFilters() []string {
 	return []string{
-		t.Key + ISNULL_SUFFIX,
 		t.Key,
+		t.Key + ISNULL_SUFFIX,
 		t.Key + LENGTH_SUFFIX,
 		t.Key + CONTAINS_SUFFIX,
 		t.Key + LENGTH_SUFFIX + LT_SUFFIX,

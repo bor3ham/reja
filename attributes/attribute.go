@@ -6,6 +6,9 @@ import (
 
 type AttributeStub struct{}
 
+func (stub AttributeStub) AvailableFilters() []string {
+	return []string{}
+}
 func (stub AttributeStub) ValidateFilters(map[string][]string) ([]schema.Filter, error) {
 	return []schema.Filter{}, nil
 }

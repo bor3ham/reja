@@ -46,8 +46,8 @@ func (f BoolExactFilter) GetWhereArgs() []interface{} {
 
 func (b Bool) AvailableFilters() []string {
 	return []string{
-		b.Key + ISNULL_SUFFIX,
 		b.Key,
+		b.Key + ISNULL_SUFFIX,
 	}
 }
 func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {

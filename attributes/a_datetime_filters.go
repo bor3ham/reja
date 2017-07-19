@@ -81,8 +81,8 @@ func (f DatetimeBeforeFilter) GetWhereArgs() []interface{} {
 
 func (dt Datetime) AvailableFilters() []string {
 	return []string{
-		dt.Key + ISNULL_SUFFIX,
 		dt.Key,
+		dt.Key + ISNULL_SUFFIX,
 		dt.Key + AFTER_SUFFIX,
 		dt.Key + BEFORE_SUFFIX,
 	}
