@@ -6,16 +6,16 @@ import (
 )
 
 type DecimalValue struct {
-	Value    *decimal.Decimal
+	Value         *decimal.Decimal
 	DecimalPlaces int32
-	Provided bool
+	Provided      bool
 }
 
 func (dv *DecimalValue) MarshalJSON() ([]byte, error) {
 	if dv.Value == nil {
 		return []byte("null"), nil
 	}
-	return []byte("\""+dv.Value.StringFixed(dv.DecimalPlaces)+"\""), nil
+	return []byte("\"" + dv.Value.StringFixed(dv.DecimalPlaces) + "\""), nil
 }
 func (dv *DecimalValue) UnmarshalJSON(data []byte) error {
 	dv.Provided = true
@@ -40,9 +40,9 @@ func AssertDecimal(val interface{}, decimalPlaces int32) DecimalValue {
 			panic("Bad decimal value")
 		}
 		return DecimalValue{
-			Value:    *plainVal,
+			Value:         *plainVal,
 			DecimalPlaces: decimalPlaces,
-			Provided: true,
+			Provided:      true,
 		}
 	}
 	dVal.DecimalPlaces = decimalPlaces

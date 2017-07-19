@@ -3,8 +3,8 @@ package attributes
 import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 type IntegerNullFilter struct {

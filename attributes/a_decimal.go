@@ -1,18 +1,18 @@
 package attributes
 
 import (
-	"github.com/shopspring/decimal"
 	"errors"
 	"fmt"
+	"github.com/shopspring/decimal"
 )
 
 type Decimal struct {
 	AttributeStub
-	Key        string
-	ColumnName string
+	Key           string
+	ColumnName    string
 	DecimalPlaces int32
-	Nullable   bool
-	Default    func(interface{}) DecimalValue
+	Nullable      bool
+	Default       func(interface{}) DecimalValue
 }
 
 func (d Decimal) GetKey() string {
