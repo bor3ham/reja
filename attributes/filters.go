@@ -11,6 +11,8 @@ const LENGTH_SUFFIX = "__length"
 const GT_SUFFIX = "__gt"
 const LT_SUFFIX = "__lt"
 const CONTAINS_SUFFIX = "__contains"
+const AFTER_SUFFIX = "__after"
+const BEFORE_SUFFIX = "__before"
 
 type BaseFilter struct {
 	QArgKey    string

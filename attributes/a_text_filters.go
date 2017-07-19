@@ -178,7 +178,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			})
 		} else {
 			return filterException(
-				"Invalid null check value on attribute '%s'.",
+				"Invalid null check value on attribute '%s'. Must be boolean.",
 				t.Key,
 			)
 		}
