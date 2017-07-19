@@ -127,10 +127,17 @@ func (gfk *GenericForeignKey) DefaultFallback(
 	interface{},
 	error,
 ) {
-	gfkVal, err := ParseResultPointer(val)
-	if err != nil {
-		return nil, err
+	var gfkVal Pointer
+	if val != nil {
+		gfkVal = Pointer{Provided: false}
+	} else {
+		var err error
+		gfkVal, err = ParseResultPointer(val)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	if !gfkVal.Provided {
 		if gfk.Default != nil {
 			return gfk.Default(c, instance), nil

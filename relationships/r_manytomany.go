@@ -143,10 +143,17 @@ func (m2m *ManyToMany) DefaultFallback(
 	interface{},
 	error,
 ) {
-	m2mVal, err := ParsePagePointerSet(val)
-	if err != nil {
-		return nil, err
+	var m2mVal PointerSet
+	if val == nil {
+		m2mVal = PointerSet{Provided: false}
+	} else {
+		var err error
+		m2mVal, err = ParsePagePointerSet(val)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	if !m2mVal.Provided {
 		if m2m.Default != nil {
 			return m2m.Default(c, instance), nil

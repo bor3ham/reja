@@ -147,10 +147,17 @@ func (gfkr *GenericForeignKeyReverse) DefaultFallback(
 	interface{},
 	error,
 ) {
-	gfkrVal, err := ParsePagePointerSet(val)
-	if err != nil {
-		return nil, err
+	var gfkrVal PointerSet
+	if val == nil {
+		gfkrVal = PointerSet{Provided: false}
+	} else {
+		var err error
+		gfkrVal, err = ParsePagePointerSet(val)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	if !gfkrVal.Provided {
 		if gfkr.Default != nil {
 			return gfkr.Default(c, instance), nil

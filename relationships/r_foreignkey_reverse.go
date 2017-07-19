@@ -143,10 +143,17 @@ func (fkr *ForeignKeyReverse) DefaultFallback(
 	interface{},
 	error,
 ) {
-	fkrVal, err := ParsePagePointerSet(val)
-	if err != nil {
-		return nil, err
+	var fkrVal PointerSet
+	if val == nil {
+		fkrVal = PointerSet{Provided: false}
+	} else {
+		var err error
+		fkrVal, err = ParsePagePointerSet(val)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	if !fkrVal.Provided {
 		if fkr.Default != nil {
 			return fkr.Default(c, instance), nil

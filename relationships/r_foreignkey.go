@@ -117,10 +117,17 @@ func (fk *ForeignKey) DefaultFallback(
 	interface{},
 	error,
 ) {
-	fkVal, err := ParseResultPointer(val)
-	if err != nil {
-		return nil, err
+	var fkVal Pointer
+	if val != nil {
+		fkVal = Pointer{Provided: false}
+	} else {
+		var err error
+		fkVal, err = ParseResultPointer(val)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	if !fkVal.Provided {
 		if fk.Default != nil {
 			return fk.Default(c, instance), nil
