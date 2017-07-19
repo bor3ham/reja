@@ -196,7 +196,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 			valids = append(valids, DateAfterFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey:    exactKey,
+					QArgKey:    afterKey,
 					QArgValues: []string{afterValue.Format(DATE_LAYOUT)},
 				},
 				value:  afterValue,
@@ -239,7 +239,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 			valids = append(valids, DateBeforeFilter{
 				BaseFilter: &BaseFilter{
-					QArgKey:    exactKey,
+					QArgKey:    beforeKey,
 					QArgValues: []string{beforeValue.Format(DATE_LAYOUT)},
 				},
 				value:  beforeValue,
