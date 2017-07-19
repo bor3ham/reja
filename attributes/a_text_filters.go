@@ -122,6 +122,16 @@ func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
 	}
 }
 
+func (t Text) AvailableFilters() []string {
+	return []string{
+		t.Key + ISNULL_SUFFIX,
+		t.Key,
+		t.Key + LENGTH_SUFFIX,
+		t.Key + CONTAINS_SUFFIX,
+		t.Key + LENGTH_SUFFIX + LT_SUFFIX,
+		t.Key + LENGTH_SUFFIX + GT_SUFFIX,
+	}
+}
 func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
@@ -129,7 +139,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	nullsOnly := false
 	nonNullsOnly := false
 
-	nullKey := t.Key+"__is_null"
+	nullKey := t.Key + ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
 		if len(nullStrings) != 1 {
@@ -172,7 +182,8 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	matchingExact := false
 	exactMatch := ""
 
-	exacts, exists := queries[t.Key]
+	exactKey := t.Key
+	exacts, exists := queries[exactKey]
 	if exists {
 		matchingExact = true
 		exactMatch = exacts[0]
@@ -193,7 +204,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 		valids = append(valids, TextExactFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: t.Key,
+				QArgKey: exactKey,
 				QArgValues: exacts,
 			},
 			matching: exactMatch,
@@ -203,7 +214,8 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 	// length match
 	matchingExactLength := false
-	lengths, exists := queries[t.Key+"__length"]
+	lengthKey := t.Key + LENGTH_SUFFIX
+	lengths, exists := queries[lengthKey]
 	if exists {
 		matchingExactLength = true
 
@@ -238,7 +250,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 		valids = append(valids, TextLengthExactFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: t.Key+"__length",
+				QArgKey: lengthKey,
 				QArgValues: []string{strconv.Itoa(lengthInt)},
 			},
 			length: lengthInt,
@@ -246,7 +258,8 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		})
 	}
 
-	contains, exists := queries[t.Key+"__contains"]
+	containsKey := t.Key + CONTAINS_SUFFIX
+	contains, exists := queries[containsKey]
 	if exists {
 		if nullsOnly {
 			return filterException(
@@ -268,7 +281,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 		valids = append(valids, TextContainsFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: t.Key+"__contains",
+				QArgKey: containsKey,
 				QArgValues: lowerContains,
 			},
 			contains: lowerContains,
@@ -276,7 +289,8 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		})
 	}
 
-	lts, exists := queries[t.Key+"__length__lt"]
+	lesserKey := t.Key + LENGTH_SUFFIX + LT_SUFFIX
+	lts, exists := queries[lesserKey]
 	if exists {
 		if nullsOnly {
 			return filterException(
@@ -314,7 +328,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		valids = append(valids, TextLengthLesserFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: t.Key+"__length__lt",
+				QArgKey: lesserKey,
 				QArgValues: []string{strconv.Itoa(ltInt)},
 			},
 			length: ltInt,
@@ -322,7 +336,8 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		})
 	}
 
-	gts, exists := queries[t.Key+"__length__gt"]
+	greaterKey := t.Key + LENGTH_SUFFIX + GT_SUFFIX
+	gts, exists := queries[greaterKey]
 	if exists {
 		if nullsOnly {
 			return filterException(
@@ -360,7 +375,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		valids = append(valids, TextLengthGreaterFilter{
 			BaseFilter: &BaseFilter{
-				QArgKey: t.Key+"__length__gt",
+				QArgKey: greaterKey,
 				QArgValues: []string{strconv.Itoa(gtInt)},
 			},
 			length: gtInt,

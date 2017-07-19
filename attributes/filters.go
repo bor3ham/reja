@@ -6,6 +6,12 @@ import (
 	"github.com/bor3ham/reja/schema"
 )
 
+const ISNULL_SUFFIX = "__is_null"
+const LENGTH_SUFFIX = "__length"
+const GT_SUFFIX = "__gt"
+const LT_SUFFIX = "__lt"
+const CONTAINS_SUFFIX = "__contains"
+
 type BaseFilter struct {
 	QArgKey string
 	QArgValues []string
