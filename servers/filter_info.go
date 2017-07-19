@@ -24,7 +24,7 @@ func FilterInfoHandler(
 		filters = append(filters, attribute.AvailableFilters()...)
 	}
 
-	responseBlob := struct{
+	responseBlob := struct {
 		Filters []string `json:"filters"`
 	}{
 		Filters: filters,

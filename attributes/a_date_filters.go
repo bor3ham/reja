@@ -2,9 +2,9 @@ package attributes
 
 import (
 	"fmt"
-	"time"
 	"github.com/bor3ham/reja/schema"
 	"strings"
+	"time"
 )
 
 type DateNullFilter struct {
