@@ -46,3 +46,16 @@ func (i *Integer) Validate(val interface{}) (interface{}, error) {
 	}
 	return iVal, nil
 }
+
+func (i *Integer) GetInsertColumns(val interface{}) []string {
+	var columns []string
+	columns = append(columns, i.ColumnName)
+	return columns
+}
+func (i *Integer) GetInsertValues(val interface{}) []interface{} {
+	iVal := AssertInteger(val)
+
+	var values []interface{}
+	values = append(values, iVal.Value)
+	return values
+}
