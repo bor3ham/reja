@@ -13,6 +13,7 @@ type GenericForeignKey struct {
 	IDColumnName   string
 	Nullable       bool
 	Default        func(schema.Context, interface{}) Pointer
+	ValidTypes     []string
 }
 
 func (gfk GenericForeignKey) GetKey() string {
@@ -168,6 +169,21 @@ func (gfk *GenericForeignKey) Validate(c schema.Context, val interface{}) (inter
 	}
 	valID := *gfkVal.Data.ID
 
+	// check that the type is valid
+	if len(gfk.ValidTypes) > 0 {
+		valid := false
+		for _, relationType := range gfk.ValidTypes {
+			if relationType == valType {
+				valid = true
+			}
+		}
+		if !valid {
+			return nil, errors.New(fmt.Sprintf(
+				"Relationship '%s' invalid: Bad type for relation.",
+				gfk.Key,
+			))
+		}
+	}
 	// check that the object exists
 	model := c.GetServer().GetModel(valType)
 	// validate the type exists
