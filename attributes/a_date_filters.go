@@ -8,7 +8,7 @@ import (
 )
 
 type DateNullFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	null   bool
 	column string
 }
@@ -29,7 +29,7 @@ func (f DateNullFilter) GetWhereArgs() []interface{} {
 }
 
 type DateExactFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  time.Time
 	column string
 }
@@ -46,7 +46,7 @@ func (f DateExactFilter) GetWhereArgs() []interface{} {
 }
 
 type DateAfterFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  time.Time
 	column string
 }
@@ -63,7 +63,7 @@ func (f DateAfterFilter) GetWhereArgs() []interface{} {
 }
 
 type DateBeforeFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  time.Time
 	column string
 }
@@ -107,7 +107,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if isNullString == "true" {
 			nullsOnly = true
 			valids = append(valids, DateNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
@@ -118,7 +118,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			nonNullsOnly = true
 			_ = nonNullsOnly
 			valids = append(valids, DateNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
@@ -153,7 +153,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		compareValue, err := time.Parse(DATE_LAYOUT, exactStrings[0])
 		if err == nil {
 			valids = append(valids, DateExactFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    exactKey,
 					QArgValues: []string{compareValue.Format(DATE_LAYOUT)},
 				},
@@ -195,7 +195,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			filteringAfterValue = afterValue
 
 			valids = append(valids, DateAfterFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    afterKey,
 					QArgValues: []string{afterValue.Format(DATE_LAYOUT)},
 				},
@@ -238,7 +238,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			}
 
 			valids = append(valids, DateBeforeFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    beforeKey,
 					QArgValues: []string{beforeValue.Format(DATE_LAYOUT)},
 				},

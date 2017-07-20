@@ -8,7 +8,7 @@ import (
 )
 
 type TextNullFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	null   bool
 	column string
 }
@@ -29,7 +29,7 @@ func (f TextNullFilter) GetWhereArgs() []interface{} {
 }
 
 type TextExactFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	matching string
 	column   string
 }
@@ -46,7 +46,7 @@ func (f TextExactFilter) GetWhereArgs() []interface{} {
 }
 
 type TextContainsFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	contains []string
 	column   string
 }
@@ -78,7 +78,7 @@ func (f TextContainsFilter) GetWhereArgs() []interface{} {
 }
 
 type TextLengthExactFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	length int
 	column string
 }
@@ -95,7 +95,7 @@ func (f TextLengthExactFilter) GetWhereArgs() []interface{} {
 }
 
 type TextLengthLesserFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	length int
 	column string
 }
@@ -112,7 +112,7 @@ func (f TextLengthLesserFilter) GetWhereArgs() []interface{} {
 }
 
 type TextLengthGreaterFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	length int
 	column string
 }
@@ -158,7 +158,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if isNullString == "true" {
 			nullsOnly = true
 			valids = append(valids, TextNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
@@ -169,7 +169,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			nonNullsOnly = true
 			_ = nonNullsOnly
 			valids = append(valids, TextNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
@@ -209,7 +209,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 
 		valids = append(valids, TextExactFilter{
-			BaseFilter: &BaseFilter{
+			BaseFilter: &schema.BaseFilter{
 				QArgKey:    exactKey,
 				QArgValues: exacts,
 			},
@@ -255,7 +255,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 
 		valids = append(valids, TextLengthExactFilter{
-			BaseFilter: &BaseFilter{
+			BaseFilter: &schema.BaseFilter{
 				QArgKey:    lengthKey,
 				QArgValues: []string{strconv.Itoa(lengthInt)},
 			},
@@ -286,7 +286,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 
 		valids = append(valids, TextContainsFilter{
-			BaseFilter: &BaseFilter{
+			BaseFilter: &schema.BaseFilter{
 				QArgKey:    containsKey,
 				QArgValues: lowerContains,
 			},
@@ -333,7 +333,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			)
 		}
 		valids = append(valids, TextLengthLesserFilter{
-			BaseFilter: &BaseFilter{
+			BaseFilter: &schema.BaseFilter{
 				QArgKey:    lesserKey,
 				QArgValues: []string{strconv.Itoa(ltInt)},
 			},
@@ -380,7 +380,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			)
 		}
 		valids = append(valids, TextLengthGreaterFilter{
-			BaseFilter: &BaseFilter{
+			BaseFilter: &schema.BaseFilter{
 				QArgKey:    greaterKey,
 				QArgValues: []string{strconv.Itoa(gtInt)},
 			},

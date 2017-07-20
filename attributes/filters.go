@@ -14,18 +14,6 @@ const CONTAINS_SUFFIX = "__contains"
 const AFTER_SUFFIX = "__after"
 const BEFORE_SUFFIX = "__before"
 
-type BaseFilter struct {
-	QArgKey    string
-	QArgValues []string
-}
-
-func (bf BaseFilter) GetQArgKey() string {
-	return bf.QArgKey
-}
-func (bf BaseFilter) GetQArgValues() []string {
-	return bf.QArgValues
-}
-
 func filterException(text string, args ...interface{}) ([]schema.Filter, error) {
 	return []schema.Filter{}, errors.New(fmt.Sprintf(text, args...))
 }

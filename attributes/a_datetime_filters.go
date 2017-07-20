@@ -8,7 +8,7 @@ import (
 )
 
 type DatetimeNullFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	null   bool
 	column string
 }
@@ -29,7 +29,7 @@ func (f DatetimeNullFilter) GetWhereArgs() []interface{} {
 }
 
 type DatetimeExactFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  time.Time
 	column string
 }
@@ -46,7 +46,7 @@ func (f DatetimeExactFilter) GetWhereArgs() []interface{} {
 }
 
 type DatetimeAfterFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  time.Time
 	column string
 }
@@ -63,7 +63,7 @@ func (f DatetimeAfterFilter) GetWhereArgs() []interface{} {
 }
 
 type DatetimeBeforeFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  time.Time
 	column string
 }
@@ -107,7 +107,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 		if isNullString == "true" {
 			nullsOnly = true
 			valids = append(valids, DatetimeNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
@@ -118,7 +118,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 			nonNullsOnly = true
 			_ = nonNullsOnly
 			valids = append(valids, DatetimeNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
@@ -153,7 +153,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 		compareValue, err := time.Parse(time.RFC3339, exactStrings[0])
 		if err == nil {
 			valids = append(valids, DatetimeExactFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    exactKey,
 					QArgValues: []string{compareValue.Format(time.RFC3339)},
 				},
@@ -194,7 +194,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 			filteringAfterValue = afterValue
 
 			valids = append(valids, DatetimeAfterFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    afterKey,
 					QArgValues: []string{afterValue.Format(time.RFC3339)},
 				},
@@ -236,7 +236,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 			}
 
 			valids = append(valids, DatetimeBeforeFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    beforeKey,
 					QArgValues: []string{beforeValue.Format(time.RFC3339)},
 				},

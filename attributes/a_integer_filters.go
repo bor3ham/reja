@@ -8,7 +8,7 @@ import (
 )
 
 type IntegerNullFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	null   bool
 	column string
 }
@@ -29,7 +29,7 @@ func (f IntegerNullFilter) GetWhereArgs() []interface{} {
 }
 
 type IntegerExactFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  int
 	column string
 }
@@ -46,7 +46,7 @@ func (f IntegerExactFilter) GetWhereArgs() []interface{} {
 }
 
 type IntegerLesserFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  int
 	column string
 }
@@ -63,7 +63,7 @@ func (f IntegerLesserFilter) GetWhereArgs() []interface{} {
 }
 
 type IntegerGreaterFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  int
 	column string
 }
@@ -107,7 +107,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 		if isNullString == "true" {
 			nullsOnly = true
 			valids = append(valids, IntegerNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
@@ -118,7 +118,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 			nonNullsOnly = true
 			_ = nonNullsOnly
 			valids = append(valids, IntegerNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
@@ -153,7 +153,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 		compareValue, err := strconv.Atoi(exactStrings[0])
 		if err == nil {
 			valids = append(valids, IntegerExactFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    exactKey,
 					QArgValues: []string{strconv.Itoa(compareValue)},
 				},
@@ -194,7 +194,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 			filteringLesserValue = lesserValue
 
 			valids = append(valids, IntegerLesserFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    lesserKey,
 					QArgValues: []string{strconv.Itoa(lesserValue)},
 				},
@@ -236,7 +236,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 			}
 
 			valids = append(valids, IntegerGreaterFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    greaterKey,
 					QArgValues: []string{strconv.Itoa(greaterValue)},
 				},

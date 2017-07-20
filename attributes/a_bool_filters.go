@@ -7,7 +7,7 @@ import (
 )
 
 type BoolNullFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	null   bool
 	column string
 }
@@ -28,7 +28,7 @@ func (f BoolNullFilter) GetWhereArgs() []interface{} {
 }
 
 type BoolExactFilter struct {
-	*BaseFilter
+	*schema.BaseFilter
 	value  bool
 	column string
 }
@@ -70,7 +70,7 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if isNullString == "true" {
 			nullsOnly = true
 			valids = append(valids, BoolNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
@@ -81,7 +81,7 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			nonNullsOnly = true
 			_ = nonNullsOnly
 			valids = append(valids, BoolNullFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
@@ -116,7 +116,7 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		compareValue := strings.ToLower(exactStrings[0])
 		if compareValue == "true" {
 			valids = append(valids, BoolExactFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    exactKey,
 					QArgValues: []string{"true"},
 				},
@@ -125,7 +125,7 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			})
 		} else if compareValue == "false" {
 			valids = append(valids, BoolExactFilter{
-				BaseFilter: &BaseFilter{
+				BaseFilter: &schema.BaseFilter{
 					QArgKey:    exactKey,
 					QArgValues: []string{"false"},
 				},
