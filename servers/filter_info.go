@@ -23,6 +23,9 @@ func FilterInfoHandler(
 	for _, attribute := range m.Attributes {
 		filters = append(filters, attribute.AvailableFilters()...)
 	}
+	for _, relationship := range m.Relationships {
+		filters = append(filters, relationship.AvailableFilters()...)
+	}
 
 	responseBlob := struct {
 		Filters []string `json:"filters"`

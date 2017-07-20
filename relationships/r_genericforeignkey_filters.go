@@ -143,6 +143,14 @@ func (f GenericForeignKeyExactFilter) GetWhereArgs() []interface{} {
 	return args
 }
 
+func (gfk GenericForeignKey) AvailableFilters() []string {
+	return []string{
+		gfk.Key,
+		gfk.Key + filters.ISNULL_SUFFIX,
+		gfk.Key + filters.TYPE_SUFFIX,
+		gfk.Key + filters.ID_SUFFIX,
+	}
+}
 func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 

@@ -50,6 +50,12 @@ func (f ForeignKeyExactFilter) GetWhereArgs() []interface{} {
 	return args
 }
 
+func (fk ForeignKey) AvailableFilters() []string {
+	return []string{
+		fk.Key,
+		fk.Key + filters.ISNULL_SUFFIX,
+	}
+}
 func (fk ForeignKey) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
