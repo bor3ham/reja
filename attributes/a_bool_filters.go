@@ -3,6 +3,7 @@ package attributes
 import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/filters"
 	"strings"
 )
 
@@ -47,7 +48,7 @@ func (f BoolExactFilter) GetWhereArgs() []interface{} {
 func (b Bool) AvailableFilters() []string {
 	return []string{
 		b.Key,
-		b.Key + ISNULL_SUFFIX,
+		b.Key + filters.ISNULL_SUFFIX,
 	}
 }
 func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
@@ -57,11 +58,11 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	nullsOnly := false
 	nonNullsOnly := false
 
-	nullKey := b.Key + ISNULL_SUFFIX
+	nullKey := b.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
 		if len(nullStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot null check attribute '%s' against more than one value.",
 				b.Key,
 			)
@@ -89,7 +90,7 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: b.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid null check value on attribute '%s'. Must be boolean.",
 				b.Key,
 			)
@@ -100,14 +101,14 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	exactStrings, exists := queries[exactKey]
 	if exists {
 		if len(exactStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' against more than one value.",
 				b.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to an exact value and null.",
 				b.Key,
 			)
@@ -133,7 +134,7 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: b.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid comparison value on attribute '%s'. Must be boolean.",
 				b.Key,
 			)

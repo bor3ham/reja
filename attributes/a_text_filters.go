@@ -3,6 +3,7 @@ package attributes
 import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/filters"
 	"strconv"
 	"strings"
 )
@@ -131,11 +132,11 @@ func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
 func (t Text) AvailableFilters() []string {
 	return []string{
 		t.Key,
-		t.Key + ISNULL_SUFFIX,
-		t.Key + LENGTH_SUFFIX,
-		t.Key + CONTAINS_SUFFIX,
-		t.Key + LENGTH_SUFFIX + LT_SUFFIX,
-		t.Key + LENGTH_SUFFIX + GT_SUFFIX,
+		t.Key + filters.ISNULL_SUFFIX,
+		t.Key + filters.LENGTH_SUFFIX,
+		t.Key + filters.CONTAINS_SUFFIX,
+		t.Key + filters.LENGTH_SUFFIX + filters.LT_SUFFIX,
+		t.Key + filters.LENGTH_SUFFIX + filters.GT_SUFFIX,
 	}
 }
 func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
@@ -145,11 +146,11 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	nullsOnly := false
 	nonNullsOnly := false
 
-	nullKey := t.Key + ISNULL_SUFFIX
+	nullKey := t.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
 		if len(nullStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot null check attribute '%s' against more than one value.",
 				t.Key,
 			)
@@ -177,7 +178,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: t.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid null check value on attribute '%s'. Must be boolean.",
 				t.Key,
 			)
@@ -195,14 +196,14 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		exactMatch = exacts[0]
 
 		if len(exacts) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' to more than one value.",
 				t.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to an exact value and null.",
 				t.Key,
 			)
@@ -220,13 +221,13 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 
 	// length match
 	matchingExactLength := false
-	lengthKey := t.Key + LENGTH_SUFFIX
+	lengthKey := t.Key + filters.LENGTH_SUFFIX
 	lengths, exists := queries[lengthKey]
 	if exists {
 		matchingExactLength = true
 
 		if len(lengths) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot length compare attribute '%s' to more than one length.",
 				t.Key,
 			)
@@ -235,20 +236,20 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		length := lengths[0]
 		lengthInt, err := strconv.Atoi(length)
 		if err != nil {
-			return filterException(
+			return filters.Exception(
 				"Invalid length match specified on attribute '%s'.",
 				t.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to an exact length and null.",
 				t.Key,
 			)
 		}
 		if matchingExact && len(exactMatch) != lengthInt {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' and also match different length.",
 				t.Key,
 			)
@@ -264,17 +265,17 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		})
 	}
 
-	containsKey := t.Key + CONTAINS_SUFFIX
+	containsKey := t.Key + filters.CONTAINS_SUFFIX
 	contains, exists := queries[containsKey]
 	if exists {
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to a contained value and null.",
 				t.Key,
 			)
 		}
 		if matchingExact {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' and also look for contained value.",
 				t.Key,
 			)
@@ -295,30 +296,30 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		})
 	}
 
-	lesserKey := t.Key + LENGTH_SUFFIX + LT_SUFFIX
+	lesserKey := t.Key + filters.LENGTH_SUFFIX + filters.LT_SUFFIX
 	lts, exists := queries[lesserKey]
 	if exists {
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to null and compare length.",
 				t.Key,
 			)
 		}
 		if matchingExact {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' and also compare length.",
 				t.Key,
 			)
 		}
 		if matchingExactLength {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' length and also compare length.",
 				t.Key,
 			)
 		}
 
 		if len(lts) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare length of attribute '%s' to more than one value.",
 				t.Key,
 			)
@@ -327,7 +328,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		lt := lts[0]
 		ltInt, err := strconv.Atoi(lt)
 		if err != nil || ltInt < 1 {
-			return filterException(
+			return filters.Exception(
 				"Invalid length comparison specified on attribute '%s'.",
 				t.Key,
 			)
@@ -342,30 +343,30 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		})
 	}
 
-	greaterKey := t.Key + LENGTH_SUFFIX + GT_SUFFIX
+	greaterKey := t.Key + filters.LENGTH_SUFFIX + filters.GT_SUFFIX
 	gts, exists := queries[greaterKey]
 	if exists {
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to null and compare length.",
 				t.Key,
 			)
 		}
 		if matchingExact {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' and also compare length.",
 				t.Key,
 			)
 		}
 		if matchingExactLength {
-			return filterException(
+			return filters.Exception(
 				"Cannot exact match attribute '%s' length and also compare length.",
 				t.Key,
 			)
 		}
 
 		if len(gts) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare length of attribute '%s' to more than one value.",
 				t.Key,
 			)
@@ -374,7 +375,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		gt := gts[0]
 		gtInt, err := strconv.Atoi(gt)
 		if err != nil {
-			return filterException(
+			return filters.Exception(
 				"Invalid length comparison specified on attribute '%s'.",
 				t.Key,
 			)

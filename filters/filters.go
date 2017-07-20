@@ -1,4 +1,4 @@
-package attributes
+package filters
 
 import (
 	"errors"
@@ -14,6 +14,6 @@ const CONTAINS_SUFFIX = "__contains"
 const AFTER_SUFFIX = "__after"
 const BEFORE_SUFFIX = "__before"
 
-func filterException(text string, args ...interface{}) ([]schema.Filter, error) {
+func Exception(text string, args ...interface{}) ([]schema.Filter, error) {
 	return []schema.Filter{}, errors.New(fmt.Sprintf(text, args...))
 }

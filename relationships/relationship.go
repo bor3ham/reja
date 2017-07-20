@@ -29,6 +29,15 @@ func (stub RelationshipStub) GetSelectExtraColumns() []string {
 func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
 	return []interface{}{}
 }
+func (stub RelationshipStub) AvailableFilters() []string {
+	return []string{}
+}
+func (stub RelationshipStub) ValidateFilters(map[string][]string) ([]schema.Filter, error) {
+	return []schema.Filter{}, nil
+}
+func (stub RelationshipStub) GetFilterWhere(int, map[string][]string) ([]string, []interface{}) {
+	return []string{}, []interface{}{}
+}
 func (stub RelationshipStub) DefaultFallback(
 	c schema.Context,
 	val interface{},

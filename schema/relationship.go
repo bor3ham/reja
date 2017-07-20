@@ -9,6 +9,10 @@ type Relationship interface {
 	GetSelectExtraColumns() []string
 	GetSelectExtraVariables() []interface{}
 
+	AvailableFilters() []string
+	ValidateFilters(map[string][]string) ([]Filter, error)
+	GetFilterWhere(int, map[string][]string) ([]string, []interface{})
+
 	GetDefaultValue() interface{}
 	GetValues(
 		Context,

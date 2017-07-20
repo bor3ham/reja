@@ -58,6 +58,14 @@ func listGET(
 		}
 		validFilters = append(validFilters, filters...)
 	}
+	for _, relationship := range m.Relationships {
+		filters, err := relationship.ValidateFilters(queryStrings)
+		if err != nil {
+			BadRequest(c, w, "Bad Filter Parameter", err.Error())
+			return
+		}
+		validFilters = append(validFilters, filters...)
+	}
 
 	// create where clause from filters
 	whereQueries := []string{}

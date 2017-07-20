@@ -3,6 +3,7 @@ package attributes
 import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/filters"
 	"strings"
 	"time"
 )
@@ -82,9 +83,9 @@ func (f DateBeforeFilter) GetWhereArgs() []interface{} {
 func (d Date) AvailableFilters() []string {
 	return []string{
 		d.Key,
-		d.Key + ISNULL_SUFFIX,
-		d.Key + AFTER_SUFFIX,
-		d.Key + BEFORE_SUFFIX,
+		d.Key + filters.ISNULL_SUFFIX,
+		d.Key + filters.AFTER_SUFFIX,
+		d.Key + filters.BEFORE_SUFFIX,
 	}
 }
 func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
@@ -94,11 +95,11 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	nullsOnly := false
 	nonNullsOnly := false
 
-	nullKey := d.Key + ISNULL_SUFFIX
+	nullKey := d.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
 		if len(nullStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot null check attribute '%s' against more than one value.",
 				d.Key,
 			)
@@ -126,7 +127,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: d.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid null check value on attribute '%s'. Must be boolean.",
 				d.Key,
 			)
@@ -137,14 +138,14 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	exactStrings, exists := queries[exactKey]
 	if exists {
 		if len(exactStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' against more than one value.",
 				d.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to an exact value and null.",
 				d.Key,
 			)
@@ -161,7 +162,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: d.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid exact value on attribute '%s'. Must be date in format %s.",
 				d.Key,
 				DATE_LAYOUT,
@@ -172,18 +173,18 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	filteringAfter := false
 	var filteringAfterValue time.Time
 
-	afterKey := d.Key + AFTER_SUFFIX
+	afterKey := d.Key + filters.AFTER_SUFFIX
 	afterStrings, exists := queries[afterKey]
 	if exists {
 		if len(afterStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to be after more than one value.",
 				d.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to a value and null.",
 				d.Key,
 			)
@@ -203,7 +204,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: d.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid after comparison value on attribute '%s'. Must be date in format %s.",
 				d.Key,
 				DATE_LAYOUT,
@@ -211,18 +212,18 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 	}
 
-	beforeKey := d.Key + BEFORE_SUFFIX
+	beforeKey := d.Key + filters.BEFORE_SUFFIX
 	beforeStrings, exists := queries[beforeKey]
 	if exists {
 		if len(beforeStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to be before more than one value.",
 				d.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to a value and null.",
 				d.Key,
 			)
@@ -231,7 +232,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		beforeValue, err := time.Parse(DATE_LAYOUT, beforeStrings[0])
 		if err == nil {
 			if filteringAfter && beforeValue.Before(filteringAfterValue) {
-				return filterException(
+				return filters.Exception(
 					"Cannot compare attribute '%s' to value before additional after filter.",
 					d.Key,
 				)
@@ -246,7 +247,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: d.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid before comparison value on attribute '%s'. Must be date in format %s.",
 				d.Key,
 				DATE_LAYOUT,

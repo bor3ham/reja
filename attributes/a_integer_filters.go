@@ -3,6 +3,7 @@ package attributes
 import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/filters"
 	"strconv"
 	"strings"
 )
@@ -82,9 +83,9 @@ func (f IntegerGreaterFilter) GetWhereArgs() []interface{} {
 func (i Integer) AvailableFilters() []string {
 	return []string{
 		i.Key,
-		i.Key + ISNULL_SUFFIX,
-		i.Key + LT_SUFFIX,
-		i.Key + GT_SUFFIX,
+		i.Key + filters.ISNULL_SUFFIX,
+		i.Key + filters.LT_SUFFIX,
+		i.Key + filters.GT_SUFFIX,
 	}
 }
 func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
@@ -94,11 +95,11 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 	nullsOnly := false
 	nonNullsOnly := false
 
-	nullKey := i.Key + ISNULL_SUFFIX
+	nullKey := i.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
 		if len(nullStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot null check attribute '%s' against more than one value.",
 				i.Key,
 			)
@@ -126,7 +127,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				column: i.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid null check value on attribute '%s'. Must be boolean.",
 				i.Key,
 			)
@@ -137,14 +138,14 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 	exactStrings, exists := queries[exactKey]
 	if exists {
 		if len(exactStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' against more than one value.",
 				i.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to an exact value and null.",
 				i.Key,
 			)
@@ -161,7 +162,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				column: i.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid exact value on attribute '%s'. Must be integer.",
 				i.Key,
 			)
@@ -171,18 +172,18 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 	filteringLesser := false
 	var filteringLesserValue int
 
-	lesserKey := i.Key + LT_SUFFIX
+	lesserKey := i.Key + filters.LT_SUFFIX
 	lesserStrings, exists := queries[lesserKey]
 	if exists {
 		if len(lesserStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to be lesser than more than one value.",
 				i.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to a value and null.",
 				i.Key,
 			)
@@ -202,25 +203,25 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				column: i.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid lesser than comparison value on attribute '%s'. Must be integer.",
 				i.Key,
 			)
 		}
 	}
 
-	greaterKey := i.Key + GT_SUFFIX
+	greaterKey := i.Key + filters.GT_SUFFIX
 	greaterStrings, exists := queries[greaterKey]
 	if exists {
 		if len(greaterStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to be greater than more than one value.",
 				i.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to a value and null.",
 				i.Key,
 			)
@@ -229,7 +230,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 		greaterValue, err := strconv.Atoi(greaterStrings[0])
 		if err == nil {
 			if filteringLesser && greaterValue > filteringLesserValue {
-				return filterException(
+				return filters.Exception(
 					"Cannot compare attribute '%s' to value greater than additional lesser than filter.",
 					i.Key,
 				)
@@ -244,7 +245,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				column: i.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid greater than comparison value on attribute '%s'. Must be integer.",
 				i.Key,
 			)

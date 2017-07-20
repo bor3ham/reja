@@ -3,6 +3,7 @@ package attributes
 import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/filters"
 	"strings"
 	"time"
 )
@@ -82,9 +83,9 @@ func (f DatetimeBeforeFilter) GetWhereArgs() []interface{} {
 func (dt Datetime) AvailableFilters() []string {
 	return []string{
 		dt.Key,
-		dt.Key + ISNULL_SUFFIX,
-		dt.Key + AFTER_SUFFIX,
-		dt.Key + BEFORE_SUFFIX,
+		dt.Key + filters.ISNULL_SUFFIX,
+		dt.Key + filters.AFTER_SUFFIX,
+		dt.Key + filters.BEFORE_SUFFIX,
 	}
 }
 func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
@@ -94,11 +95,11 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 	nullsOnly := false
 	nonNullsOnly := false
 
-	nullKey := dt.Key + ISNULL_SUFFIX
+	nullKey := dt.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
 		if len(nullStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot null check attribute '%s' against more than one value.",
 				dt.Key,
 			)
@@ -126,7 +127,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				column: dt.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid null check value on attribute '%s'. Must be boolean.",
 				dt.Key,
 			)
@@ -137,14 +138,14 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 	exactStrings, exists := queries[exactKey]
 	if exists {
 		if len(exactStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' against more than one value.",
 				dt.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot match attribute '%s' to an exact value and null.",
 				dt.Key,
 			)
@@ -161,7 +162,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				column: dt.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid exact value on attribute '%s'. Must be datetime in RFC3339 format.",
 				dt.Key,
 			)
@@ -171,18 +172,18 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 	filteringAfter := false
 	var filteringAfterValue time.Time
 
-	afterKey := dt.Key + AFTER_SUFFIX
+	afterKey := dt.Key + filters.AFTER_SUFFIX
 	afterStrings, exists := queries[afterKey]
 	if exists {
 		if len(afterStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to be after more than one value.",
 				dt.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to a value and null.",
 				dt.Key,
 			)
@@ -202,25 +203,25 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				column: dt.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid after comparison value on attribute '%s'. Must be datetime in RFC3339 format.",
 				dt.Key,
 			)
 		}
 	}
 
-	beforeKey := dt.Key + BEFORE_SUFFIX
+	beforeKey := dt.Key + filters.BEFORE_SUFFIX
 	beforeStrings, exists := queries[beforeKey]
 	if exists {
 		if len(beforeStrings) != 1 {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to be before more than one value.",
 				dt.Key,
 			)
 		}
 
 		if nullsOnly {
-			return filterException(
+			return filters.Exception(
 				"Cannot compare attribute '%s' to a value and null.",
 				dt.Key,
 			)
@@ -229,7 +230,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 		beforeValue, err := time.Parse(time.RFC3339, beforeStrings[0])
 		if err == nil {
 			if filteringAfter && beforeValue.Before(filteringAfterValue) {
-				return filterException(
+				return filters.Exception(
 					"Cannot compare attribute '%s' to value before additional after filter.",
 					dt.Key,
 				)
@@ -244,7 +245,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				column: dt.ColumnName,
 			})
 		} else {
-			return filterException(
+			return filters.Exception(
 				"Invalid before comparison value on attribute '%s'. Must be datetime in RFC3339 format.",
 				dt.Key,
 			)
