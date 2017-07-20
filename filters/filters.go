@@ -13,6 +13,8 @@ const LT_SUFFIX = "__lt"
 const CONTAINS_SUFFIX = "__contains"
 const AFTER_SUFFIX = "__after"
 const BEFORE_SUFFIX = "__before"
+const TYPE_SUFFIX = "__type"
+const ID_SUFFIX = "__id"
 
 func Exception(text string, args ...interface{}) ([]schema.Filter, error) {
 	return []schema.Filter{}, errors.New(fmt.Sprintf(text, args...))
