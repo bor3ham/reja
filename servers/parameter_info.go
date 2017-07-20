@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func FilterInfoHandler(
+func ParameterInfoHandler(
 	s schema.Server,
 	m *schema.Model,
 	w http.ResponseWriter,
@@ -19,7 +19,7 @@ func FilterInfoHandler(
 	}
 	rc.InitCache()
 
-	filters := []string{}
+	filters := []interface{}{}
 	for _, attribute := range m.Attributes {
 		filters = append(filters, attribute.AvailableFilters()...)
 	}
@@ -28,7 +28,7 @@ func FilterInfoHandler(
 	}
 
 	responseBlob := struct {
-		Filters []string `json:"filters"`
+		Filters []interface{} `json:"filters"`
 	}{
 		Filters: filters,
 	}

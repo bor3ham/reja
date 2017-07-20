@@ -50,8 +50,8 @@ func (f ForeignKeyExactFilter) GetWhereArgs() []interface{} {
 	return args
 }
 
-func (fk ForeignKey) AvailableFilters() []string {
-	return []string{
+func (fk ForeignKey) AvailableFilters() []interface{} {
+	return []interface{}{
 		fk.Key,
 		fk.Key + filters.ISNULL_SUFFIX,
 	}

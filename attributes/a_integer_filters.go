@@ -80,8 +80,8 @@ func (f IntegerGreaterFilter) GetWhereArgs() []interface{} {
 	}
 }
 
-func (i Integer) AvailableFilters() []string {
-	return []string{
+func (i Integer) AvailableFilters() []interface{} {
+	return []interface{}{
 		i.Key,
 		i.Key + filters.ISNULL_SUFFIX,
 		i.Key + filters.LT_SUFFIX,

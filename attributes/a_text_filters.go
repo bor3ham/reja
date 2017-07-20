@@ -129,8 +129,8 @@ func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
 	}
 }
 
-func (t Text) AvailableFilters() []string {
-	return []string{
+func (t Text) AvailableFilters() []interface{} {
+	return []interface{}{
 		t.Key,
 		t.Key + filters.ISNULL_SUFFIX,
 		t.Key + filters.LENGTH_SUFFIX,

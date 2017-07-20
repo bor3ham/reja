@@ -80,8 +80,8 @@ func (f DateBeforeFilter) GetWhereArgs() []interface{} {
 	}
 }
 
-func (d Date) AvailableFilters() []string {
-	return []string{
+func (d Date) AvailableFilters() []interface{} {
+	return []interface{}{
 		d.Key,
 		d.Key + filters.ISNULL_SUFFIX,
 		d.Key + filters.AFTER_SUFFIX,

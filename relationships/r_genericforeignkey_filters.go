@@ -143,8 +143,8 @@ func (f GenericForeignKeyExactFilter) GetWhereArgs() []interface{} {
 	return args
 }
 
-func (gfk GenericForeignKey) AvailableFilters() []string {
-	return []string{
+func (gfk GenericForeignKey) AvailableFilters() []interface{} {
+	return []interface{}{
 		gfk.Key,
 		gfk.Key + filters.ISNULL_SUFFIX,
 		gfk.Key + filters.TYPE_SUFFIX,

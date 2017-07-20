@@ -29,8 +29,8 @@ func (stub RelationshipStub) GetSelectExtraColumns() []string {
 func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
 	return []interface{}{}
 }
-func (stub RelationshipStub) AvailableFilters() []string {
-	return []string{}
+func (stub RelationshipStub) AvailableFilters() []interface{} {
+	return []interface{}{}
 }
 func (stub RelationshipStub) ValidateFilters(map[string][]string) ([]schema.Filter, error) {
 	return []schema.Filter{}, nil

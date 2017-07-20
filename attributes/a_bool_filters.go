@@ -45,8 +45,8 @@ func (f BoolExactFilter) GetWhereArgs() []interface{} {
 	}
 }
 
-func (b Bool) AvailableFilters() []string {
-	return []string{
+func (b Bool) AvailableFilters() []interface{} {
+	return []interface{}{
 		b.Key,
 		b.Key + filters.ISNULL_SUFFIX,
 	}

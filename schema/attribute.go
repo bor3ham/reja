@@ -6,7 +6,7 @@ type Attribute interface {
 	GetSelectDirectColumns() []string
 	GetSelectDirectVariables() []interface{}
 
-	AvailableFilters() []string
+	AvailableFilters() []interface{}
 	ValidateFilters(map[string][]string) ([]Filter, error)
 	GetFilterWhere(int, map[string][]string) ([]string, []interface{})
 
