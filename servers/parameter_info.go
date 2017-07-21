@@ -37,6 +37,7 @@ func ParameterInfoHandler(
 	if rc.GetServer().Whitespace() {
 		encoder.SetIndent("", "    ")
 	}
+	encoder.SetEscapeHTML(false)
 	err := encoder.Encode(responseBlob)
 	if err != nil {
 		panic(err)

@@ -145,10 +145,38 @@ func (f GenericForeignKeyExactFilter) GetWhereArgs() []interface{} {
 
 func (gfk GenericForeignKey) AvailableFilters() []interface{} {
 	return []interface{}{
-		gfk.Key,
-		gfk.Key + filters.ISNULL_SUFFIX,
-		gfk.Key + filters.TYPE_SUFFIX,
-		gfk.Key + filters.ID_SUFFIX,
+		filters.FilterDescription{
+			Key: gfk.Key,
+			Description: "Related item to filter for. One or more pointers in the format 'Type:ID'.",
+			Examples: []string{
+				fmt.Sprintf("?%s=User%%3A1", gfk.Key),
+				fmt.Sprintf("?%s=User%%3A1&%s=Task%%3A2", gfk.Key, gfk.Key),
+			},
+		},
+		filters.FilterDescription{
+			Key: gfk.Key + filters.ISNULL_SUFFIX,
+			Description: "Whether related item exists. Single value boolean.",
+			Examples: []string{
+				fmt.Sprintf("?%s=true", gfk.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", gfk.Key + filters.ISNULL_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key: gfk.Key + filters.TYPE_SUFFIX,
+			Description: "Type of related item. One or more valid object types for relation.",
+			Examples: []string{
+				fmt.Sprintf("?%s=User", gfk.Key + filters.TYPE_SUFFIX),
+				fmt.Sprintf("?%s=User&%s=Task", gfk.Key + filters.TYPE_SUFFIX, gfk.Key + filters.TYPE_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key: gfk.Key + filters.ID_SUFFIX,
+			Description: "ID of related item. One or more IDs.",
+			Examples: []string{
+				fmt.Sprintf("?%s=1", gfk.Key + filters.ID_SUFFIX),
+				fmt.Sprintf("?%s=1&%s=2", gfk.Key + filters.ID_SUFFIX, gfk.Key + filters.ID_SUFFIX),
+			},
+		},
 	}
 }
 func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {

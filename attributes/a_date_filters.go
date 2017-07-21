@@ -82,10 +82,44 @@ func (f DateBeforeFilter) GetWhereArgs() []interface{} {
 
 func (d Date) AvailableFilters() []interface{} {
 	return []interface{}{
-		d.Key,
-		d.Key + filters.ISNULL_SUFFIX,
-		d.Key + filters.AFTER_SUFFIX,
-		d.Key + filters.BEFORE_SUFFIX,
+		filters.FilterDescription{
+			Key: d.Key,
+			Description: fmt.Sprintf(
+				"Exact match on date value. Single value date in format '%s'.",
+				DATE_LAYOUT,
+			),
+			Examples: []string{
+				fmt.Sprintf("?%s=%s", d.Key, time.Now().Format(DATE_LAYOUT)),
+			},
+		},
+		filters.FilterDescription{
+			Key: d.Key + filters.ISNULL_SUFFIX,
+			Description: "Whether date value exists. Single value boolean.",
+			Examples: []string{
+				fmt.Sprintf("?%s=true", d.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", d.Key + filters.ISNULL_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key: d.Key + filters.AFTER_SUFFIX,
+			Description: fmt.Sprintf(
+				"Any date values after given date. Single value date in format '%s'.",
+				DATE_LAYOUT,
+			),
+			Examples: []string{
+				fmt.Sprintf("?%s=%s", d.Key + filters.AFTER_SUFFIX, time.Now().Format(DATE_LAYOUT)),
+			},
+		},
+		filters.FilterDescription{
+			Key: d.Key + filters.BEFORE_SUFFIX,
+			Description: fmt.Sprintf(
+				"Any date values before given date. Single value date in format '%s'.",
+				DATE_LAYOUT,
+			),
+			Examples: []string{
+				fmt.Sprintf("?%s=%s", d.Key + filters.BEFORE_SUFFIX, time.Now().Format(DATE_LAYOUT)),
+			},
+		},
 	}
 }
 func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {

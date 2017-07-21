@@ -52,8 +52,22 @@ func (f ForeignKeyExactFilter) GetWhereArgs() []interface{} {
 
 func (fk ForeignKey) AvailableFilters() []interface{} {
 	return []interface{}{
-		fk.Key,
-		fk.Key + filters.ISNULL_SUFFIX,
+		filters.FilterDescription{
+			Key: fk.Key,
+			Description: "Related item to filter for. One or more IDs.",
+			Examples: []string{
+				fmt.Sprintf("?%s=1", fk.Key),
+				fmt.Sprintf("?%s=1&%s=2", fk.Key, fk.Key),
+			},
+		},
+		filters.FilterDescription{
+			Key: fk.Key + filters.ISNULL_SUFFIX,
+			Description: "Whether related item exists. Single value boolean.",
+			Examples: []string{
+				fmt.Sprintf("?%s=true", fk.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", fk.Key + filters.ISNULL_SUFFIX),
+			},
+		},
 	}
 }
 func (fk ForeignKey) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {

@@ -121,10 +121,10 @@ func (s *Server) Handle(router *mux.Router, modelType string, path string) {
 	router.HandleFunc(path+"/", func(w http.ResponseWriter, r *http.Request) {
 		ListHandler(s, &model, w, r)
 	})
-	router.HandleFunc(path+"/filters", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+"/parameters", func(w http.ResponseWriter, r *http.Request) {
 		ParameterInfoHandler(s, &model, w, r)
 	})
-	router.HandleFunc(path+"/filters/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+"/parameters/", func(w http.ResponseWriter, r *http.Request) {
 		ParameterInfoHandler(s, &model, w, r)
 	})
 	router.HandleFunc(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {

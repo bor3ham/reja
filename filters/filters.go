@@ -16,6 +16,12 @@ const BEFORE_SUFFIX = "__before"
 const TYPE_SUFFIX = "__type"
 const ID_SUFFIX = "__id"
 
+type FilterDescription struct {
+	Key string `json:"key"`
+	Description string `json:"description"`
+	Examples []string `json:"examples"`
+}
+
 func Exception(text string, args ...interface{}) ([]schema.Filter, error) {
 	return []schema.Filter{}, errors.New(fmt.Sprintf(text, args...))
 }

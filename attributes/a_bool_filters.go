@@ -47,8 +47,22 @@ func (f BoolExactFilter) GetWhereArgs() []interface{} {
 
 func (b Bool) AvailableFilters() []interface{} {
 	return []interface{}{
-		b.Key,
-		b.Key + filters.ISNULL_SUFFIX,
+		filters.FilterDescription{
+			Key: b.Key,
+			Description: "Exact match on bool value. Single value boolean.",
+			Examples: []string{
+				fmt.Sprintf("?%s=true", b.Key),
+				fmt.Sprintf("?%s=false", b.Key),
+			},
+		},
+		filters.FilterDescription{
+			Key: b.Key + filters.ISNULL_SUFFIX,
+			Description: "Whether bool value exists. Single value boolean.",
+			Examples: []string{
+				fmt.Sprintf("?%s=true", b.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", b.Key + filters.ISNULL_SUFFIX),
+			},
+		},
 	}
 }
 func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
