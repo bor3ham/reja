@@ -15,7 +15,14 @@ type DatetimeNullFilter struct {
 	column string
 }
 
-func (f DatetimeNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f DatetimeNullFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -33,7 +40,14 @@ type DatetimeExactFilter struct {
 	column string
 }
 
-func (f DatetimeExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f DatetimeExactFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	return []string{
 		fmt.Sprintf("date_trunc('second', %s) = $%d", f.column, nextArg),
 	}, []interface{}{
@@ -48,7 +62,14 @@ type DatetimeAfterFilter struct {
 	after bool
 }
 
-func (f DatetimeAfterFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f DatetimeAfterFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	operator := ">"
 	if !f.after {
 		operator = "<"

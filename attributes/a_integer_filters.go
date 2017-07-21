@@ -14,7 +14,14 @@ type IntegerNullFilter struct {
 	column string
 }
 
-func (f IntegerNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f IntegerNullFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -32,7 +39,14 @@ type IntegerExactFilter struct {
 	column string
 }
 
-func (f IntegerExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f IntegerExactFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
 	}, []interface{}{
@@ -47,7 +61,14 @@ type IntegerLesserFilter struct {
 	lesser bool
 }
 
-func (f IntegerLesserFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f IntegerLesserFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	operator := "<"
 	if !f.lesser {
 		operator = ">"

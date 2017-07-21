@@ -4,7 +4,7 @@ type Filter interface {
 	GetQArgKey() string
 	GetQArgValues() []string
 
-	GetWhere(Context, int) ([]string, []interface{})
+	GetWhere(Context, string, int) ([]string, []interface{})
 }
 
 type BaseFilter struct {

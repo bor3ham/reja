@@ -13,7 +13,14 @@ type ForeignKeyNullFilter struct {
 	column string
 }
 
-func (f ForeignKeyNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f ForeignKeyNullFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -31,7 +38,14 @@ type ForeignKeyExactFilter struct {
 	column string
 }
 
-func (f ForeignKeyExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f ForeignKeyExactFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	spots := []string{}
 	args := []interface{}{}
 	for _, value := range f.values {

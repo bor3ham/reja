@@ -17,6 +17,7 @@ type ForeignKeyReverseContainsFilter struct {
 }
 func (f ForeignKeyReverseContainsFilter) GetWhere(
 	c schema.Context,
+	idColumn string,
 	nextArg int,
 ) (
 	[]string,
@@ -51,11 +52,10 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 		ids = append(ids, id)
 	}
 
-	ownIDColumn := "id"
 	if f.exclude {
 		if len(ids) > 0 {
 			return []string{
-				fmt.Sprintf("%s not in (%s)", ownIDColumn, strings.Join(ids, ", ")),
+				fmt.Sprintf("%s not in (%s)", idColumn, strings.Join(ids, ", ")),
 			}, []interface{}{}
 		} else {
 			return []string{}, []interface{}{}
@@ -63,7 +63,7 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 	} else {
 		if len(ids) > 0 {
 			return []string{
-				fmt.Sprintf("%s in (%s)", ownIDColumn, strings.Join(ids, ", ")),
+				fmt.Sprintf("%s in (%s)", idColumn, strings.Join(ids, ", ")),
 			}, []interface{}{}
 		} else {
 			return []string{"true is false"}, []interface{}{}

@@ -14,7 +14,14 @@ type TextNullFilter struct {
 	column string
 }
 
-func (f TextNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f TextNullFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -32,7 +39,14 @@ type TextExactFilter struct {
 	column   string
 }
 
-func (f TextExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f TextExactFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
 	}, []interface{}{
@@ -46,7 +60,14 @@ type TextContainsFilter struct {
 	column   string
 }
 
-func (f TextContainsFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f TextContainsFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	args := []interface{}{}
 	where := "("
 	for matchIndex, match := range f.contains {
@@ -73,7 +94,14 @@ type TextLengthExactFilter struct {
 	column string
 }
 
-func (f TextLengthExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f TextLengthExactFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	return []string{
 		fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
 	}, []interface{}{
@@ -88,7 +116,14 @@ type TextLengthLesserFilter struct {
 	lesser bool
 }
 
-func (f TextLengthLesserFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f TextLengthLesserFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	operator := "<"
 	if !f.lesser {
 		operator = ">"
@@ -106,7 +141,14 @@ type TextLengthGreaterFilter struct {
 	column string
 }
 
-func (f TextLengthGreaterFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+func (f TextLengthGreaterFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	return []string{
 		fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
 	}, []interface{}{
