@@ -5,6 +5,7 @@ import (
 	"github.com/bor3ham/reja/filters"
 	"github.com/bor3ham/reja/schema"
 	"strings"
+	"strconv"
 )
 
 type ForeignKeyReverseContainsFilter struct {
@@ -72,11 +73,72 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 	}
 }
 
+type ForeignKeyReverseCountFilter struct {
+	*schema.BaseFilter
+	key            string
+	columnName     string
+	sourceTable    string
+	value          int
+	operator       string
+}
+func (f ForeignKeyReverseCountFilter) GetWhere(
+	c schema.Context,
+	idColumn string,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
+	query := fmt.Sprintf(
+		`
+			select %s from (
+				select
+					count(*) as %s_count,
+					%s
+				from %s
+				where %s is not null
+				group by %s
+			) as countQuery where countQuery.%s_count %s $1
+		`,
+		f.columnName,
+		f.key,
+		f.columnName,
+		f.sourceTable,
+		f.columnName,
+		f.columnName,
+		f.key,
+		f.operator,
+	)
+
+	rows, err := c.Query(query, f.value)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	ids := []string{}
+	for rows.Next() {
+		var id string
+		err := rows.Scan(&id)
+		if err != nil {
+			panic(err)
+		}
+		ids = append(ids, id)
+	}
+
+	if len(ids) > 0 {
+		return []string{
+			fmt.Sprintf("%s in (%s)", idColumn, strings.Join(ids, ", ")),
+		}, []interface{}{}
+	} else {
+		return []string{"true is false"}, []interface{}{}
+	}
+}
+
 func (fkr ForeignKeyReverse) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
 			Key:         fkr.Key + filters.CONTAINS_SUFFIX,
-			Description: "Related items to filter for. One or more IDs.",
+			Description: "Related items to search for in set. One or more IDs.",
 			Examples: []string{
 				fmt.Sprintf("?%s=1", fkr.Key+filters.CONTAINS_SUFFIX),
 				fmt.Sprintf("?%s=1&%s=2", fkr.Key+filters.CONTAINS_SUFFIX, fkr.Key+filters.CONTAINS_SUFFIX),
@@ -84,10 +146,31 @@ func (fkr ForeignKeyReverse) AvailableFilters() []interface{} {
 		},
 		filters.FilterDescription{
 			Key:         fkr.Key + filters.EXCLUDES_SUFFIX,
-			Description: "Related items to exclude. One or more IDs.",
+			Description: "Related items to exclude if appearing in set. One or more IDs.",
 			Examples: []string{
 				fmt.Sprintf("?%s=1", fkr.Key+filters.EXCLUDES_SUFFIX),
 				fmt.Sprintf("?%s=1&%s=2", fkr.Key+filters.EXCLUDES_SUFFIX, fkr.Key+filters.EXCLUDES_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         fkr.Key + filters.COUNT_SUFFIX,
+			Description: "Count of related items. Single value integer.",
+			Examples: []string{
+				fmt.Sprintf("?%s=5", fkr.Key + filters.COUNT_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         fkr.Key + filters.COUNT_SUFFIX + filters.LT_SUFFIX,
+			Description: "Maximum count of related items. Single value integer.",
+			Examples: []string{
+				fmt.Sprintf("?%s=5", fkr.Key + filters.COUNT_SUFFIX + filters.LT_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         fkr.Key + filters.COUNT_SUFFIX + filters.GT_SUFFIX,
+			Description: "Minimum count of related items. Single value integer.",
+			Examples: []string{
+				fmt.Sprintf("?%s=5", fkr.Key + filters.COUNT_SUFFIX + filters.GT_SUFFIX),
 			},
 		},
 	}
@@ -134,6 +217,99 @@ func (fkr ForeignKeyReverse) ValidateFilters(queries map[string][]string) ([]sch
 			sourceIDColumn: fkr.SourceIDColumn,
 			values:         compareValues,
 			exclude:        true,
+		})
+	}
+
+	exactCountKey := fkr.Key + filters.COUNT_SUFFIX
+	exactCountStrings, exists := queries[exactCountKey]
+	if exists {
+		if len(exactCountStrings) != 1 {
+			return filters.Exception(
+				"Cannot compare count of relationship '%s' to more than one value.",
+				fkr.Key,
+			)
+		}
+
+		stringValue := exactCountStrings[0]
+		intValue, err := strconv.Atoi(stringValue)
+		if err != nil {
+			return filters.Exception(
+				"Invalid count comparison value on relationship '%s'. Must be integer.",
+				fkr.Key,
+			)
+		}
+		valids = append(valids, ForeignKeyReverseCountFilter{
+			BaseFilter: &schema.BaseFilter{
+				QArgKey:    exactCountKey,
+				QArgValues: []string{strconv.Itoa(intValue)},
+			},
+			key:            fkr.Key,
+			columnName:     fkr.ColumnName,
+			sourceTable:    fkr.SourceTable,
+			value:          intValue,
+			operator:       "=",
+		})
+	}
+
+	lesserCountKey := fkr.Key + filters.COUNT_SUFFIX + filters.LT_SUFFIX
+	lesserCountStrings, exists := queries[lesserCountKey]
+	if exists {
+		if len(lesserCountStrings) != 1 {
+			return filters.Exception(
+				"Cannot compare count of relationship '%s' to more than one value.",
+				fkr.Key,
+			)
+		}
+
+		stringValue := lesserCountStrings[0]
+		intValue, err := strconv.Atoi(stringValue)
+		if err != nil {
+			return filters.Exception(
+				"Invalid count comparison value on relationship '%s'. Must be integer.",
+				fkr.Key,
+			)
+		}
+		valids = append(valids, ForeignKeyReverseCountFilter{
+			BaseFilter: &schema.BaseFilter{
+				QArgKey:    lesserCountKey,
+				QArgValues: []string{strconv.Itoa(intValue)},
+			},
+			key:            fkr.Key,
+			columnName:     fkr.ColumnName,
+			sourceTable:    fkr.SourceTable,
+			value:          intValue,
+			operator:       "<",
+		})
+	}
+
+	greaterCountKey := fkr.Key + filters.COUNT_SUFFIX + filters.GT_SUFFIX
+	greaterCountStrings, exists := queries[greaterCountKey]
+	if exists {
+		if len(greaterCountStrings) != 1 {
+			return filters.Exception(
+				"Cannot compare count of relationship '%s' to more than one value.",
+				fkr.Key,
+			)
+		}
+
+		stringValue := greaterCountStrings[0]
+		intValue, err := strconv.Atoi(stringValue)
+		if err != nil {
+			return filters.Exception(
+				"Invalid count comparison value on relationship '%s'. Must be integer.",
+				fkr.Key,
+			)
+		}
+		valids = append(valids, ForeignKeyReverseCountFilter{
+			BaseFilter: &schema.BaseFilter{
+				QArgKey:    greaterCountKey,
+				QArgValues: []string{strconv.Itoa(intValue)},
+			},
+			key:            fkr.Key,
+			columnName:     fkr.ColumnName,
+			sourceTable:    fkr.SourceTable,
+			value:          intValue,
+			operator:       ">",
 		})
 	}
 
