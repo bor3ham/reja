@@ -14,19 +14,16 @@ type DateNullFilter struct {
 	column string
 }
 
-func (f DateNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f DateNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
-		}
+		}, []interface{}{}
 	} else {
 		return []string{
 			fmt.Sprintf("%s is not null", f.column),
-		}
+		}, []interface{}{}
 	}
-}
-func (f DateNullFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 type DateExactFilter struct {
@@ -35,13 +32,10 @@ type DateExactFilter struct {
 	column string
 }
 
-func (f DateExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f DateExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}
-}
-func (f DateExactFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	}, []interface{}{
 		f.value,
 	}
 }
@@ -50,32 +44,17 @@ type DateAfterFilter struct {
 	*schema.BaseFilter
 	value  time.Time
 	column string
+	after bool
 }
 
-func (f DateAfterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f DateAfterFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+	operator := ">"
+	if !f.after {
+		operator = "<"
+	}
 	return []string{
-		fmt.Sprintf("%s > $%d", f.column, nextArg),
-	}
-}
-func (f DateAfterFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
-		f.value,
-	}
-}
-
-type DateBeforeFilter struct {
-	*schema.BaseFilter
-	value  time.Time
-	column string
-}
-
-func (f DateBeforeFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
-	return []string{
-		fmt.Sprintf("%s < $%d", f.column, nextArg),
-	}
-}
-func (f DateBeforeFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+		fmt.Sprintf("%s %s $%d", f.column, operator, nextArg),
+	}, []interface{}{
 		f.value,
 	}
 }
@@ -236,6 +215,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				},
 				value:  afterValue,
 				column: d.ColumnName,
+				after: true,
 			})
 		} else {
 			return filters.Exception(
@@ -272,13 +252,14 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				)
 			}
 
-			valids = append(valids, DateBeforeFilter{
+			valids = append(valids, DateAfterFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    beforeKey,
 					QArgValues: []string{beforeValue.Format(DATE_LAYOUT)},
 				},
 				value:  beforeValue,
 				column: d.ColumnName,
+				after: false,
 			})
 		} else {
 			return filters.Exception(

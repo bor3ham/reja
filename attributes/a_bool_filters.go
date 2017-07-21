@@ -13,19 +13,16 @@ type BoolNullFilter struct {
 	column string
 }
 
-func (f BoolNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f BoolNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
-		}
+		}, []interface{}{}
 	} else {
 		return []string{
 			fmt.Sprintf("%s is not null", f.column),
-		}
+		}, []interface{}{}
 	}
-}
-func (f BoolNullFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 type BoolExactFilter struct {
@@ -34,13 +31,10 @@ type BoolExactFilter struct {
 	column string
 }
 
-func (f BoolExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f BoolExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}
-}
-func (f BoolExactFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	}, []interface{}{
 		f.value,
 	}
 }

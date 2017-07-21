@@ -21,19 +21,22 @@ type GenericForeignKeyNullFilter struct {
 	idColumn string
 }
 
-func (f GenericForeignKeyNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f GenericForeignKeyNullFilter) GetWhere(
+	c schema.Context,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.idColumn),
-		}
+		}, []interface{}{}
 	} else {
 		return []string{
 			fmt.Sprintf("%s is not null", f.idColumn),
-		}
+		}, []interface{}{}
 	}
-}
-func (f GenericForeignKeyNullFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 type GenericForeignKeyTypeFilter struct {
@@ -42,12 +45,19 @@ type GenericForeignKeyTypeFilter struct {
 	typeColumn string
 }
 
-func (f GenericForeignKeyTypeFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f GenericForeignKeyTypeFilter) GetWhere(
+	c schema.Context,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
+	args := []interface{}{}
 	query := ""
 	if len(f.values) > 1 {
 		query += "("
 	}
-	for valueIndex, _ := range f.values {
+	for valueIndex, value := range f.values {
 		if valueIndex > 0 {
 			query += " or "
 		}
@@ -56,19 +66,13 @@ func (f GenericForeignKeyTypeFilter) GetWhereQueries(c schema.Context, nextArg i
 			f.typeColumn,
 			nextArg,
 		)
+		args = append(args, value)
 		nextArg += 1
 	}
 	if len(f.values) > 1 {
 		query += ")"
 	}
-	return []string{query}
-}
-func (f GenericForeignKeyTypeFilter) GetWhereArgs() []interface{} {
-	args := []interface{}{}
-	for _, value := range f.values {
-		args = append(args, value)
-	}
-	return args
+	return []string{query}, args
 }
 
 type GenericForeignKeyIDFilter struct {
@@ -77,12 +81,19 @@ type GenericForeignKeyIDFilter struct {
 	idColumn string
 }
 
-func (f GenericForeignKeyIDFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f GenericForeignKeyIDFilter) GetWhere(
+	c schema.Context,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
+	args := []interface{}{}
 	query := ""
 	if len(f.values) > 1 {
 		query += "("
 	}
-	for valueIndex, _ := range f.values {
+	for valueIndex, value := range f.values {
 		if valueIndex > 0 {
 			query += " or "
 		}
@@ -91,19 +102,13 @@ func (f GenericForeignKeyIDFilter) GetWhereQueries(c schema.Context, nextArg int
 			f.idColumn,
 			nextArg,
 		)
+		args = append(args, value)
 		nextArg += 1
 	}
 	if len(f.values) > 1 {
 		query += ")"
 	}
-	return []string{query}
-}
-func (f GenericForeignKeyIDFilter) GetWhereArgs() []interface{} {
-	args := []interface{}{}
-	for _, value := range f.values {
-		args = append(args, value)
-	}
-	return args
+	return []string{query}, args
 }
 
 type GenericForeignKeyExactFilter struct {
@@ -113,13 +118,20 @@ type GenericForeignKeyExactFilter struct {
 	idColumn   string
 }
 
-func (f GenericForeignKeyExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f GenericForeignKeyExactFilter) GetWhere(
+	c schema.Context,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
+	args := []interface{}{}
 	query := ""
 	if len(f.values) > 0 {
 		if len(f.values) > 1 {
 			query = "("
 		}
-		for valueIndex, _ := range f.values {
+		for valueIndex, value := range f.values {
 			if valueIndex > 0 {
 				query += " or "
 			}
@@ -130,21 +142,15 @@ func (f GenericForeignKeyExactFilter) GetWhereQueries(c schema.Context, nextArg 
 				f.idColumn,
 				nextArg+1,
 			)
+			args = append(args, value.Type)
+			args = append(args, *value.ID)
 			nextArg += 2
 		}
 		if len(f.values) > 1 {
 			query += ")"
 		}
 	}
-	return []string{query}
-}
-func (f GenericForeignKeyExactFilter) GetWhereArgs() []interface{} {
-	args := []interface{}{}
-	for _, value := range f.values {
-		args = append(args, value.Type)
-		args = append(args, *value.ID)
-	}
-	return args
+	return []string{query}, args
 }
 
 func (gfk GenericForeignKey) AvailableFilters() []interface{} {

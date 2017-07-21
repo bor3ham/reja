@@ -71,8 +71,10 @@ func listGET(
 	whereQueries := []string{}
 	whereArgs := []interface{}{}
 	for _, filter := range validFilters {
-		whereQueries = append(whereQueries, filter.GetWhereQueries(c, len(whereArgs)+1)...)
-		whereArgs = append(whereArgs, filter.GetWhereArgs()...)
+		queries, args := filter.GetWhere(c, len(whereArgs)+1)
+
+		whereQueries = append(whereQueries, queries...)
+		whereArgs = append(whereArgs, args...)
 	}
 	whereClause := ""
 	if len(whereQueries) > 0 {

@@ -14,19 +14,16 @@ type IntegerNullFilter struct {
 	column string
 }
 
-func (f IntegerNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f IntegerNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
-		}
+		}, []interface{}{}
 	} else {
 		return []string{
 			fmt.Sprintf("%s is not null", f.column),
-		}
+		}, []interface{}{}
 	}
-}
-func (f IntegerNullFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 type IntegerExactFilter struct {
@@ -35,13 +32,10 @@ type IntegerExactFilter struct {
 	column string
 }
 
-func (f IntegerExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f IntegerExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}
-}
-func (f IntegerExactFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	}, []interface{}{
 		f.value,
 	}
 }
@@ -50,32 +44,17 @@ type IntegerLesserFilter struct {
 	*schema.BaseFilter
 	value  int
 	column string
+	lesser bool
 }
 
-func (f IntegerLesserFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f IntegerLesserFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+	operator := "<"
+	if !f.lesser {
+		operator = ">"
+	}
 	return []string{
-		fmt.Sprintf("%s < $%d", f.column, nextArg),
-	}
-}
-func (f IntegerLesserFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
-		f.value,
-	}
-}
-
-type IntegerGreaterFilter struct {
-	*schema.BaseFilter
-	value  int
-	column string
-}
-
-func (f IntegerGreaterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
-	return []string{
-		fmt.Sprintf("%s > $%d", f.column, nextArg),
-	}
-}
-func (f IntegerGreaterFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+		fmt.Sprintf("%s %s $%d", f.column, operator, nextArg),
+	}, []interface{}{
 		f.value,
 	}
 }
@@ -226,6 +205,7 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				},
 				value:  lesserValue,
 				column: i.ColumnName,
+				lesser: true,
 			})
 		} else {
 			return filters.Exception(
@@ -261,13 +241,14 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				)
 			}
 
-			valids = append(valids, IntegerGreaterFilter{
+			valids = append(valids, IntegerLesserFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    greaterKey,
 					QArgValues: []string{strconv.Itoa(greaterValue)},
 				},
 				value:  greaterValue,
 				column: i.ColumnName,
+				lesser: false,
 			})
 		} else {
 			return filters.Exception(

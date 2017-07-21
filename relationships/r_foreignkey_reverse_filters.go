@@ -15,7 +15,13 @@ type ForeignKeyReverseContainsFilter struct {
 	values []string
 	exclude bool
 }
-func (f ForeignKeyReverseContainsFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f ForeignKeyReverseContainsFilter) GetWhere(
+	c schema.Context,
+	nextArg int,
+) (
+	[]string,
+	[]interface{},
+) {
 	argSpots := []string{}
 	argVals := []interface{}{}
 	for index, value := range f.values {
@@ -48,20 +54,21 @@ func (f ForeignKeyReverseContainsFilter) GetWhereQueries(c schema.Context, nextA
 	ownIDColumn := "id"
 	if f.exclude {
 		if len(ids) > 0 {
-			return []string{fmt.Sprintf("%s not in (%s)", ownIDColumn, strings.Join(ids, ", "))}
+			return []string{
+				fmt.Sprintf("%s not in (%s)", ownIDColumn, strings.Join(ids, ", ")),
+			}, []interface{}{}
 		} else {
-			return []string{}
+			return []string{}, []interface{}{}
 		}
 	} else {
 		if len(ids) > 0 {
-			return []string{fmt.Sprintf("%s in (%s)", ownIDColumn, strings.Join(ids, ", "))}
+			return []string{
+				fmt.Sprintf("%s in (%s)", ownIDColumn, strings.Join(ids, ", ")),
+			}, []interface{}{}
 		} else {
-			return []string{"true is false"}
+			return []string{"true is false"}, []interface{}{}
 		}
 	}
-}
-func (f ForeignKeyReverseContainsFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 func (fkr ForeignKeyReverse) AvailableFilters() []interface{} {

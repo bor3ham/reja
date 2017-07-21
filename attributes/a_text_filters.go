@@ -14,19 +14,16 @@ type TextNullFilter struct {
 	column string
 }
 
-func (f TextNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f TextNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
-		}
+		}, []interface{}{}
 	} else {
 		return []string{
 			fmt.Sprintf("%s is not null", f.column),
-		}
+		}, []interface{}{}
 	}
-}
-func (f TextNullFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 type TextExactFilter struct {
@@ -35,13 +32,10 @@ type TextExactFilter struct {
 	column   string
 }
 
-func (f TextExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f TextExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}
-}
-func (f TextExactFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	}, []interface{}{
 		f.matching,
 	}
 }
@@ -52,9 +46,10 @@ type TextContainsFilter struct {
 	column   string
 }
 
-func (f TextContainsFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f TextContainsFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+	args := []interface{}{}
 	where := "("
-	for matchIndex, _ := range f.contains {
+	for matchIndex, match := range f.contains {
 		if matchIndex > 0 {
 			where += " or "
 		}
@@ -63,19 +58,13 @@ func (f TextContainsFilter) GetWhereQueries(c schema.Context, nextArg int) []str
 			f.column,
 			nextArg,
 		)
+		args = append(args, strings.Replace(match, "%%", "\\%%", -1))
 		nextArg += 1
 	}
 	where += ")"
 	return []string{
 		where,
-	}
-}
-func (f TextContainsFilter) GetWhereArgs() []interface{} {
-	args := []interface{}{}
-	for _, match := range f.contains {
-		args = append(args, strings.Replace(match, "%%", "\\%%", -1))
-	}
-	return args
+	}, args
 }
 
 type TextLengthExactFilter struct {
@@ -84,13 +73,10 @@ type TextLengthExactFilter struct {
 	column string
 }
 
-func (f TextLengthExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f TextLengthExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	return []string{
 		fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
-	}
-}
-func (f TextLengthExactFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	}, []interface{}{
 		f.length,
 	}
 }
@@ -99,15 +85,17 @@ type TextLengthLesserFilter struct {
 	*schema.BaseFilter
 	length int
 	column string
+	lesser bool
 }
 
-func (f TextLengthLesserFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
-	return []string{
-		fmt.Sprintf("char_length(%s) < $%d", f.column, nextArg),
+func (f TextLengthLesserFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+	operator := "<"
+	if !f.lesser {
+		operator = ">"
 	}
-}
-func (f TextLengthLesserFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	return []string{
+		fmt.Sprintf("char_length(%s) %s $%d", f.column, operator, nextArg),
+	}, []interface{}{
 		f.length,
 	}
 }
@@ -118,13 +106,10 @@ type TextLengthGreaterFilter struct {
 	column string
 }
 
-func (f TextLengthGreaterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f TextLengthGreaterFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	return []string{
 		fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
-	}
-}
-func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
-	return []interface{}{
+	}, []interface{}{
 		f.length,
 	}
 }
@@ -377,6 +362,7 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			},
 			length: ltInt,
 			column: t.ColumnName,
+			lesser: true,
 		})
 	}
 
@@ -417,13 +403,14 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				t.Key,
 			)
 		}
-		valids = append(valids, TextLengthGreaterFilter{
+		valids = append(valids, TextLengthLesserFilter{
 			BaseFilter: &schema.BaseFilter{
 				QArgKey:    greaterKey,
 				QArgValues: []string{strconv.Itoa(gtInt)},
 			},
 			length: gtInt,
 			column: t.ColumnName,
+			lesser: false,
 		})
 	}
 

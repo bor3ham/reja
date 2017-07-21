@@ -13,19 +13,16 @@ type ForeignKeyNullFilter struct {
 	column string
 }
 
-func (f ForeignKeyNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
+func (f ForeignKeyNullFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
-		}
+		}, []interface{}{}
 	} else {
 		return []string{
 			fmt.Sprintf("%s is not null", f.column),
-		}
+		}, []interface{}{}
 	}
-}
-func (f ForeignKeyNullFilter) GetWhereArgs() []interface{} {
-	return []interface{}{}
 }
 
 type ForeignKeyExactFilter struct {
@@ -34,22 +31,17 @@ type ForeignKeyExactFilter struct {
 	column string
 }
 
-func (f ForeignKeyExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
-	args := []string{}
-	for _, _ = range f.values {
-		args = append(args, fmt.Sprintf("$%d", nextArg))
+func (f ForeignKeyExactFilter) GetWhere(c schema.Context, nextArg int) ([]string, []interface{}) {
+	spots := []string{}
+	args := []interface{}{}
+	for _, value := range f.values {
+		spots = append(spots, fmt.Sprintf("$%d", nextArg))
+		args = append(args, value)
 		nextArg += 1
 	}
 	return []string{
-		fmt.Sprintf("%s in (%s)", f.column, strings.Join(args, ", ")),
-	}
-}
-func (f ForeignKeyExactFilter) GetWhereArgs() []interface{} {
-	args := []interface{}{}
-	for _, value := range f.values {
-		args = append(args, value)
-	}
-	return args
+		fmt.Sprintf("%s in (%s)", f.column, strings.Join(spots, ", ")),
+	}, args
 }
 
 func (fk ForeignKey) AvailableFilters() []interface{} {
