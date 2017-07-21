@@ -48,10 +48,10 @@ func (f TextExactFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}, []interface{}{
-		f.matching,
-	}
+			fmt.Sprintf("%s = $%d", f.column, nextArg),
+		}, []interface{}{
+			f.matching,
+		}
 }
 
 type TextContainsFilter struct {
@@ -103,10 +103,10 @@ func (f TextLengthExactFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
-	}, []interface{}{
-		f.length,
-	}
+			fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
+		}, []interface{}{
+			f.length,
+		}
 }
 
 type TextLengthLesserFilter struct {
@@ -129,10 +129,10 @@ func (f TextLengthLesserFilter) GetWhere(
 		operator = ">"
 	}
 	return []string{
-		fmt.Sprintf("char_length(%s) %s $%d", f.column, operator, nextArg),
-	}, []interface{}{
-		f.length,
-	}
+			fmt.Sprintf("char_length(%s) %s $%d", f.column, operator, nextArg),
+		}, []interface{}{
+			f.length,
+		}
 }
 
 type TextLengthGreaterFilter struct {
@@ -150,10 +150,10 @@ func (f TextLengthGreaterFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
-	}, []interface{}{
-		f.length,
-	}
+			fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
+		}, []interface{}{
+			f.length,
+		}
 }
 
 func (t Text) AvailableFilters() []interface{} {

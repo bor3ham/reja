@@ -2,19 +2,20 @@ package relationships
 
 import (
 	"fmt"
-	"strings"
 	"github.com/bor3ham/reja/filters"
 	"github.com/bor3ham/reja/schema"
+	"strings"
 )
 
 type ForeignKeyReverseContainsFilter struct {
 	*schema.BaseFilter
-	columnName string
-	sourceTable string
+	columnName     string
+	sourceTable    string
 	sourceIDColumn string
-	values []string
-	exclude bool
+	values         []string
+	exclude        bool
 }
+
 func (f ForeignKeyReverseContainsFilter) GetWhere(
 	c schema.Context,
 	idColumn string,
@@ -26,7 +27,7 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 	argSpots := []string{}
 	argVals := []interface{}{}
 	for index, value := range f.values {
-		argSpots = append(argSpots, fmt.Sprintf("$%d", index + 1))
+		argSpots = append(argSpots, fmt.Sprintf("$%d", index+1))
 		argVals = append(argVals, value)
 	}
 
@@ -77,16 +78,16 @@ func (fkr ForeignKeyReverse) AvailableFilters() []interface{} {
 			Key:         fkr.Key + filters.CONTAINS_SUFFIX,
 			Description: "Related items to filter for. One or more IDs.",
 			Examples: []string{
-				fmt.Sprintf("?%s=1", fkr.Key + filters.CONTAINS_SUFFIX),
-				fmt.Sprintf("?%s=1&%s=2", fkr.Key + filters.CONTAINS_SUFFIX, fkr.Key + filters.CONTAINS_SUFFIX),
+				fmt.Sprintf("?%s=1", fkr.Key+filters.CONTAINS_SUFFIX),
+				fmt.Sprintf("?%s=1&%s=2", fkr.Key+filters.CONTAINS_SUFFIX, fkr.Key+filters.CONTAINS_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
 			Key:         fkr.Key + filters.EXCLUDES_SUFFIX,
 			Description: "Related items to exclude. One or more IDs.",
 			Examples: []string{
-				fmt.Sprintf("?%s=1", fkr.Key + filters.EXCLUDES_SUFFIX),
-				fmt.Sprintf("?%s=1&%s=2", fkr.Key + filters.EXCLUDES_SUFFIX, fkr.Key + filters.EXCLUDES_SUFFIX),
+				fmt.Sprintf("?%s=1", fkr.Key+filters.EXCLUDES_SUFFIX),
+				fmt.Sprintf("?%s=1&%s=2", fkr.Key+filters.EXCLUDES_SUFFIX, fkr.Key+filters.EXCLUDES_SUFFIX),
 			},
 		},
 	}
@@ -107,11 +108,11 @@ func (fkr ForeignKeyReverse) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    containsKey,
 				QArgValues: compareValues,
 			},
-			columnName: fkr.ColumnName,
-			sourceTable: fkr.SourceTable,
+			columnName:     fkr.ColumnName,
+			sourceTable:    fkr.SourceTable,
 			sourceIDColumn: fkr.SourceIDColumn,
-			values: compareValues,
-			exclude: false,
+			values:         compareValues,
+			exclude:        false,
 		})
 	}
 
@@ -128,11 +129,11 @@ func (fkr ForeignKeyReverse) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    excludesKey,
 				QArgValues: compareValues,
 			},
-			columnName: fkr.ColumnName,
-			sourceTable: fkr.SourceTable,
+			columnName:     fkr.ColumnName,
+			sourceTable:    fkr.SourceTable,
 			sourceIDColumn: fkr.SourceIDColumn,
-			values: compareValues,
-			exclude: true,
+			values:         compareValues,
+			exclude:        true,
 		})
 	}
 

@@ -49,17 +49,17 @@ func (f DatetimeExactFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("date_trunc('second', %s) = $%d", f.column, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("date_trunc('second', %s) = $%d", f.column, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 type DatetimeAfterFilter struct {
 	*schema.BaseFilter
 	value  time.Time
 	column string
-	after bool
+	after  bool
 }
 
 func (f DatetimeAfterFilter) GetWhere(
@@ -75,10 +75,10 @@ func (f DatetimeAfterFilter) GetWhere(
 		operator = "<"
 	}
 	return []string{
-		fmt.Sprintf("date_trunc('second', %s) %s $%d", f.column, operator, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("date_trunc('second', %s) %s $%d", f.column, operator, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 func (dt Datetime) AvailableFilters() []interface{} {
@@ -239,7 +239,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				},
 				value:  afterValue,
 				column: dt.ColumnName,
-				after: true,
+				after:  true,
 			})
 		} else {
 			return filters.Exception(
@@ -282,7 +282,7 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				},
 				value:  beforeValue,
 				column: dt.ColumnName,
-				after: false,
+				after:  false,
 			})
 		} else {
 			return filters.Exception(

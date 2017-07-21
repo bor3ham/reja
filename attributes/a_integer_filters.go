@@ -48,10 +48,10 @@ func (f IntegerExactFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("%s = $%d", f.column, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 type IntegerLesserFilter struct {
@@ -74,10 +74,10 @@ func (f IntegerLesserFilter) GetWhere(
 		operator = ">"
 	}
 	return []string{
-		fmt.Sprintf("%s %s $%d", f.column, operator, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("%s %s $%d", f.column, operator, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 func (i Integer) AvailableFilters() []interface{} {

@@ -47,10 +47,10 @@ func (f BoolExactFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("%s = $%d", f.column, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 func (b Bool) AvailableFilters() []interface{} {

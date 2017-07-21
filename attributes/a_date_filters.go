@@ -48,17 +48,17 @@ func (f DateExactFilter) GetWhere(
 	[]interface{},
 ) {
 	return []string{
-		fmt.Sprintf("%s = $%d", f.column, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("%s = $%d", f.column, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 type DateAfterFilter struct {
 	*schema.BaseFilter
 	value  time.Time
 	column string
-	after bool
+	after  bool
 }
 
 func (f DateAfterFilter) GetWhere(
@@ -74,10 +74,10 @@ func (f DateAfterFilter) GetWhere(
 		operator = "<"
 	}
 	return []string{
-		fmt.Sprintf("%s %s $%d", f.column, operator, nextArg),
-	}, []interface{}{
-		f.value,
-	}
+			fmt.Sprintf("%s %s $%d", f.column, operator, nextArg),
+		}, []interface{}{
+			f.value,
+		}
 }
 
 func (d Date) AvailableFilters() []interface{} {
@@ -236,7 +236,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				},
 				value:  afterValue,
 				column: d.ColumnName,
-				after: true,
+				after:  true,
 			})
 		} else {
 			return filters.Exception(
@@ -280,7 +280,7 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				},
 				value:  beforeValue,
 				column: d.ColumnName,
-				after: false,
+				after:  false,
 			})
 		} else {
 			return filters.Exception(
