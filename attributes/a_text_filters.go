@@ -2,8 +2,8 @@ package attributes
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
 	"strconv"
 	"strings"
 )
@@ -132,46 +132,46 @@ func (f TextLengthGreaterFilter) GetWhereArgs() []interface{} {
 func (t Text) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
-			Key: t.Key,
+			Key:         t.Key,
 			Description: "Exact match on text value. Single value case sensitive freeform text.",
 			Examples: []string{
 				fmt.Sprintf("?%s=Foo", t.Key),
 			},
 		},
 		filters.FilterDescription{
-			Key: t.Key + filters.ISNULL_SUFFIX,
+			Key:         t.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether text value exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", t.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", t.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", t.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", t.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: t.Key + filters.LENGTH_SUFFIX,
+			Key:         t.Key + filters.LENGTH_SUFFIX,
 			Description: "Exact match on text length. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", t.Key + filters.LENGTH_SUFFIX),
+				fmt.Sprintf("?%s=5", t.Key+filters.LENGTH_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: t.Key + filters.CONTAINS_SUFFIX,
+			Key:         t.Key + filters.CONTAINS_SUFFIX,
 			Description: "Contains match on text value. Single value case insensitive freeform text.",
 			Examples: []string{
-				fmt.Sprintf("?%s=foo", t.Key + filters.CONTAINS_SUFFIX),
+				fmt.Sprintf("?%s=foo", t.Key+filters.CONTAINS_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: t.Key + filters.LENGTH_SUFFIX + filters.LT_SUFFIX,
+			Key:         t.Key + filters.LENGTH_SUFFIX + filters.LT_SUFFIX,
 			Description: "Any text value with a length less than given integer. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", t.Key + filters.LENGTH_SUFFIX + filters.LT_SUFFIX),
+				fmt.Sprintf("?%s=5", t.Key+filters.LENGTH_SUFFIX+filters.LT_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: t.Key + filters.LENGTH_SUFFIX + filters.GT_SUFFIX,
+			Key:         t.Key + filters.LENGTH_SUFFIX + filters.GT_SUFFIX,
 			Description: "Any text value with a greater less than given integer. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", t.Key + filters.LENGTH_SUFFIX + filters.GT_SUFFIX),
+				fmt.Sprintf("?%s=5", t.Key+filters.LENGTH_SUFFIX+filters.GT_SUFFIX),
 			},
 		},
 	}

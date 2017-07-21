@@ -17,9 +17,9 @@ const TYPE_SUFFIX = "__type"
 const ID_SUFFIX = "__id"
 
 type FilterDescription struct {
-	Key string `json:"key"`
-	Description string `json:"description"`
-	Examples []string `json:"examples"`
+	Key         string   `json:"key"`
+	Description string   `json:"description"`
+	Examples    []string `json:"examples"`
 }
 
 func Exception(text string, args ...interface{}) ([]schema.Filter, error) {

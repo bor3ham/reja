@@ -2,8 +2,8 @@ package attributes
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 	"time"
 )
@@ -93,11 +93,11 @@ func (d Date) AvailableFilters() []interface{} {
 			},
 		},
 		filters.FilterDescription{
-			Key: d.Key + filters.ISNULL_SUFFIX,
+			Key:         d.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether date value exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", d.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", d.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", d.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", d.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
@@ -107,7 +107,7 @@ func (d Date) AvailableFilters() []interface{} {
 				DATE_LAYOUT,
 			),
 			Examples: []string{
-				fmt.Sprintf("?%s=%s", d.Key + filters.AFTER_SUFFIX, time.Now().Format(DATE_LAYOUT)),
+				fmt.Sprintf("?%s=%s", d.Key+filters.AFTER_SUFFIX, time.Now().Format(DATE_LAYOUT)),
 			},
 		},
 		filters.FilterDescription{
@@ -117,7 +117,7 @@ func (d Date) AvailableFilters() []interface{} {
 				DATE_LAYOUT,
 			),
 			Examples: []string{
-				fmt.Sprintf("?%s=%s", d.Key + filters.BEFORE_SUFFIX, time.Now().Format(DATE_LAYOUT)),
+				fmt.Sprintf("?%s=%s", d.Key+filters.BEFORE_SUFFIX, time.Now().Format(DATE_LAYOUT)),
 			},
 		},
 	}

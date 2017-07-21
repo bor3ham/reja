@@ -2,9 +2,9 @@ package attributes
 
 import (
 	"fmt"
-	"net/url"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -84,7 +84,7 @@ func (f DatetimeBeforeFilter) GetWhereArgs() []interface{} {
 func (dt Datetime) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
-			Key: dt.Key,
+			Key:         dt.Key,
 			Description: "Exact match on datetime value. Single value datetime in RFC3339 format.",
 			Examples: []string{
 				fmt.Sprintf(
@@ -95,31 +95,31 @@ func (dt Datetime) AvailableFilters() []interface{} {
 			},
 		},
 		filters.FilterDescription{
-			Key: dt.Key + filters.ISNULL_SUFFIX,
+			Key:         dt.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether datetime value exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", dt.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", dt.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", dt.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", dt.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: dt.Key + filters.AFTER_SUFFIX,
+			Key:         dt.Key + filters.AFTER_SUFFIX,
 			Description: "Any datetime values after given time. Single value datetime in RFC3339 format.",
 			Examples: []string{
 				fmt.Sprintf(
 					"?%s=%s",
-					dt.Key + filters.AFTER_SUFFIX,
+					dt.Key+filters.AFTER_SUFFIX,
 					url.QueryEscape(time.Now().Format(time.RFC3339)),
 				),
 			},
 		},
 		filters.FilterDescription{
-			Key: dt.Key + filters.BEFORE_SUFFIX,
+			Key:         dt.Key + filters.BEFORE_SUFFIX,
 			Description: "Any date values before given date. Single value date in RFC3339 format.",
 			Examples: []string{
 				fmt.Sprintf(
 					"?%s=%s",
-					dt.Key + filters.BEFORE_SUFFIX,
+					dt.Key+filters.BEFORE_SUFFIX,
 					url.QueryEscape(time.Now().Format(time.RFC3339)),
 				),
 			},

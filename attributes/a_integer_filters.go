@@ -2,8 +2,8 @@ package attributes
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
 	"strconv"
 	"strings"
 )
@@ -83,32 +83,32 @@ func (f IntegerGreaterFilter) GetWhereArgs() []interface{} {
 func (i Integer) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
-			Key: i.Key,
+			Key:         i.Key,
 			Description: "Exact match on integer value. Single value integer.",
 			Examples: []string{
 				fmt.Sprintf("?%s=1", i.Key),
 			},
 		},
 		filters.FilterDescription{
-			Key: i.Key + filters.ISNULL_SUFFIX,
+			Key:         i.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether integer value exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", i.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", i.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", i.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", i.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: i.Key + filters.LT_SUFFIX,
+			Key:         i.Key + filters.LT_SUFFIX,
 			Description: "Any value less than given integer. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", i.Key + filters.LT_SUFFIX),
+				fmt.Sprintf("?%s=5", i.Key+filters.LT_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: i.Key + filters.GT_SUFFIX,
+			Key:         i.Key + filters.GT_SUFFIX,
 			Description: "Any value greater than given integer. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", i.Key + filters.GT_SUFFIX),
+				fmt.Sprintf("?%s=5", i.Key+filters.GT_SUFFIX),
 			},
 		},
 	}

@@ -2,9 +2,9 @@ package relationships
 
 import (
 	"fmt"
-	"strings"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
+	"strings"
 )
 
 func stringifyPointers(pointers []schema.InstancePointer) []string {
@@ -17,9 +17,10 @@ func stringifyPointers(pointers []schema.InstancePointer) []string {
 
 type GenericForeignKeyNullFilter struct {
 	*schema.BaseFilter
-	null   bool
+	null     bool
 	idColumn string
 }
+
 func (f GenericForeignKeyNullFilter) GetWhereQueries(nextArg int) []string {
 	if f.null {
 		return []string{
@@ -37,9 +38,10 @@ func (f GenericForeignKeyNullFilter) GetWhereArgs() []interface{} {
 
 type GenericForeignKeyTypeFilter struct {
 	*schema.BaseFilter
-	values  []string
+	values     []string
 	typeColumn string
 }
+
 func (f GenericForeignKeyTypeFilter) GetWhereQueries(nextArg int) []string {
 	query := ""
 	if len(f.values) > 1 {
@@ -71,9 +73,10 @@ func (f GenericForeignKeyTypeFilter) GetWhereArgs() []interface{} {
 
 type GenericForeignKeyIDFilter struct {
 	*schema.BaseFilter
-	values  []string
+	values   []string
 	idColumn string
 }
+
 func (f GenericForeignKeyIDFilter) GetWhereQueries(nextArg int) []string {
 	query := ""
 	if len(f.values) > 1 {
@@ -105,10 +108,11 @@ func (f GenericForeignKeyIDFilter) GetWhereArgs() []interface{} {
 
 type GenericForeignKeyExactFilter struct {
 	*schema.BaseFilter
-	values  []schema.InstancePointer
+	values     []schema.InstancePointer
 	typeColumn string
-	idColumn string
+	idColumn   string
 }
+
 func (f GenericForeignKeyExactFilter) GetWhereQueries(nextArg int) []string {
 	query := ""
 	if len(f.values) > 0 {
@@ -124,7 +128,7 @@ func (f GenericForeignKeyExactFilter) GetWhereQueries(nextArg int) []string {
 				f.typeColumn,
 				nextArg,
 				f.idColumn,
-				nextArg + 1,
+				nextArg+1,
 			)
 			nextArg += 2
 		}
@@ -146,7 +150,7 @@ func (f GenericForeignKeyExactFilter) GetWhereArgs() []interface{} {
 func (gfk GenericForeignKey) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
-			Key: gfk.Key,
+			Key:         gfk.Key,
 			Description: "Related item to filter for. One or more pointers in the format 'Type:ID'.",
 			Examples: []string{
 				fmt.Sprintf("?%s=User%%3A1", gfk.Key),
@@ -154,27 +158,27 @@ func (gfk GenericForeignKey) AvailableFilters() []interface{} {
 			},
 		},
 		filters.FilterDescription{
-			Key: gfk.Key + filters.ISNULL_SUFFIX,
+			Key:         gfk.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether related item exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", gfk.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", gfk.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", gfk.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", gfk.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: gfk.Key + filters.TYPE_SUFFIX,
+			Key:         gfk.Key + filters.TYPE_SUFFIX,
 			Description: "Type of related item. One or more valid object types for relation.",
 			Examples: []string{
-				fmt.Sprintf("?%s=User", gfk.Key + filters.TYPE_SUFFIX),
-				fmt.Sprintf("?%s=User&%s=Task", gfk.Key + filters.TYPE_SUFFIX, gfk.Key + filters.TYPE_SUFFIX),
+				fmt.Sprintf("?%s=User", gfk.Key+filters.TYPE_SUFFIX),
+				fmt.Sprintf("?%s=User&%s=Task", gfk.Key+filters.TYPE_SUFFIX, gfk.Key+filters.TYPE_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
-			Key: gfk.Key + filters.ID_SUFFIX,
+			Key:         gfk.Key + filters.ID_SUFFIX,
 			Description: "ID of related item. One or more IDs.",
 			Examples: []string{
-				fmt.Sprintf("?%s=1", gfk.Key + filters.ID_SUFFIX),
-				fmt.Sprintf("?%s=1&%s=2", gfk.Key + filters.ID_SUFFIX, gfk.Key + filters.ID_SUFFIX),
+				fmt.Sprintf("?%s=1", gfk.Key+filters.ID_SUFFIX),
+				fmt.Sprintf("?%s=1&%s=2", gfk.Key+filters.ID_SUFFIX, gfk.Key+filters.ID_SUFFIX),
 			},
 		},
 	}
@@ -203,7 +207,7 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 					QArgKey:    nullKey,
 					QArgValues: []string{"true"},
 				},
-				null:   true,
+				null:     true,
 				idColumn: gfk.IDColumnName,
 			})
 		} else if isNullString == "false" {
@@ -214,7 +218,7 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 					QArgKey:    nullKey,
 					QArgValues: []string{"false"},
 				},
-				null:   false,
+				null:     false,
 				idColumn: gfk.IDColumnName,
 			})
 		} else {
@@ -260,7 +264,7 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    typeKey,
 				QArgValues: compareValues,
 			},
-			values:  compareValues,
+			values:     compareValues,
 			typeColumn: gfk.TypeColumnName,
 		})
 	}
@@ -285,7 +289,7 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    idKey,
 				QArgValues: compareValues,
 			},
-			values:  compareValues,
+			values:   compareValues,
 			idColumn: gfk.IDColumnName,
 		})
 	}
@@ -328,7 +332,7 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 			stringID := splitValue[1]
 			comparePointers = append(comparePointers, schema.InstancePointer{
 				Type: stringType,
-				ID: &stringID,
+				ID:   &stringID,
 			})
 		}
 
@@ -337,9 +341,9 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    exactKey,
 				QArgValues: stringifyPointers(comparePointers),
 			},
-			values:  comparePointers,
+			values:     comparePointers,
 			typeColumn: gfk.TypeColumnName,
-			idColumn: gfk.IDColumnName,
+			idColumn:   gfk.IDColumnName,
 		})
 	}
 

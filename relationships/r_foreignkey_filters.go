@@ -2,9 +2,9 @@ package relationships
 
 import (
 	"fmt"
-	"strings"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
+	"strings"
 )
 
 type ForeignKeyNullFilter struct {
@@ -12,6 +12,7 @@ type ForeignKeyNullFilter struct {
 	null   bool
 	column string
 }
+
 func (f ForeignKeyNullFilter) GetWhereQueries(nextArg int) []string {
 	if f.null {
 		return []string{
@@ -29,9 +30,10 @@ func (f ForeignKeyNullFilter) GetWhereArgs() []interface{} {
 
 type ForeignKeyExactFilter struct {
 	*schema.BaseFilter
-	values  []string
+	values []string
 	column string
 }
+
 func (f ForeignKeyExactFilter) GetWhereQueries(nextArg int) []string {
 	args := []string{}
 	for _, _ = range f.values {
@@ -53,7 +55,7 @@ func (f ForeignKeyExactFilter) GetWhereArgs() []interface{} {
 func (fk ForeignKey) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
-			Key: fk.Key,
+			Key:         fk.Key,
 			Description: "Related item to filter for. One or more IDs.",
 			Examples: []string{
 				fmt.Sprintf("?%s=1", fk.Key),
@@ -61,11 +63,11 @@ func (fk ForeignKey) AvailableFilters() []interface{} {
 			},
 		},
 		filters.FilterDescription{
-			Key: fk.Key + filters.ISNULL_SUFFIX,
+			Key:         fk.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether related item exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", fk.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", fk.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", fk.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", fk.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 	}
@@ -136,7 +138,7 @@ func (fk ForeignKey) ValidateFilters(queries map[string][]string) ([]schema.Filt
 				QArgKey:    exactKey,
 				QArgValues: compareValues,
 			},
-			values:  compareValues,
+			values: compareValues,
 			column: fk.ColumnName,
 		})
 	}

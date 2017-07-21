@@ -2,8 +2,8 @@ package attributes
 
 import (
 	"fmt"
-	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/filters"
+	"github.com/bor3ham/reja/schema"
 	"strings"
 )
 
@@ -48,7 +48,7 @@ func (f BoolExactFilter) GetWhereArgs() []interface{} {
 func (b Bool) AvailableFilters() []interface{} {
 	return []interface{}{
 		filters.FilterDescription{
-			Key: b.Key,
+			Key:         b.Key,
 			Description: "Exact match on bool value. Single value boolean.",
 			Examples: []string{
 				fmt.Sprintf("?%s=true", b.Key),
@@ -56,11 +56,11 @@ func (b Bool) AvailableFilters() []interface{} {
 			},
 		},
 		filters.FilterDescription{
-			Key: b.Key + filters.ISNULL_SUFFIX,
+			Key:         b.Key + filters.ISNULL_SUFFIX,
 			Description: "Whether bool value exists. Single value boolean.",
 			Examples: []string{
-				fmt.Sprintf("?%s=true", b.Key + filters.ISNULL_SUFFIX),
-				fmt.Sprintf("?%s=false", b.Key + filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=true", b.Key+filters.ISNULL_SUFFIX),
+				fmt.Sprintf("?%s=false", b.Key+filters.ISNULL_SUFFIX),
 			},
 		},
 	}
