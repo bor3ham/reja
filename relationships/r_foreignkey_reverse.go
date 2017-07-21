@@ -44,12 +44,12 @@ func (fkr ForeignKeyReverse) GetValues(
 
 	query := fmt.Sprintf(
 		`
-      select
-        %s,
-        %s
-      from %s
-      where %s
-    `,
+			select
+				%s,
+				%s
+			from %s
+			where %s
+		`,
 		fkr.SourceIDColumn,
 		fkr.ColumnName,
 		fkr.SourceTable,

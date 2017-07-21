@@ -87,7 +87,7 @@ func listGET(
 				count(*)
 			from %s
 			%s
-        `,
+		`,
 		m.Table,
 		whereClause,
 	)
