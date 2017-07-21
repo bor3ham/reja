@@ -13,7 +13,7 @@ type BoolNullFilter struct {
 	column string
 }
 
-func (f BoolNullFilter) GetWhereQueries(nextArg int) []string {
+func (f BoolNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -34,7 +34,7 @@ type BoolExactFilter struct {
 	column string
 }
 
-func (f BoolExactFilter) GetWhereQueries(nextArg int) []string {
+func (f BoolExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
 	}

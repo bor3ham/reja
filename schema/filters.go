@@ -4,7 +4,7 @@ type Filter interface {
 	GetQArgKey() string
 	GetQArgValues() []string
 
-	GetWhereQueries(int) []string
+	GetWhereQueries(Context, int) []string
 	GetWhereArgs() []interface{}
 }
 

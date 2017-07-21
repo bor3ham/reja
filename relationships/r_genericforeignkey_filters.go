@@ -21,7 +21,7 @@ type GenericForeignKeyNullFilter struct {
 	idColumn string
 }
 
-func (f GenericForeignKeyNullFilter) GetWhereQueries(nextArg int) []string {
+func (f GenericForeignKeyNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.idColumn),
@@ -42,7 +42,7 @@ type GenericForeignKeyTypeFilter struct {
 	typeColumn string
 }
 
-func (f GenericForeignKeyTypeFilter) GetWhereQueries(nextArg int) []string {
+func (f GenericForeignKeyTypeFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	query := ""
 	if len(f.values) > 1 {
 		query += "("
@@ -77,7 +77,7 @@ type GenericForeignKeyIDFilter struct {
 	idColumn string
 }
 
-func (f GenericForeignKeyIDFilter) GetWhereQueries(nextArg int) []string {
+func (f GenericForeignKeyIDFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	query := ""
 	if len(f.values) > 1 {
 		query += "("
@@ -113,7 +113,7 @@ type GenericForeignKeyExactFilter struct {
 	idColumn   string
 }
 
-func (f GenericForeignKeyExactFilter) GetWhereQueries(nextArg int) []string {
+func (f GenericForeignKeyExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	query := ""
 	if len(f.values) > 0 {
 		if len(f.values) > 1 {

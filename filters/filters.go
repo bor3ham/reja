@@ -11,10 +11,12 @@ const LENGTH_SUFFIX = "__length"
 const GT_SUFFIX = "__gt"
 const LT_SUFFIX = "__lt"
 const CONTAINS_SUFFIX = "__contains"
+const EXCLUDES_SUFFIX = "__excludes"
 const AFTER_SUFFIX = "__after"
 const BEFORE_SUFFIX = "__before"
 const TYPE_SUFFIX = "__type"
 const ID_SUFFIX = "__id"
+const COUNT_SUFFIX = "__count"
 
 type FilterDescription struct {
 	Key         string   `json:"key"`

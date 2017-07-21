@@ -15,7 +15,7 @@ type DatetimeNullFilter struct {
 	column string
 }
 
-func (f DatetimeNullFilter) GetWhereQueries(nextArg int) []string {
+func (f DatetimeNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -36,7 +36,7 @@ type DatetimeExactFilter struct {
 	column string
 }
 
-func (f DatetimeExactFilter) GetWhereQueries(nextArg int) []string {
+func (f DatetimeExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("date_trunc('second', %s) = $%d", f.column, nextArg),
 	}
@@ -53,7 +53,7 @@ type DatetimeAfterFilter struct {
 	column string
 }
 
-func (f DatetimeAfterFilter) GetWhereQueries(nextArg int) []string {
+func (f DatetimeAfterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("date_trunc('second', %s) > $%d", f.column, nextArg),
 	}
@@ -70,7 +70,7 @@ type DatetimeBeforeFilter struct {
 	column string
 }
 
-func (f DatetimeBeforeFilter) GetWhereQueries(nextArg int) []string {
+func (f DatetimeBeforeFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("date_trunc('second', %s) < $%d", f.column, nextArg),
 	}

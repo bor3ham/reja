@@ -13,7 +13,7 @@ type ForeignKeyNullFilter struct {
 	column string
 }
 
-func (f ForeignKeyNullFilter) GetWhereQueries(nextArg int) []string {
+func (f ForeignKeyNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -34,7 +34,7 @@ type ForeignKeyExactFilter struct {
 	column string
 }
 
-func (f ForeignKeyExactFilter) GetWhereQueries(nextArg int) []string {
+func (f ForeignKeyExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	args := []string{}
 	for _, _ = range f.values {
 		args = append(args, fmt.Sprintf("$%d", nextArg))

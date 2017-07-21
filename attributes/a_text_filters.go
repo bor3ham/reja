@@ -14,7 +14,7 @@ type TextNullFilter struct {
 	column string
 }
 
-func (f TextNullFilter) GetWhereQueries(nextArg int) []string {
+func (f TextNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -35,7 +35,7 @@ type TextExactFilter struct {
 	column   string
 }
 
-func (f TextExactFilter) GetWhereQueries(nextArg int) []string {
+func (f TextExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
 	}
@@ -52,7 +52,7 @@ type TextContainsFilter struct {
 	column   string
 }
 
-func (f TextContainsFilter) GetWhereQueries(nextArg int) []string {
+func (f TextContainsFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	where := "("
 	for matchIndex, _ := range f.contains {
 		if matchIndex > 0 {
@@ -84,7 +84,7 @@ type TextLengthExactFilter struct {
 	column string
 }
 
-func (f TextLengthExactFilter) GetWhereQueries(nextArg int) []string {
+func (f TextLengthExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("char_length(%s) = $%d", f.column, nextArg),
 	}
@@ -101,7 +101,7 @@ type TextLengthLesserFilter struct {
 	column string
 }
 
-func (f TextLengthLesserFilter) GetWhereQueries(nextArg int) []string {
+func (f TextLengthLesserFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("char_length(%s) < $%d", f.column, nextArg),
 	}
@@ -118,7 +118,7 @@ type TextLengthGreaterFilter struct {
 	column string
 }
 
-func (f TextLengthGreaterFilter) GetWhereQueries(nextArg int) []string {
+func (f TextLengthGreaterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("char_length(%s) > $%d", f.column, nextArg),
 	}

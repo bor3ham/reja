@@ -14,7 +14,7 @@ type DateNullFilter struct {
 	column string
 }
 
-func (f DateNullFilter) GetWhereQueries(nextArg int) []string {
+func (f DateNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -35,7 +35,7 @@ type DateExactFilter struct {
 	column string
 }
 
-func (f DateExactFilter) GetWhereQueries(nextArg int) []string {
+func (f DateExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
 	}
@@ -52,7 +52,7 @@ type DateAfterFilter struct {
 	column string
 }
 
-func (f DateAfterFilter) GetWhereQueries(nextArg int) []string {
+func (f DateAfterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s > $%d", f.column, nextArg),
 	}
@@ -69,7 +69,7 @@ type DateBeforeFilter struct {
 	column string
 }
 
-func (f DateBeforeFilter) GetWhereQueries(nextArg int) []string {
+func (f DateBeforeFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s < $%d", f.column, nextArg),
 	}

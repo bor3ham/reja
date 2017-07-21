@@ -14,7 +14,7 @@ type IntegerNullFilter struct {
 	column string
 }
 
-func (f IntegerNullFilter) GetWhereQueries(nextArg int) []string {
+func (f IntegerNullFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	if f.null {
 		return []string{
 			fmt.Sprintf("%s is null", f.column),
@@ -35,7 +35,7 @@ type IntegerExactFilter struct {
 	column string
 }
 
-func (f IntegerExactFilter) GetWhereQueries(nextArg int) []string {
+func (f IntegerExactFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s = $%d", f.column, nextArg),
 	}
@@ -52,7 +52,7 @@ type IntegerLesserFilter struct {
 	column string
 }
 
-func (f IntegerLesserFilter) GetWhereQueries(nextArg int) []string {
+func (f IntegerLesserFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s < $%d", f.column, nextArg),
 	}
@@ -69,7 +69,7 @@ type IntegerGreaterFilter struct {
 	column string
 }
 
-func (f IntegerGreaterFilter) GetWhereQueries(nextArg int) []string {
+func (f IntegerGreaterFilter) GetWhereQueries(c schema.Context, nextArg int) []string {
 	return []string{
 		fmt.Sprintf("%s > $%d", f.column, nextArg),
 	}
