@@ -206,10 +206,6 @@ func (t Text) AvailableFilters() []interface{} {
 func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
-	// null check
-	nullsOnly := false
-	nonNullsOnly := false
-
 	nullKey := t.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
@@ -221,7 +217,6 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		isNullString := strings.ToLower(nullStrings[0])
 		if isNullString == "true" {
-			nullsOnly = true
 			valids = append(valids, TextNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -231,8 +226,6 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: t.ColumnName,
 			})
 		} else if isNullString == "false" {
-			nonNullsOnly = true
-			_ = nonNullsOnly
 			valids = append(valids, TextNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -249,26 +242,12 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 	}
 
-	// exact match
-	matchingExact := false
-	exactMatch := ""
-
 	exactKey := t.Key
 	exacts, exists := queries[exactKey]
 	if exists {
-		matchingExact = true
-		exactMatch = exacts[0]
-
 		if len(exacts) != 1 {
 			return filters.Exception(
 				"Cannot exact match attribute '%s' to more than one value.",
-				t.Key,
-			)
-		}
-
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to an exact value and null.",
 				t.Key,
 			)
 		}
@@ -278,18 +257,14 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				QArgKey:    exactKey,
 				QArgValues: exacts,
 			},
-			matching: exactMatch,
+			matching: exacts[0],
 			column:   t.ColumnName,
 		})
 	}
 
-	// length match
-	matchingExactLength := false
 	lengthKey := t.Key + filters.LENGTH_SUFFIX
 	lengths, exists := queries[lengthKey]
 	if exists {
-		matchingExactLength = true
-
 		if len(lengths) != 1 {
 			return filters.Exception(
 				"Cannot length compare attribute '%s' to more than one length.",
@@ -302,19 +277,6 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if err != nil {
 			return filters.Exception(
 				"Invalid length match specified on attribute '%s'.",
-				t.Key,
-			)
-		}
-
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to an exact length and null.",
-				t.Key,
-			)
-		}
-		if matchingExact && len(exactMatch) != lengthInt {
-			return filters.Exception(
-				"Cannot exact match attribute '%s' and also match different length.",
 				t.Key,
 			)
 		}
@@ -332,19 +294,6 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	containsKey := t.Key + filters.CONTAINS_SUFFIX
 	contains, exists := queries[containsKey]
 	if exists {
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to a contained value and null.",
-				t.Key,
-			)
-		}
-		if matchingExact {
-			return filters.Exception(
-				"Cannot exact match attribute '%s' and also look for contained value.",
-				t.Key,
-			)
-		}
-
 		lowerContains := []string{}
 		for _, match := range contains {
 			lowerContains = append(lowerContains, strings.ToLower(match))
@@ -363,25 +312,6 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	lesserKey := t.Key + filters.LENGTH_SUFFIX + filters.LT_SUFFIX
 	lts, exists := queries[lesserKey]
 	if exists {
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to null and compare length.",
-				t.Key,
-			)
-		}
-		if matchingExact {
-			return filters.Exception(
-				"Cannot exact match attribute '%s' and also compare length.",
-				t.Key,
-			)
-		}
-		if matchingExactLength {
-			return filters.Exception(
-				"Cannot exact match attribute '%s' length and also compare length.",
-				t.Key,
-			)
-		}
-
 		if len(lts) != 1 {
 			return filters.Exception(
 				"Cannot compare length of attribute '%s' to more than one value.",
@@ -411,25 +341,6 @@ func (t Text) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 	greaterKey := t.Key + filters.LENGTH_SUFFIX + filters.GT_SUFFIX
 	gts, exists := queries[greaterKey]
 	if exists {
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to null and compare length.",
-				t.Key,
-			)
-		}
-		if matchingExact {
-			return filters.Exception(
-				"Cannot exact match attribute '%s' and also compare length.",
-				t.Key,
-			)
-		}
-		if matchingExactLength {
-			return filters.Exception(
-				"Cannot exact match attribute '%s' length and also compare length.",
-				t.Key,
-			)
-		}
-
 		if len(gts) != 1 {
 			return filters.Exception(
 				"Cannot compare length of attribute '%s' to more than one value.",

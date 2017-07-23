@@ -129,10 +129,6 @@ func (dt Datetime) AvailableFilters() []interface{} {
 func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
-	// null check
-	nullsOnly := false
-	nonNullsOnly := false
-
 	nullKey := dt.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
@@ -144,7 +140,6 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 		}
 		isNullString := strings.ToLower(nullStrings[0])
 		if isNullString == "true" {
-			nullsOnly = true
 			valids = append(valids, DatetimeNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -154,8 +149,6 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 				column: dt.ColumnName,
 			})
 		} else if isNullString == "false" {
-			nonNullsOnly = true
-			_ = nonNullsOnly
 			valids = append(valids, DatetimeNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -182,13 +175,6 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to an exact value and null.",
-				dt.Key,
-			)
-		}
-
 		compareValue, err := time.Parse(time.RFC3339, exactStrings[0])
 		if err == nil {
 			valids = append(valids, DatetimeExactFilter{
@@ -207,9 +193,6 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 		}
 	}
 
-	filteringAfter := false
-	var filteringAfterValue time.Time
-
 	afterKey := dt.Key + filters.AFTER_SUFFIX
 	afterStrings, exists := queries[afterKey]
 	if exists {
@@ -220,18 +203,8 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot compare attribute '%s' to a value and null.",
-				dt.Key,
-			)
-		}
-
 		afterValue, err := time.Parse(time.RFC3339, afterStrings[0])
 		if err == nil {
-			filteringAfter = true
-			filteringAfterValue = afterValue
-
 			valids = append(valids, DatetimeAfterFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    afterKey,
@@ -259,22 +232,8 @@ func (dt Datetime) ValidateFilters(queries map[string][]string) ([]schema.Filter
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot compare attribute '%s' to a value and null.",
-				dt.Key,
-			)
-		}
-
 		beforeValue, err := time.Parse(time.RFC3339, beforeStrings[0])
 		if err == nil {
-			if filteringAfter && beforeValue.Before(filteringAfterValue) {
-				return filters.Exception(
-					"Cannot compare attribute '%s' to value before additional after filter.",
-					dt.Key,
-				)
-			}
-
 			valids = append(valids, DatetimeAfterFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    beforeKey,

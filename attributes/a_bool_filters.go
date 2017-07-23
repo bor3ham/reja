@@ -76,10 +76,6 @@ func (b Bool) AvailableFilters() []interface{} {
 func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
-	// null check
-	nullsOnly := false
-	nonNullsOnly := false
-
 	nullKey := b.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
@@ -91,7 +87,6 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		isNullString := strings.ToLower(nullStrings[0])
 		if isNullString == "true" {
-			nullsOnly = true
 			valids = append(valids, BoolNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -101,8 +96,6 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: b.ColumnName,
 			})
 		} else if isNullString == "false" {
-			nonNullsOnly = true
-			_ = nonNullsOnly
 			valids = append(valids, BoolNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -125,13 +118,6 @@ func (b Bool) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		if len(exactStrings) != 1 {
 			return filters.Exception(
 				"Cannot compare attribute '%s' against more than one value.",
-				b.Key,
-			)
-		}
-
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to an exact value and null.",
 				b.Key,
 			)
 		}

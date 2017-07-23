@@ -116,10 +116,6 @@ func (i Integer) AvailableFilters() []interface{} {
 func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
-	// null check
-	nullsOnly := false
-	nonNullsOnly := false
-
 	nullKey := i.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
@@ -131,7 +127,6 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 		}
 		isNullString := strings.ToLower(nullStrings[0])
 		if isNullString == "true" {
-			nullsOnly = true
 			valids = append(valids, IntegerNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -141,8 +136,6 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 				column: i.ColumnName,
 			})
 		} else if isNullString == "false" {
-			nonNullsOnly = true
-			_ = nonNullsOnly
 			valids = append(valids, IntegerNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -169,13 +162,6 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to an exact value and null.",
-				i.Key,
-			)
-		}
-
 		compareValue, err := strconv.Atoi(exactStrings[0])
 		if err == nil {
 			valids = append(valids, IntegerExactFilter{
@@ -194,9 +180,6 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 		}
 	}
 
-	filteringLesser := false
-	var filteringLesserValue int
-
 	lesserKey := i.Key + filters.LT_SUFFIX
 	lesserStrings, exists := queries[lesserKey]
 	if exists {
@@ -207,18 +190,8 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot compare attribute '%s' to a value and null.",
-				i.Key,
-			)
-		}
-
 		lesserValue, err := strconv.Atoi(lesserStrings[0])
 		if err == nil {
-			filteringLesser = true
-			filteringLesserValue = lesserValue
-
 			valids = append(valids, IntegerLesserFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    lesserKey,
@@ -246,22 +219,8 @@ func (i Integer) ValidateFilters(queries map[string][]string) ([]schema.Filter, 
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot compare attribute '%s' to a value and null.",
-				i.Key,
-			)
-		}
-
 		greaterValue, err := strconv.Atoi(greaterStrings[0])
 		if err == nil {
-			if filteringLesser && greaterValue > filteringLesserValue {
-				return filters.Exception(
-					"Cannot compare attribute '%s' to value greater than additional lesser than filter.",
-					i.Key,
-				)
-			}
-
 			valids = append(valids, IntegerLesserFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    greaterKey,

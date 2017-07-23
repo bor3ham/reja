@@ -125,10 +125,6 @@ func (d Date) AvailableFilters() []interface{} {
 func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, error) {
 	valids := []schema.Filter{}
 
-	// null check
-	nullsOnly := false
-	nonNullsOnly := false
-
 	nullKey := d.Key + filters.ISNULL_SUFFIX
 	nullStrings, exists := queries[nullKey]
 	if exists {
@@ -140,7 +136,6 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 		isNullString := strings.ToLower(nullStrings[0])
 		if isNullString == "true" {
-			nullsOnly = true
 			valids = append(valids, DateNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -150,8 +145,6 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 				column: d.ColumnName,
 			})
 		} else if isNullString == "false" {
-			nonNullsOnly = true
-			_ = nonNullsOnly
 			valids = append(valids, DateNullFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    nullKey,
@@ -178,13 +171,6 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot match attribute '%s' to an exact value and null.",
-				d.Key,
-			)
-		}
-
 		compareValue, err := time.Parse(DATE_LAYOUT, exactStrings[0])
 		if err == nil {
 			valids = append(valids, DateExactFilter{
@@ -204,9 +190,6 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 		}
 	}
 
-	filteringAfter := false
-	var filteringAfterValue time.Time
-
 	afterKey := d.Key + filters.AFTER_SUFFIX
 	afterStrings, exists := queries[afterKey]
 	if exists {
@@ -217,18 +200,8 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot compare attribute '%s' to a value and null.",
-				d.Key,
-			)
-		}
-
 		afterValue, err := time.Parse(DATE_LAYOUT, afterStrings[0])
 		if err == nil {
-			filteringAfter = true
-			filteringAfterValue = afterValue
-
 			valids = append(valids, DateAfterFilter{
 				BaseFilter: &schema.BaseFilter{
 					QArgKey:    afterKey,
@@ -257,38 +230,23 @@ func (d Date) ValidateFilters(queries map[string][]string) ([]schema.Filter, err
 			)
 		}
 
-		if nullsOnly {
-			return filters.Exception(
-				"Cannot compare attribute '%s' to a value and null.",
-				d.Key,
-			)
-		}
-
 		beforeValue, err := time.Parse(DATE_LAYOUT, beforeStrings[0])
-		if err == nil {
-			if filteringAfter && beforeValue.Before(filteringAfterValue) {
-				return filters.Exception(
-					"Cannot compare attribute '%s' to value before additional after filter.",
-					d.Key,
-				)
-			}
-
-			valids = append(valids, DateAfterFilter{
-				BaseFilter: &schema.BaseFilter{
-					QArgKey:    beforeKey,
-					QArgValues: []string{beforeValue.Format(DATE_LAYOUT)},
-				},
-				value:  beforeValue,
-				column: d.ColumnName,
-				after:  false,
-			})
-		} else {
+		if err != nil {
 			return filters.Exception(
 				"Invalid before comparison value on attribute '%s'. Must be date in format %s.",
 				d.Key,
 				DATE_LAYOUT,
 			)
 		}
+		valids = append(valids, DateAfterFilter{
+			BaseFilter: &schema.BaseFilter{
+				QArgKey:    beforeKey,
+				QArgValues: []string{beforeValue.Format(DATE_LAYOUT)},
+			},
+			value:  beforeValue,
+			column: d.ColumnName,
+			after:  false,
+		})
 	}
 
 	return valids, nil
