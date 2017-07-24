@@ -16,6 +16,7 @@ type IntegerNullFilter struct {
 
 func (f IntegerNullFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -41,6 +42,7 @@ type IntegerExactFilter struct {
 
 func (f IntegerExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -63,6 +65,7 @@ type IntegerLesserFilter struct {
 
 func (f IntegerLesserFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (

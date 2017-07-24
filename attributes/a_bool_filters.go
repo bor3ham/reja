@@ -15,6 +15,7 @@ type BoolNullFilter struct {
 
 func (f BoolNullFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -40,6 +41,7 @@ type BoolExactFilter struct {
 
 func (f BoolExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (

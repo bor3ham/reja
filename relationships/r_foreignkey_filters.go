@@ -15,6 +15,7 @@ type ForeignKeyNullFilter struct {
 
 func (f ForeignKeyNullFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -40,6 +41,7 @@ type ForeignKeyExactFilter struct {
 
 func (f ForeignKeyExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (

@@ -17,6 +17,7 @@ type DatetimeNullFilter struct {
 
 func (f DatetimeNullFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -42,6 +43,7 @@ type DatetimeExactFilter struct {
 
 func (f DatetimeExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -64,6 +66,7 @@ type DatetimeAfterFilter struct {
 
 func (f DatetimeAfterFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (

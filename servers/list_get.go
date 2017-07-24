@@ -71,7 +71,7 @@ func listGET(
 	whereQueries := []string{}
 	whereArgs := []interface{}{}
 	for _, filter := range validFilters {
-		queries, args := filter.GetWhere(c, m.IDColumn, len(whereArgs)+1)
+		queries, args := filter.GetWhere(c, m.Table, m.IDColumn, len(whereArgs)+1)
 
 		whereQueries = append(whereQueries, queries...)
 		whereArgs = append(whereArgs, args...)

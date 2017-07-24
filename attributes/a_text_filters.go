@@ -16,6 +16,7 @@ type TextNullFilter struct {
 
 func (f TextNullFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -41,6 +42,7 @@ type TextExactFilter struct {
 
 func (f TextExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -62,6 +64,7 @@ type TextContainsFilter struct {
 
 func (f TextContainsFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -96,6 +99,7 @@ type TextLengthExactFilter struct {
 
 func (f TextLengthExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -118,6 +122,7 @@ type TextLengthLesserFilter struct {
 
 func (f TextLengthLesserFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -143,6 +148,7 @@ type TextLengthGreaterFilter struct {
 
 func (f TextLengthGreaterFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (

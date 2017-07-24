@@ -23,6 +23,7 @@ type GenericForeignKeyNullFilter struct {
 
 func (f GenericForeignKeyNullFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -48,6 +49,7 @@ type GenericForeignKeyTypeFilter struct {
 
 func (f GenericForeignKeyTypeFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -85,6 +87,7 @@ type GenericForeignKeyIDFilter struct {
 
 func (f GenericForeignKeyIDFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
@@ -123,6 +126,7 @@ type GenericForeignKeyExactFilter struct {
 
 func (f GenericForeignKeyExactFilter) GetWhere(
 	c schema.Context,
+	modelTable string,
 	idColumn string,
 	nextArg int,
 ) (
