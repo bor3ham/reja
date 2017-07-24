@@ -81,7 +81,6 @@ type ManyToManyCountFilter struct {
 
 	table         string
 	ownIDColumn   string
-	otherIDColumn string
 	key           string
 
 	value    int
@@ -108,7 +107,7 @@ func (f ManyToManyCountFilter) GetWhere(
 				left join (
 					select
 						%s,
-						count(%s) as count
+						count(*) as count
 					from
 						%s
 					group by
@@ -122,7 +121,6 @@ func (f ManyToManyCountFilter) GetWhere(
 		idColumn,
 		modelTable,
 		f.ownIDColumn,
-		f.otherIDColumn,
 		f.table,
 		f.ownIDColumn,
 		f.ownIDColumn,
@@ -230,7 +228,6 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 
 			table:         m2m.Table,
 			ownIDColumn:   m2m.OwnIDColumn,
-			otherIDColumn: m2m.OtherIDColumn,
 			key:           m2m.Key,
 
 			value:    intValue,
@@ -264,7 +261,6 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 
 			table:         m2m.Table,
 			ownIDColumn:   m2m.OwnIDColumn,
-			otherIDColumn: m2m.OtherIDColumn,
 			key:           m2m.Key,
 
 			value:    intValue,
@@ -298,7 +294,6 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 
 			table:         m2m.Table,
 			ownIDColumn:   m2m.OwnIDColumn,
-			otherIDColumn: m2m.OtherIDColumn,
 			key:           m2m.Key,
 
 			value:    intValue,

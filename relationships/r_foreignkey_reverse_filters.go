@@ -96,20 +96,31 @@ func (f ForeignKeyReverseCountFilter) GetWhere(
 		`
 			select %s from (
 				select
-					count(*) as %s_count,
-					%s
+					%s,
+					coalesce(countselect.count, 0) as total
 				from %s
-				where %s is not null
-				group by %s
-			) as countQuery where countQuery.%s_count %s $1
+					left join (
+						select
+							%s,
+							count(*) as count
+						from
+							%s
+						group by
+							%s
+					)
+					as countselect
+					on countselect.%s = %s.%s
+			) as totalSelect where totalSelect.total %s $1
 		`,
-		f.columnName,
-		f.key,
+		idColumn,
+		idColumn,
+		modelTable,
 		f.columnName,
 		f.sourceTable,
 		f.columnName,
 		f.columnName,
-		f.key,
+		modelTable,
+		idColumn,
 		f.operator,
 	)
 
