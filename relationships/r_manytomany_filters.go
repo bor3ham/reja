@@ -2,22 +2,23 @@ package relationships
 
 import (
 	"fmt"
-	"strings"
-	"strconv"
 	"github.com/bor3ham/reja/filters"
 	"github.com/bor3ham/reja/schema"
+	"strconv"
+	"strings"
 )
 
 type ManyToManyContainsFilter struct {
 	*schema.BaseFilter
 
-	table string
-	ownIDColumn string
+	table         string
+	ownIDColumn   string
 	otherIDColumn string
 
-	values []string
+	values  []string
 	exclude bool
 }
+
 func (f ManyToManyContainsFilter) GetWhere(
 	c schema.Context,
 	modelTable string,
@@ -78,14 +79,15 @@ func (f ManyToManyContainsFilter) GetWhere(
 type ManyToManyCountFilter struct {
 	*schema.BaseFilter
 
-	table string
-	ownIDColumn string
+	table         string
+	ownIDColumn   string
 	otherIDColumn string
-	key string
+	key           string
 
-	value int
+	value    int
 	operator string
 }
+
 func (f ManyToManyCountFilter) GetWhere(
 	c schema.Context,
 	modelTable string,
@@ -170,12 +172,12 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: compareValues,
 			},
 
-			table: m2m.Table,
-			ownIDColumn: m2m.OwnIDColumn,
+			table:         m2m.Table,
+			ownIDColumn:   m2m.OwnIDColumn,
 			otherIDColumn: m2m.OtherIDColumn,
 
-			values:         compareValues,
-			exclude:        false,
+			values:  compareValues,
+			exclude: false,
 		})
 	}
 
@@ -193,12 +195,12 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: compareValues,
 			},
 
-			table: m2m.Table,
-			ownIDColumn: m2m.OwnIDColumn,
+			table:         m2m.Table,
+			ownIDColumn:   m2m.OwnIDColumn,
 			otherIDColumn: m2m.OtherIDColumn,
 
-			values:         compareValues,
-			exclude:        true,
+			values:  compareValues,
+			exclude: true,
 		})
 	}
 
@@ -226,13 +228,13 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table: m2m.Table,
-			ownIDColumn: m2m.OwnIDColumn,
+			table:         m2m.Table,
+			ownIDColumn:   m2m.OwnIDColumn,
 			otherIDColumn: m2m.OtherIDColumn,
-			key:            m2m.Key,
+			key:           m2m.Key,
 
-			value:          intValue,
-			operator:       "=",
+			value:    intValue,
+			operator: "=",
 		})
 	}
 
@@ -260,13 +262,13 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table: m2m.Table,
-			ownIDColumn: m2m.OwnIDColumn,
+			table:         m2m.Table,
+			ownIDColumn:   m2m.OwnIDColumn,
 			otherIDColumn: m2m.OtherIDColumn,
-			key:            m2m.Key,
+			key:           m2m.Key,
 
-			value:          intValue,
-			operator:       "<",
+			value:    intValue,
+			operator: "<",
 		})
 	}
 
@@ -294,13 +296,13 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table: m2m.Table,
-			ownIDColumn: m2m.OwnIDColumn,
+			table:         m2m.Table,
+			ownIDColumn:   m2m.OwnIDColumn,
 			otherIDColumn: m2m.OtherIDColumn,
-			key:            m2m.Key,
+			key:           m2m.Key,
 
-			value:          intValue,
-			operator:       ">",
+			value:    intValue,
+			operator: ">",
 		})
 	}
 

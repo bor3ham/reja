@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/filters"
 	"github.com/bor3ham/reja/schema"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 type ForeignKeyReverseContainsFilter struct {
@@ -76,12 +76,13 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 
 type ForeignKeyReverseCountFilter struct {
 	*schema.BaseFilter
-	key            string
-	columnName     string
-	sourceTable    string
-	value          int
-	operator       string
+	key         string
+	columnName  string
+	sourceTable string
+	value       int
+	operator    string
 }
+
 func (f ForeignKeyReverseCountFilter) GetWhere(
 	c schema.Context,
 	modelTable string,
@@ -158,21 +159,21 @@ func (fkr ForeignKeyReverse) AvailableFilters() []interface{} {
 			Key:         fkr.Key + filters.COUNT_SUFFIX,
 			Description: "Count of related items. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", fkr.Key + filters.COUNT_SUFFIX),
+				fmt.Sprintf("?%s=5", fkr.Key+filters.COUNT_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
 			Key:         fkr.Key + filters.COUNT_SUFFIX + filters.LT_SUFFIX,
 			Description: "Maximum count of related items. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", fkr.Key + filters.COUNT_SUFFIX + filters.LT_SUFFIX),
+				fmt.Sprintf("?%s=5", fkr.Key+filters.COUNT_SUFFIX+filters.LT_SUFFIX),
 			},
 		},
 		filters.FilterDescription{
 			Key:         fkr.Key + filters.COUNT_SUFFIX + filters.GT_SUFFIX,
 			Description: "Minimum count of related items. Single value integer.",
 			Examples: []string{
-				fmt.Sprintf("?%s=5", fkr.Key + filters.COUNT_SUFFIX + filters.GT_SUFFIX),
+				fmt.Sprintf("?%s=5", fkr.Key+filters.COUNT_SUFFIX+filters.GT_SUFFIX),
 			},
 		},
 	}
@@ -245,11 +246,11 @@ func (fkr ForeignKeyReverse) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    exactCountKey,
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
-			key:            fkr.Key,
-			columnName:     fkr.ColumnName,
-			sourceTable:    fkr.SourceTable,
-			value:          intValue,
-			operator:       "=",
+			key:         fkr.Key,
+			columnName:  fkr.ColumnName,
+			sourceTable: fkr.SourceTable,
+			value:       intValue,
+			operator:    "=",
 		})
 	}
 
@@ -276,11 +277,11 @@ func (fkr ForeignKeyReverse) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    lesserCountKey,
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
-			key:            fkr.Key,
-			columnName:     fkr.ColumnName,
-			sourceTable:    fkr.SourceTable,
-			value:          intValue,
-			operator:       "<",
+			key:         fkr.Key,
+			columnName:  fkr.ColumnName,
+			sourceTable: fkr.SourceTable,
+			value:       intValue,
+			operator:    "<",
 		})
 	}
 
@@ -307,11 +308,11 @@ func (fkr ForeignKeyReverse) ValidateFilters(queries map[string][]string) ([]sch
 				QArgKey:    greaterCountKey,
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
-			key:            fkr.Key,
-			columnName:     fkr.ColumnName,
-			sourceTable:    fkr.SourceTable,
-			value:          intValue,
-			operator:       ">",
+			key:         fkr.Key,
+			columnName:  fkr.ColumnName,
+			sourceTable: fkr.SourceTable,
+			value:       intValue,
+			operator:    ">",
 		})
 	}
 
