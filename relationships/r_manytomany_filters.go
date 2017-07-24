@@ -79,9 +79,9 @@ func (f ManyToManyContainsFilter) GetWhere(
 type ManyToManyCountFilter struct {
 	*schema.BaseFilter
 
-	table         string
-	ownIDColumn   string
-	key           string
+	table       string
+	ownIDColumn string
+	key         string
 
 	value    int
 	operator string
@@ -267,9 +267,9 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table:         m2m.Table,
-			ownIDColumn:   m2m.OwnIDColumn,
-			key:           m2m.Key,
+			table:       m2m.Table,
+			ownIDColumn: m2m.OwnIDColumn,
+			key:         m2m.Key,
 
 			value:    intValue,
 			operator: "=",
@@ -300,9 +300,9 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table:         m2m.Table,
-			ownIDColumn:   m2m.OwnIDColumn,
-			key:           m2m.Key,
+			table:       m2m.Table,
+			ownIDColumn: m2m.OwnIDColumn,
+			key:         m2m.Key,
 
 			value:    intValue,
 			operator: "<",
@@ -333,9 +333,9 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table:         m2m.Table,
-			ownIDColumn:   m2m.OwnIDColumn,
-			key:           m2m.Key,
+			table:       m2m.Table,
+			ownIDColumn: m2m.OwnIDColumn,
+			key:         m2m.Key,
 
 			value:    intValue,
 			operator: ">",
