@@ -87,6 +87,47 @@ type ManyToManyCountFilter struct {
 	operator string
 }
 
+func (m2m ManyToMany) AvailableFilters() []interface{} {
+	return []interface{}{
+		filters.FilterDescription{
+			Key:         m2m.Key + filters.CONTAINS_SUFFIX,
+			Description: "Related items to search for in set. One or more IDs.",
+			Examples: []string{
+				fmt.Sprintf("?%s=1", m2m.Key+filters.CONTAINS_SUFFIX),
+				fmt.Sprintf("?%s=1&%s=2", m2m.Key+filters.CONTAINS_SUFFIX, m2m.Key+filters.CONTAINS_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         m2m.Key + filters.EXCLUDES_SUFFIX,
+			Description: "Related items to exclude if appearing in set. One or more IDs.",
+			Examples: []string{
+				fmt.Sprintf("?%s=1", m2m.Key+filters.EXCLUDES_SUFFIX),
+				fmt.Sprintf("?%s=1&%s=2", m2m.Key+filters.EXCLUDES_SUFFIX, m2m.Key+filters.EXCLUDES_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         m2m.Key + filters.COUNT_SUFFIX,
+			Description: "Count of related items. Single value integer.",
+			Examples: []string{
+				fmt.Sprintf("?%s=5", m2m.Key+filters.COUNT_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         m2m.Key + filters.COUNT_SUFFIX + filters.LT_SUFFIX,
+			Description: "Maximum count of related items. Single value integer.",
+			Examples: []string{
+				fmt.Sprintf("?%s=5", m2m.Key+filters.COUNT_SUFFIX+filters.LT_SUFFIX),
+			},
+		},
+		filters.FilterDescription{
+			Key:         m2m.Key + filters.COUNT_SUFFIX + filters.GT_SUFFIX,
+			Description: "Minimum count of related items. Single value integer.",
+			Examples: []string{
+				fmt.Sprintf("?%s=5", m2m.Key+filters.COUNT_SUFFIX+filters.GT_SUFFIX),
+			},
+		},
+	}
+}
 func (f ManyToManyCountFilter) GetWhere(
 	c schema.Context,
 	modelTable string,
