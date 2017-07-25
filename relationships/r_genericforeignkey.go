@@ -129,7 +129,7 @@ func (gfk *GenericForeignKey) DefaultFallback(
 	error,
 ) {
 	var gfkVal Pointer
-	if val != nil {
+	if val == nil {
 		gfkVal = Pointer{Provided: false}
 	} else {
 		var err error
