@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/filters"
 	"github.com/bor3ham/reja/schema"
-	"strings"
 	"github.com/shopspring/decimal"
+	"strings"
 )
 
 type DecimalNullFilter struct {

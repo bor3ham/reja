@@ -1,9 +1,9 @@
 package attributes
 
 import (
-	"time"
 	"errors"
 	"fmt"
+	"time"
 )
 
 type Datetime struct {

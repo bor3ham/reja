@@ -11,14 +11,14 @@ import (
 type GenericForeignKeyReverseContainsFilter struct {
 	*schema.BaseFilter
 
-	table string
+	table         string
 	ownTypeColumn string
-	ownIDColumn string
-	ownType string
+	ownIDColumn   string
+	ownType       string
 	otherIDColumn string
 
-	values         []string
-	exclude        bool
+	values  []string
+	exclude bool
 }
 
 func (f GenericForeignKeyReverseContainsFilter) GetWhere(
@@ -82,15 +82,15 @@ func (f GenericForeignKeyReverseContainsFilter) GetWhere(
 
 type GenericForeignKeyReverseCountFilter struct {
 	*schema.BaseFilter
-	key         string
+	key string
 
-	table string
+	table         string
 	ownTypeColumn string
-	ownIDColumn string
-	ownType string
+	ownIDColumn   string
+	ownType       string
 
-	value       int
-	operator    string
+	value    int
+	operator string
 }
 
 func (f GenericForeignKeyReverseCountFilter) GetWhere(
@@ -219,14 +219,14 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 				QArgValues: compareValues,
 			},
 
-			table: gfkr.Table,
+			table:         gfkr.Table,
 			ownTypeColumn: gfkr.OwnTypeColumn,
-			ownIDColumn: gfkr.OwnIDColumn,
-			ownType: gfkr.OwnType,
+			ownIDColumn:   gfkr.OwnIDColumn,
+			ownType:       gfkr.OwnType,
 			otherIDColumn: gfkr.OtherIDColumn,
 
-			values:         compareValues,
-			exclude:        false,
+			values:  compareValues,
+			exclude: false,
 		})
 	}
 
@@ -244,14 +244,14 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 				QArgValues: compareValues,
 			},
 
-			table: gfkr.Table,
+			table:         gfkr.Table,
 			ownTypeColumn: gfkr.OwnTypeColumn,
-			ownIDColumn: gfkr.OwnIDColumn,
-			ownType: gfkr.OwnType,
+			ownIDColumn:   gfkr.OwnIDColumn,
+			ownType:       gfkr.OwnType,
 			otherIDColumn: gfkr.OtherIDColumn,
 
-			values:         compareValues,
-			exclude:        true,
+			values:  compareValues,
+			exclude: true,
 		})
 	}
 
@@ -279,13 +279,13 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table: gfkr.Table,
+			table:         gfkr.Table,
 			ownTypeColumn: gfkr.OwnTypeColumn,
-			ownIDColumn: gfkr.OwnIDColumn,
-			ownType: gfkr.OwnType,
+			ownIDColumn:   gfkr.OwnIDColumn,
+			ownType:       gfkr.OwnType,
 
-			value:       intValue,
-			operator:    "=",
+			value:    intValue,
+			operator: "=",
 		})
 	}
 
@@ -313,13 +313,13 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table: gfkr.Table,
+			table:         gfkr.Table,
 			ownTypeColumn: gfkr.OwnTypeColumn,
-			ownIDColumn: gfkr.OwnIDColumn,
-			ownType: gfkr.OwnType,
+			ownIDColumn:   gfkr.OwnIDColumn,
+			ownType:       gfkr.OwnType,
 
-			value:       intValue,
-			operator:    "<",
+			value:    intValue,
+			operator: "<",
 		})
 	}
 
@@ -347,13 +347,13 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 				QArgValues: []string{strconv.Itoa(intValue)},
 			},
 
-			table: gfkr.Table,
+			table:         gfkr.Table,
 			ownTypeColumn: gfkr.OwnTypeColumn,
-			ownIDColumn: gfkr.OwnIDColumn,
-			ownType: gfkr.OwnType,
+			ownIDColumn:   gfkr.OwnIDColumn,
+			ownType:       gfkr.OwnType,
 
-			value:       intValue,
-			operator:    ">",
+			value:    intValue,
+			operator: ">",
 		})
 	}
 

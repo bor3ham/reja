@@ -1,13 +1,13 @@
 package servers
 
 import (
-	"github.com/bor3ham/reja/schema"
-	"net/http"
-	"io/ioutil"
-	"fmt"
-	"strings"
 	"encoding/json"
+	"fmt"
+	"github.com/bor3ham/reja/schema"
 	"github.com/davecgh/go-spew/spew"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 func detailPATCH(
