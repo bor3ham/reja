@@ -225,9 +225,11 @@ func (fk *ForeignKey) ValidateUpdate(
 		oldValue = Pointer{Data: &oldPointer}
 	}
 
+	// return nothing if no changes
 	if validNewPointer.Equal(oldValue) {
 		return nil, nil
 	}
+	// otherwise return new validated value
 	return validNewPointer, nil
 }
 
