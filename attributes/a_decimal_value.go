@@ -31,6 +31,14 @@ func (dv *DecimalValue) UnmarshalJSON(data []byte) error {
 	dv.Value = &val
 	return nil
 }
+func (dv DecimalValue) Equal(odv DecimalValue) bool {
+	if dv.Value == nil {
+		return (odv.Value == nil)
+	} else if odv.Value == nil {
+		return false
+	}
+	return (dv.Value.Equals(*odv.Value))
+}
 
 func AssertDecimal(val interface{}, decimalPlaces int32) DecimalValue {
 	dVal, ok := val.(DecimalValue)

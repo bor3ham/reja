@@ -45,8 +45,27 @@ func (d *Decimal) Validate(val interface{}) (interface{}, error) {
 		if !d.Nullable {
 			return nil, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", d.Key))
 		}
+	} else {
+		truncValue := dVal.Value.Truncate(d.DecimalPlaces)
+		dVal.Value = &truncValue
 	}
 	return dVal, nil
+}
+func (d *Decimal) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
+	newDecimal := AssertDecimal(newVal, d.DecimalPlaces)
+	oldDecimal := AssertDecimal(oldVal, d.DecimalPlaces)
+	if !newDecimal.Provided {
+		return nil, nil
+	}
+	valid, err := d.Validate(newDecimal)
+	if err != nil {
+		return nil, err
+	}
+	validNewDecimal := AssertDecimal(valid, d.DecimalPlaces)
+	if validNewDecimal.Equal(oldDecimal) {
+		return nil, nil
+	}
+	return validNewDecimal, nil
 }
 
 func (d *Decimal) GetInsertColumns(val interface{}) []string {

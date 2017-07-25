@@ -46,6 +46,22 @@ func (i *Integer) Validate(val interface{}) (interface{}, error) {
 	}
 	return iVal, nil
 }
+func (i *Integer) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
+	newInteger := AssertInteger(newVal)
+	oldInteger := AssertInteger(oldVal)
+	if !newInteger.Provided {
+		return nil, nil
+	}
+	valid, err := i.Validate(newInteger)
+	if err != nil {
+		return nil, err
+	}
+	validNewInteger := AssertInteger(valid)
+	if validNewInteger.Equal(oldInteger) {
+		return nil, nil
+	}
+	return validNewInteger, nil
+}
 
 func (i *Integer) GetInsertColumns(val interface{}) []string {
 	var columns []string

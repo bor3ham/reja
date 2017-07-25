@@ -49,6 +49,22 @@ func (d *Date) Validate(val interface{}) (interface{}, error) {
 	}
 	return dVal, nil
 }
+func (d *Date) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
+	newDate := AssertDate(newVal)
+	oldDate := AssertDate(oldVal)
+	if !newDate.Provided {
+		return nil, nil
+	}
+	valid, err := d.Validate(newDate)
+	if err != nil {
+		return nil, err
+	}
+	validNewDate := AssertDate(valid)
+	if validNewDate.Equal(oldDate) {
+		return nil, nil
+	}
+	return validNewDate, nil
+}
 
 func (d *Date) GetInsertColumns(val interface{}) []string {
 	var columns []string

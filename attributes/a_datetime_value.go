@@ -35,6 +35,14 @@ func (dtv *DatetimeValue) UnmarshalJSON(data []byte) error {
 	dtv.Value = &val
 	return nil
 }
+func (dtv DatetimeValue) Equal(odtv DatetimeValue) bool {
+	if dtv.Value == nil {
+		return (odtv.Value == nil)
+	} else if odtv.Value == nil {
+		return false
+	}
+	return (dtv.Value.Equal(*odtv.Value))
+}
 
 func AssertDatetime(val interface{}) DatetimeValue {
 	dtVal, ok := val.(DatetimeValue)

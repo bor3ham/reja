@@ -35,6 +35,14 @@ func (dv *DateValue) UnmarshalJSON(data []byte) error {
 	dv.Value = &val
 	return nil
 }
+func (dv DateValue) Equal(odv DateValue) bool {
+	if dv.Value == nil {
+		return (odv.Value == nil)
+	} else if odv.Value == nil {
+		return false
+	}
+	return (dv.Value.Equal(*odv.Value))
+}
 
 func AssertDate(val interface{}) DateValue {
 	dVal, ok := val.(DateValue)
