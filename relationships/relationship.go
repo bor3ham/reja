@@ -10,6 +10,15 @@ type Pointer struct {
 	Data     *schema.InstancePointer `json:"data"`
 }
 
+func (p Pointer) Equal(op Pointer) bool {
+	if p.Data == nil {
+		return (op.Data == nil)
+	} else if op.Data == nil {
+		return false
+	}
+	return p.Data.Equal(*op.Data)
+}
+
 type PointerSet struct {
 	Provided bool                     `json:"-"`
 	Data     []schema.InstancePointer `json:"data"`
@@ -50,6 +59,16 @@ func (stub RelationshipStub) DefaultFallback(
 }
 func (stub RelationshipStub) Validate(c schema.Context, val interface{}) (interface{}, error) {
 	return val, nil
+}
+func (stub RelationshipStub) ValidateUpdate(
+	c schema.Context,
+	newVal interface{},
+	oldVal interface{},
+) (
+	interface{},
+	error,
+) {
+	return nil, nil
 }
 func (stub RelationshipStub) GetInsertColumns(val interface{}) []string {
 	return []string{}

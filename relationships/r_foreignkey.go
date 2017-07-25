@@ -185,6 +185,51 @@ func (fk *ForeignKey) Validate(c schema.Context, val interface{}) (interface{}, 
 	}
 	return fkVal, nil
 }
+func (fk *ForeignKey) ValidateUpdate(
+	c schema.Context,
+	newVal interface{},
+	oldVal interface{},
+) (
+	interface{},
+	error,
+) {
+	// extract new value
+	newPointer, err := ParseResultPointer(newVal)
+	if err != nil {
+		return nil, err
+	}
+	// if not provided, return nothing
+	if !newPointer.Provided {
+		return nil, nil
+	}
+	// clean and check validity of new value
+	valid, err := fk.Validate(c, newPointer)
+	if err != nil {
+		return nil, err
+	}
+	validNewPointer := AssertPointer(valid)
+
+	// extract old value
+	oldResult, ok := oldVal.(schema.Result)
+	if !ok {
+		panic("Bad old foreign key value")
+	}
+	var oldValue Pointer
+	if oldResult.Data == nil {
+		oldValue = Pointer{}
+	} else {
+		oldPointer, ok := oldResult.Data.(schema.InstancePointer)
+		if !ok {
+			panic("Bad old foreign key value")
+		}
+		oldValue = Pointer{Data: &oldPointer}
+	}
+
+	if validNewPointer.Equal(oldValue) {
+		return nil, nil
+	}
+	return validNewPointer, nil
+}
 
 func (fk *ForeignKey) GetInsertColumns(val interface{}) []string {
 	return []string{

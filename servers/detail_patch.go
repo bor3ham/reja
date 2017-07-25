@@ -71,15 +71,13 @@ func detailPATCH(
 	}
 	// and all relationships
 	for _, relation := range m.Relationships {
-		_ = relation
-		// if values[valueIndex] != nil {
-		// 	values[valueIndex], err = relation.Validate(c, values[valueIndex])
-		// 	if err != nil {
-		// 		BadRequest(c, w, "Bad Relationship Value", err.Error())
-		// 		return
-		// 	}
-		// }
-		updates[valueIndex] = nil
+		if updates[valueIndex] != nil {
+			updates[valueIndex], err = relation.ValidateUpdate(c, updates[valueIndex], originals[valueIndex])
+			if err != nil {
+				BadRequest(c, w, "Bad Relationship Value", err.Error())
+				return
+			}
+		}
 		valueIndex += 1
 	}
 
@@ -103,10 +101,16 @@ func detailPATCH(
 		}
 		valueIndex += 1
 	}
-	for _, relationship := range m.Relationships {
-		_ = relationship
+	for _, relation := range m.Relationships {
 		value := updates[valueIndex]
 		if value != nil {
+			columns := relation.GetInsertColumns(value)
+			values := relation.GetInsertValues(value)
+			for index, column := range columns {
+				updateKeys = append(updateKeys, fmt.Sprintf("%s = $%d", column, nextArgIndex))
+				updateArgs = append(updateArgs, values[index])
+				nextArgIndex += 1
+			}
 		}
 		valueIndex += 1
 	}

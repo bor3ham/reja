@@ -30,4 +30,5 @@ type Relationship interface {
 
 	DefaultFallback(Context, interface{}, interface{}) (interface{}, error)
 	Validate(Context, interface{}) (interface{}, error)
+	ValidateUpdate(Context, interface{}, interface{}) (interface{}, error)
 }
