@@ -3,6 +3,7 @@ package attributes
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type Text struct {
@@ -45,6 +46,8 @@ func (t *Text) Validate(val interface{}) (interface{}, error) {
 			return textVal, errors.New(fmt.Sprintf("Attribute '%s' cannot be null.", t.Key))
 		}
 	} else {
+		trimmedValue := strings.TrimSpace(*textVal.Value)
+		textVal.Value = &trimmedValue
 		if t.MinLength != nil && len(*textVal.Value) < *t.MinLength {
 			if *t.MinLength == 1 {
 				return nil, errors.New(fmt.Sprintf(
@@ -67,6 +70,22 @@ func (t *Text) Validate(val interface{}) (interface{}, error) {
 		}
 	}
 	return textVal, nil
+}
+func (t *Text) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
+	newText := AssertText(newVal)
+	oldText := AssertText(oldVal)
+	if !newText.Provided {
+		return nil, nil
+	}
+	valid, err := t.Validate(newText)
+	if err != nil {
+		return nil, err
+	}
+	validNewText := AssertText(valid)
+	if validNewText.Equal(oldText) {
+		return nil, nil
+	}
+	return validNewText, nil
 }
 
 func (t *Text) GetInsertColumns(val interface{}) []string {

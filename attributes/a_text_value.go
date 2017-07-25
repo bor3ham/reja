@@ -26,6 +26,14 @@ func (tv *TextValue) UnmarshalJSON(data []byte) error {
 	tv.Value = &val
 	return nil
 }
+func (tv TextValue) Equal(otv TextValue) bool {
+	if tv.Value == nil {
+		return (otv.Value == nil)
+	} else if otv.Value == nil {
+		return false
+	}
+	return (*tv.Value == *otv.Value)
+}
 
 func AssertText(val interface{}) TextValue {
 	textVal, ok := val.(TextValue)

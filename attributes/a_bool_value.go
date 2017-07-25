@@ -26,6 +26,14 @@ func (bv *BoolValue) UnmarshalJSON(data []byte) error {
 	bv.Value = &val
 	return nil
 }
+func (bv BoolValue) Equal(obv BoolValue) bool {
+	if bv.Value == nil {
+		return (obv.Value == nil)
+	} else if obv.Value == nil {
+		return false
+	}
+	return (*bv.Value == *obv.Value)
+}
 
 func AssertBool(val interface{}) BoolValue {
 	bVal, ok := val.(BoolValue)

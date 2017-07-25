@@ -80,6 +80,9 @@ func (rc *RequestContext) InitCache() {
 	rc.InstanceCache.Instances = map[string]map[string]CachedInstance{}
 	rc.InstanceCache.Unlock()
 }
+func (rc *RequestContext) FlushCache() {
+	rc.InitCache()
+}
 func (rc *RequestContext) CacheObject(object schema.Instance, relationMap map[string]map[string][]string) {
 	rc.InstanceCache.Lock()
 	model := object.GetType()

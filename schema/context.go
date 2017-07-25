@@ -16,6 +16,7 @@ type Context interface {
 	Begin() (Transaction, error)
 
 	InitCache()
+	FlushCache()
 	CacheObject(Instance, map[string]map[string][]string)
 	GetCachedObject(string, string) (Instance, map[string]map[string][]string)
 	GetObjectsByIDs(*Model, []string, *Include) ([]Instance, []Instance, error)

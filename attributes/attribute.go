@@ -28,6 +28,9 @@ func (stub AttributeStub) DefaultFallback(
 func (stub AttributeStub) Validate(val interface{}) (interface{}, error) {
 	return val, nil
 }
+func (stub AttributeStub) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
+	return nil, nil
+}
 func (stub AttributeStub) GetInsertColumns(val interface{}) []string {
 	return []string{}
 }

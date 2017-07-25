@@ -46,6 +46,22 @@ func (b *Bool) Validate(val interface{}) (interface{}, error) {
 	}
 	return boolVal, nil
 }
+func (b *Bool) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
+	newBool := AssertBool(newVal)
+	oldBool := AssertBool(oldVal)
+	if !newBool.Provided {
+		return nil, nil
+	}
+	valid, err := b.Validate(newBool)
+	if err != nil {
+		return nil, err
+	}
+	validNewBool := AssertBool(valid)
+	if validNewBool.Equal(oldBool) {
+		return nil, nil
+	}
+	return validNewBool, nil
+}
 
 func (b *Bool) GetInsertColumns(val interface{}) []string {
 	var columns []string
