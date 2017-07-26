@@ -123,15 +123,13 @@ func detailPATCH(
 	}
 
 	updateQueries := []schema.Query{}
-	valueIndex = 0
-	valueIndex += len(m.Attributes)
+	valueIndex = len(m.Attributes)
 	for _, relation := range m.Relationships {
 		value := updates[valueIndex]
-		if value == nil {
-			continue
+		if value != nil {
+			original := originals[valueIndex]
+			updateQueries = append(updateQueries, relation.GetUpdateQueries(id, original, value)...)
 		}
-		original := originals[valueIndex]
-		updateQueries = append(updateQueries, relation.GetUpdateQueries(id, original, value)...)
 		valueIndex += 1
 	}
 

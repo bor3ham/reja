@@ -18,6 +18,7 @@ type GenericForeignKeyReverse struct {
 	OtherIDColumn string
 	OtherType     string
 	Default       func(schema.Context, interface{}) PointerSet
+	Nullable      bool
 }
 
 func (gfkr GenericForeignKeyReverse) GetKey() string {
@@ -223,6 +224,54 @@ func (gfkr *GenericForeignKeyReverse) Validate(
 	}
 	return gfkrVal, nil
 }
+func (gfkr *GenericForeignKeyReverse) ValidateUpdate(
+	c schema.Context,
+	newVal interface{},
+	oldVal interface{},
+) (
+	interface{},
+	error,
+) {
+	// extract new value
+	newPointer, err := ParsePagePointerSet(newVal)
+	if err != nil {
+		return nil, err
+	}
+	// if not provided, return nothing
+	if !newPointer.Provided {
+		return nil, nil
+	}
+	// clean and check validity of new value
+	valid, err := gfkr.Validate(c, newPointer)
+	if err != nil {
+		return nil, err
+	}
+	validNewPointerSet := AssertPointerSet(valid)
+
+	// extract old value
+	oldValue := pointerSetFromPage(oldVal)
+
+	// return nothing if no changes
+	if validNewPointerSet.Equal(oldValue) {
+		return nil, nil
+	}
+	// check if a value has been removed if not nullable
+	if !gfkr.Nullable {
+		oldCounts := oldValue.Counts()
+		newCounts := validNewPointerSet.Counts()
+		for key, _ := range oldCounts {
+			_, exists := newCounts[key]
+			if !exists {
+				return nil, errors.New(fmt.Sprintf(
+					"Relationship '%s' invalid: Cannot remove item from non nullable reverse relation.",
+					gfkr.Key,
+				))
+			}
+		}
+	}
+	// otherwise return new validated value
+	return validNewPointerSet, nil
+}
 
 func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 	newId string,
@@ -259,6 +308,68 @@ func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 			},
 		},
 	}
+}
+
+func (gfkr *GenericForeignKeyReverse) GetUpdateQueries(id string, oldVal interface{}, newVal interface{}) []schema.Query {
+	oldSet := pointerSetFromPage(oldVal)
+	newSet, ok := newVal.(PointerSet)
+	if !ok {
+		panic("Bad pointer set value")
+	}
+
+	queries := []schema.Query{}
+
+	oldCount := oldSet.Counts()
+	newCount := newSet.Counts()
+
+	nulling := []string{}
+	for key, _ := range oldCount {
+		_, exists := newCount[key]
+		if !exists {
+			splitKey := strings.Split(key, ":")
+			nulling = append(nulling, splitKey[1])
+		}
+	}
+	if len(nulling) > 0 {
+		queries = append(queries, schema.Query{
+			Query: fmt.Sprintf(
+				"update %s set (%s = null, %s = null) where %s in (%s)",
+				gfkr.Table,
+				gfkr.OwnIDColumn,
+				gfkr.OwnTypeColumn,
+				gfkr.OtherIDColumn,
+				strings.Join(nulling, ", "),
+			),
+			Args: []interface{}{},
+		})
+	}
+
+	adding := []string{}
+	for key, _ := range newCount {
+		_, exists := oldCount[key]
+		if !exists {
+			splitKey := strings.Split(key, ":")
+			adding = append(adding, splitKey[1])
+		}
+	}
+	if len(adding) > 0 {
+		queries = append(queries, schema.Query{
+			Query: fmt.Sprintf(
+				"update %s set %s = %s, %s = $1 where %s in (%s)",
+				gfkr.Table,
+				gfkr.OwnIDColumn,
+				id,
+				gfkr.OwnTypeColumn,
+				gfkr.OtherIDColumn,
+				strings.Join(adding, ", "),
+			),
+			Args: []interface{}{
+				gfkr.OwnType,
+			},
+		})
+	}
+
+	return queries
 }
 
 func AssertGenericForeignKeyReverse(val interface{}) schema.Page {
