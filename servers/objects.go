@@ -96,6 +96,18 @@ func combineRelations(
 	return combinedMap
 }
 
+func (rc *RequestContext) GetObjectsByIDsAllRelations(
+	m *schema.Model,
+	objectIds []string,
+	include *schema.Include,
+) (
+	[]schema.Instance,
+	[]schema.Instance,
+	error,
+) {
+	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, 0, 0, include, true)
+}
+
 func (rc *RequestContext) GetObjectsByIDs(
 	m *schema.Model,
 	objectIds []string,
@@ -105,7 +117,7 @@ func (rc *RequestContext) GetObjectsByIDs(
 	[]schema.Instance,
 	error,
 ) {
-	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, 0, 0, include)
+	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, 0, 0, include, false)
 }
 
 func (rc *RequestContext) GetObjectsByFilter(
@@ -120,7 +132,7 @@ func (rc *RequestContext) GetObjectsByFilter(
 	[]schema.Instance,
 	error,
 ) {
-	return rc.getObjects(m, []string{}, whereQueries, whereArgs, offset, limit, include)
+	return rc.getObjects(m, []string{}, whereQueries, whereArgs, offset, limit, include, false)
 }
 
 func (rc *RequestContext) getObjects(
@@ -135,6 +147,8 @@ func (rc *RequestContext) getObjects(
 	limit int,
 
 	include *schema.Include,
+	// whether to include all related items or use indirect pagination
+	allRelations bool,
 ) (
 	[]schema.Instance,
 	[]schema.Instance,
@@ -251,7 +265,7 @@ func (rc *RequestContext) getObjects(
 					relationExtras = append(relationExtras, result[index])
 				}
 
-				values, maps := relation.GetValues(rc, m, ids, relationExtras)
+				values, maps := relation.GetValues(rc, m, ids, relationExtras, allRelations)
 				relationResults <- RelationResult{
 					Index:        index,
 					Key:          relation.GetKey(),

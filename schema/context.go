@@ -20,6 +20,7 @@ type Context interface {
 	CacheObject(Instance, map[string]map[string][]string)
 	GetCachedObject(string, string) (Instance, map[string]map[string][]string)
 	GetObjectsByIDs(*Model, []string, *Include) ([]Instance, []Instance, error)
+	GetObjectsByIDsAllRelations(*Model, []string, *Include) ([]Instance, []Instance, error)
 	GetObjectsByFilter(
 		*Model,
 		[]string,

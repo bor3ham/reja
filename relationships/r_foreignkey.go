@@ -40,6 +40,7 @@ func (fk ForeignKey) GetValues(
 	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
+	allRelations bool,
 ) (
 	map[string]interface{},
 	map[string]map[string][]string,

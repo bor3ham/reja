@@ -22,7 +22,7 @@ func detailPATCH(
 	noInclude := schema.Include{
 		Children: map[string]*schema.Include{},
 	}
-	instances, _, err := c.GetObjectsByIDs(m, []string{id}, &noInclude)
+	instances, _, err := c.GetObjectsByIDsAllRelations(m, []string{id}, &noInclude)
 	if err != nil {
 		panic(err)
 	}
@@ -114,7 +114,7 @@ func detailPATCH(
 		}
 		valueIndex += 1
 	}
-	spew.Dump(updates)
+	spew.Dump(instance)
 
 	// start a transaction
 	tx, err := c.Begin()

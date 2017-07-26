@@ -60,7 +60,7 @@ func RelationHandler(
 			extraVariables = append(extraVariables, vars)
 		}
 	}
-	values, _ := relationship.GetValues(rc, m, []string{id}, extraVariables)
+	values, _ := relationship.GetValues(rc, m, []string{id}, extraVariables, false)
 	defaultValue := relationship.GetDefaultValue()
 	var responseBlob interface{}
 	responseBlob, exists := values[id]

@@ -33,6 +33,7 @@ func (m2m ManyToMany) GetValues(
 	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
+	allRelations bool,
 ) (
 	map[string]interface{},
 	map[string]map[string][]string,
@@ -73,7 +74,10 @@ func (m2m ManyToMany) GetValues(
 	}
 	// go through result data
 	server := c.GetServer()
-	pageSize := server.GetIndirectPageSize()
+	pageSize := -1
+	if !allRelations {
+		pageSize = server.GetIndirectPageSize()
+	}
 	for rows.Next() {
 		var myID, otherID string
 		rows.Scan(&myID, &otherID)
@@ -99,7 +103,7 @@ func (m2m ManyToMany) GetValues(
 		maps[myID][m2m.OtherType] = append(maps[myID][m2m.OtherType], otherID)
 
 		total += 1
-		if total <= pageSize {
+		if pageSize < 0 || total <= pageSize {
 			count += 1
 			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherID,

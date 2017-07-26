@@ -39,6 +39,9 @@ func GetPaginationLinks(
 	extraQueries map[string][]string,
 ) map[string]*string {
 	links := map[string]*string{}
+	if pageSize < 0 {
+		return links
+	}
 
 	// calculate what the last page would be
 	lastPage := int(math.Ceil(float64(totalItems) / float64(pageSize)))
