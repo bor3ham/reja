@@ -210,6 +210,53 @@ func (gfk *GenericForeignKey) Validate(c schema.Context, val interface{}) (inter
 	}
 	return gfkVal, nil
 }
+func (gfk *GenericForeignKey) ValidateUpdate(
+	c schema.Context,
+	newVal interface{},
+	oldVal interface{},
+) (
+	interface{},
+	error,
+) {
+	// extract new value
+	newPointer, err := ParseResultPointer(newVal)
+	if err != nil {
+		return nil, err
+	}
+	// if not provided, return nothing
+	if !newPointer.Provided {
+		return nil, nil
+	}
+	// clean and check validity of new value
+	valid, err := gfk.Validate(c, newPointer)
+	if err != nil {
+		return nil, err
+	}
+	validNewPointer := AssertPointer(valid)
+
+	// extract old value
+	oldResult, ok := oldVal.(schema.Result)
+	if !ok {
+		panic("Bad old generic foreign key value")
+	}
+	var oldValue Pointer
+	if oldResult.Data == nil {
+		oldValue = Pointer{}
+	} else {
+		oldPointer, ok := oldResult.Data.(schema.InstancePointer)
+		if !ok {
+			panic("Bad old generic foreign key value")
+		}
+		oldValue = Pointer{Data: &oldPointer}
+	}
+
+	// return nothing if no changes
+	if validNewPointer.Equal(oldValue) {
+		return nil, nil
+	}
+	// otherwise return new validated value
+	return validNewPointer, nil
+}
 
 func (gfk *GenericForeignKey) GetInsertColumns(val interface{}) []string {
 	return []string{
