@@ -28,6 +28,7 @@ type Relationship interface {
 	GetInsertColumns(interface{}) []string
 	GetInsertValues(interface{}) []interface{}
 	GetInsertQueries(string, interface{}) []Query
+	GetUpdateQueries(string, interface{}, interface{}) []Query
 
 	DefaultFallback(Context, interface{}, interface{}) (interface{}, error)
 	Validate(Context, interface{}) (interface{}, error)

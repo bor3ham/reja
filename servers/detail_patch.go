@@ -114,12 +114,29 @@ func detailPATCH(
 		}
 		valueIndex += 1
 	}
-	spew.Dump(instance)
+	spew.Dump(updates)
 
 	// start a transaction
 	tx, err := c.Begin()
 	if err != nil {
 		panic(err)
+	}
+
+	updateQueries := []schema.Query{}
+	valueIndex = 0
+	valueIndex += len(m.Attributes)
+	for _, relation := range m.Relationships {
+		value := updates[valueIndex]
+		if value == nil {
+			continue
+		}
+		original := originals[valueIndex]
+		updateQueries = append(updateQueries, relation.GetUpdateQueries(id, original, value)...)
+		valueIndex += 1
+	}
+
+	for _, query := range updateQueries {
+		tx.Exec(query.Query, query.Args...)
 	}
 
 	if len(updateKeys) > 0 {

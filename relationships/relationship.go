@@ -24,6 +24,68 @@ type PointerSet struct {
 	Data     []schema.InstancePointer `json:"data"`
 }
 
+func (ps PointerSet) Counts() map[string]int {
+	counts := map[string]int{}
+	if ps.Data == nil {
+		return counts
+	}
+	for _, pointer := range ps.Data {
+		key := pointer.Type + ":"
+		if pointer.ID == nil {
+			key += "nil"
+		} else {
+			key += *pointer.ID
+		}
+		_, exists := counts[key]
+		if exists {
+			counts[key] += 1
+		} else {
+			counts[key] = 1
+		}
+	}
+	return counts
+}
+func (ps PointerSet) Equal(ops PointerSet) bool {
+	if ps.Data == nil {
+		return (ops.Data == nil)
+	} else if ops.Data == nil {
+		return false
+	}
+	psCounts := ps.Counts()
+	opsCounts := ops.Counts()
+	for key, count := range psCounts {
+		oCount, exists := opsCounts[key]
+		if !exists || oCount != count {
+			return false
+		}
+	}
+	for key, count := range opsCounts {
+		oCount, exists := psCounts[key]
+		if !exists || oCount != count {
+			return false
+		}
+	}
+	return true
+}
+
+func pointerSetFromPage(val interface{}) PointerSet {
+	asPage, ok := val.(schema.Page)
+	if !ok {
+		panic("Bad page value")
+	}
+	dataSet := []schema.InstancePointer{}
+	if asPage.Data != nil {
+		for _, item := range asPage.Data {
+			asInstance, ok := item.(schema.InstancePointer)
+			if !ok {
+				panic("Bad instance value in page value")
+			}
+			dataSet = append(dataSet, asInstance)
+		}
+	}
+	return PointerSet{Data: dataSet}
+}
+
 type RelationshipStub struct{}
 
 func (stub RelationshipStub) GetSelectDirectColumns() []string {
@@ -77,6 +139,9 @@ func (stub RelationshipStub) GetInsertValues(val interface{}) []interface{} {
 	return []interface{}{}
 }
 func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []schema.Query {
+	return []schema.Query{}
+}
+func (stub RelationshipStub) GetUpdateQueries(id string, oldVal interface{}, newVal interface{}) []schema.Query {
 	return []schema.Query{}
 }
 
