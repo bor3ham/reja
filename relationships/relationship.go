@@ -19,6 +19,21 @@ func (p Pointer) Equal(op Pointer) bool {
 	return p.Data.Equal(*op.Data)
 }
 
+func pointerFromResult(val interface{}) Pointer {
+	asResult, ok := val.(schema.Result)
+	if !ok {
+		panic("Bad result value")
+	}
+	if asResult.Data == nil {
+		return Pointer{}
+	}
+	asPointer, ok := asResult.Data.(schema.InstancePointer)
+	if !ok {
+		panic("Bad pointer value in result value")
+	}
+	return Pointer{Data: &asPointer}
+}
+
 type PointerSet struct {
 	Provided bool                     `json:"-"`
 	Data     []schema.InstancePointer `json:"data"`

@@ -211,23 +211,10 @@ func (fk *ForeignKey) ValidateUpdate(
 	validNewPointer := AssertPointer(valid)
 
 	// extract old value
-	oldResult, ok := oldVal.(schema.Result)
-	if !ok {
-		panic("Bad old foreign key value")
-	}
-	var oldValue Pointer
-	if oldResult.Data == nil {
-		oldValue = Pointer{}
-	} else {
-		oldPointer, ok := oldResult.Data.(schema.InstancePointer)
-		if !ok {
-			panic("Bad old foreign key value")
-		}
-		oldValue = Pointer{Data: &oldPointer}
-	}
+	oldPointer := pointerFromResult(oldVal)
 
 	// return nothing if no changes
-	if validNewPointer.Equal(oldValue) {
+	if validNewPointer.Equal(oldPointer) {
 		return nil, nil
 	}
 	// otherwise return new validated value
