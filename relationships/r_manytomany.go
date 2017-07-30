@@ -213,6 +213,40 @@ func (m2m *ManyToMany) Validate(c schema.Context, val interface{}) (interface{},
 	}
 	return m2mVal, nil
 }
+func (m2m *ManyToMany) ValidateUpdate(
+	c schema.Context,
+	newVal interface{},
+	oldVal interface{},
+) (
+	interface{},
+	error,
+) {
+	// extract new value
+	newPointer, err := ParsePagePointerSet(newVal)
+	if err != nil {
+		return nil, err
+	}
+	// if not provided, return nothing
+	if !newPointer.Provided {
+		return nil, nil
+	}
+	// clean and check validity of new value
+	valid, err := m2m.Validate(c, newPointer)
+	if err != nil {
+		return nil, err
+	}
+	validNewPointerSet := AssertPointerSet(valid)
+
+	// extract old value
+	oldValue := pointerSetFromPage(oldVal)
+
+	// return nothing if no changes
+	if validNewPointerSet.Equal(oldValue) {
+		return nil, nil
+	}
+	// otherwise return new validated value
+	return validNewPointerSet, nil
+}
 
 func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []schema.Query {
 	m2mVal, ok := val.(PointerSet)
@@ -235,6 +269,72 @@ func (m2m *ManyToMany) GetInsertQueries(newId string, val interface{}) []schema.
 			},
 		})
 	}
+	return queries
+}
+func (m2m *ManyToMany) GetUpdateQueries(
+	id string,
+	oldVal interface{},
+	newVal interface{},
+) (
+	[]schema.Query,
+) {
+	oldSet := pointerSetFromPage(oldVal)
+	newSet, ok := newVal.(PointerSet)
+	if !ok {
+		panic("Bad pointer set value")
+	}
+
+	queries := []schema.Query{}
+
+	oldCount := oldSet.Counts()
+	newCount := newSet.Counts()
+
+	nulling := []string{}
+	for key, _ := range oldCount {
+		_, exists := newCount[key]
+		if !exists {
+			splitKey := strings.Split(key, ":")
+			nulling = append(nulling, splitKey[1])
+		}
+	}
+	if len(nulling) > 0 {
+		queries = append(queries, schema.Query{
+			Query: fmt.Sprintf(
+				"delete from %s where %s = $1 and %s in (%s)",
+				m2m.Table,
+				m2m.OwnIDColumn,
+				m2m.OtherIDColumn,
+				strings.Join(nulling, ", "),
+			),
+			Args: []interface{}{
+				id,
+			},
+		})
+	}
+
+	adding := []string{}
+	for key, _ := range newCount {
+		_, exists := oldCount[key]
+		if !exists {
+			splitKey := strings.Split(key, ":")
+			adding = append(adding, splitKey[1])
+		}
+	}
+	for _, newItem := range adding {
+		queries = append(queries, schema.Query{
+			Query: fmt.Sprintf(
+				"insert into %s (%s, %s) values ($1, $2)",
+				m2m.Table,
+				m2m.OwnIDColumn,
+				m2m.OtherIDColumn,
+			),
+			Args: []interface{}{
+				id,
+				newItem,
+			},
+		})
+	}
+
 	return queries
 }
 
