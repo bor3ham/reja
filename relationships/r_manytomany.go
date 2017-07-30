@@ -275,9 +275,7 @@ func (m2m *ManyToMany) GetUpdateQueries(
 	id string,
 	oldVal interface{},
 	newVal interface{},
-) (
-	[]schema.Query,
-) {
+) []schema.Query {
 	oldSet := pointerSetFromPage(oldVal)
 	newSet, ok := newVal.(PointerSet)
 	if !ok {
