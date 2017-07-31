@@ -17,12 +17,9 @@ func (b Bool) GetKey() string {
 	return b.Key
 }
 
-func (b Bool) GetSelectDirectColumns() []string {
-	return []string{b.ColumnName}
-}
-func (b Bool) GetSelectDirectVariables() []interface{} {
+func (b Bool) GetSelectDirect() ([]string, []interface{}) {
 	var destination *bool
-	return []interface{}{
+	return []string{b.ColumnName}, []interface{}{
 		&destination,
 	}
 }

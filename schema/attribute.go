@@ -3,8 +3,7 @@ package schema
 type Attribute interface {
 	GetKey() string
 
-	GetSelectDirectColumns() []string
-	GetSelectDirectVariables() []interface{}
+	GetSelectDirect() ([]string, []interface{})
 
 	GetOrderMap() map[string]string
 

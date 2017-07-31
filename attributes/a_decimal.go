@@ -19,12 +19,9 @@ func (d Decimal) GetKey() string {
 	return d.Key
 }
 
-func (d Decimal) GetSelectDirectColumns() []string {
-	return []string{d.ColumnName}
-}
-func (d Decimal) GetSelectDirectVariables() []interface{} {
+func (d Decimal) GetSelectDirect() ([]string, []interface{}) {
 	var destination *decimal.Decimal
-	return []interface{}{
+	return []string{d.ColumnName}, []interface{}{
 		&destination,
 	}
 }

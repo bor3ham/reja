@@ -4,8 +4,6 @@ type Relationship interface {
 	GetKey() string
 	GetType() string
 
-	GetSelectDirectColumns() []string
-	GetSelectDirectVariables() []interface{}
 	GetSelectExtraColumns() []string
 	GetSelectExtraVariables() []interface{}
 

@@ -103,12 +103,6 @@ func pointerSetFromPage(val interface{}) PointerSet {
 
 type RelationshipStub struct{}
 
-func (stub RelationshipStub) GetSelectDirectColumns() []string {
-	return []string{}
-}
-func (stub RelationshipStub) GetSelectDirectVariables() []interface{} {
-	return []interface{}{}
-}
 func (stub RelationshipStub) GetSelectExtraColumns() []string {
 	return []string{}
 }

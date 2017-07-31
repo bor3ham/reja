@@ -18,12 +18,9 @@ func (dt Datetime) GetKey() string {
 	return dt.Key
 }
 
-func (dt Datetime) GetSelectDirectColumns() []string {
-	return []string{dt.ColumnName}
-}
-func (dt Datetime) GetSelectDirectVariables() []interface{} {
+func (dt Datetime) GetSelectDirect() ([]string, []interface{}) {
 	var destination *time.Time
-	return []interface{}{
+	return []string{dt.ColumnName}, []interface{}{
 		&destination,
 	}
 }

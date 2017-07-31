@@ -20,12 +20,9 @@ func (t Text) GetKey() string {
 	return t.Key
 }
 
-func (t Text) GetSelectDirectColumns() []string {
-	return []string{t.ColumnName}
-}
-func (t Text) GetSelectDirectVariables() []interface{} {
+func (t Text) GetSelectDirect() ([]string, []interface{}) {
 	var destination *string
-	return []interface{}{
+	return []string{t.ColumnName}, []interface{}{
 		&destination,
 	}
 }
