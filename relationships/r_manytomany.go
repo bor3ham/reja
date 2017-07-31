@@ -41,19 +41,72 @@ func (m2m ManyToMany) GetValues(
 	if len(ids) == 0 {
 		return map[string]interface{}{}, map[string]map[string][]string{}
 	}
+
+	server := c.GetServer()
+	otherModel := server.GetModel(m2m.OtherType)
+	order, _, err := otherModel.GetOrderQuery(otherModel.DefaultOrder)
+	if err != nil {
+		panic(err)
+	}
+
+	orderArgsCombined := strings.TrimLeft(order, "order by ")
+	orderArgs := strings.Split(orderArgsCombined, ", ")
+	orderColumns := []string{}
+	for _, arg := range orderArgs {
+		column := strings.TrimSuffix(arg, " desc")
+		if column == otherModel.IDColumn {
+			continue
+		}
+		orderColumns = append(orderColumns, column)
+	}
+
+	orderSelects := ""
+	orderQuery := ""
+	if len(orderArgs) > 0 {
+		if len(orderColumns) > 0 {
+			orderSelects = ", " + strings.Join(orderColumns, ", ")
+		}
+		orderQuery = "order by "
+		for index, arg := range orderArgs {
+			if index != 0 {
+				orderQuery += ", "
+			}
+			orderQuery += "sorters."
+			orderQuery += arg
+		}
+	}
+
 	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(ids, ", "))
 	query := fmt.Sprintf(
 		`
 			select
-				%s,
-				%s
-			from %s
-			where %s
+				relation.%s,
+				relation.%s
+			from (
+				select
+					%s,
+					%s
+				from %s
+				where %s
+			) as relation
+			left join (
+				select %s%s from %s
+			) as sorters
+			on sorters.%s = relation.%s
+			%s
 	    `,
+		m2m.OwnIDColumn,
+		m2m.OtherIDColumn,
 		m2m.OwnIDColumn,
 		m2m.OtherIDColumn,
 		m2m.Table,
 		filter,
+		otherModel.IDColumn,
+		orderSelects,
+		otherModel.Table,
+		otherModel.IDColumn,
+		m2m.OtherIDColumn,
+		orderQuery,
 	)
 	rows, err := c.Query(query)
 	if err != nil {
@@ -73,7 +126,6 @@ func (m2m ManyToMany) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	server := c.GetServer()
 	pageSize := -1
 	if !allRelations {
 		pageSize = server.GetIndirectPageSize()

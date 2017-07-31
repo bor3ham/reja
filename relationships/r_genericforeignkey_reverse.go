@@ -45,6 +45,13 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		return map[string]interface{}{}, map[string]map[string][]string{}
 	}
 
+	server := c.GetServer()
+	otherModel := server.GetModel(gfkr.OtherType)
+	order, _, err := otherModel.GetOrderQuery(otherModel.DefaultOrder)
+	if err != nil {
+		panic(err)
+	}
+
 	idFilter := fmt.Sprintf("%s in (%s)", gfkr.OwnIDColumn, strings.Join(ids, ", "))
 	typeFilter := fmt.Sprintf("%s = $1", gfkr.OwnTypeColumn)
 	query := fmt.Sprintf(
@@ -54,12 +61,14 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 				%s
 			from %s
 			where (%s and %s)
+			%s
 	    `,
 		gfkr.OtherIDColumn,
 		gfkr.OwnIDColumn,
 		gfkr.Table,
 		idFilter,
 		typeFilter,
+		order,
 	)
 	rows, err := c.Query(query, gfkr.OwnType)
 	if err != nil {
@@ -79,7 +88,6 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	server := c.GetServer()
 	pageSize := -1
 	if !allRelations {
 		pageSize = server.GetIndirectPageSize()
