@@ -49,30 +49,32 @@ func (m2m ManyToMany) GetValues(
 		panic(err)
 	}
 
-	orderArgsCombined := strings.TrimLeft(order, "order by ")
-	orderArgs := strings.Split(orderArgsCombined, ", ")
-	orderColumns := []string{}
-	for _, arg := range orderArgs {
-		column := strings.TrimSuffix(arg, " desc")
-		if column == otherModel.IDColumn {
-			continue
-		}
-		orderColumns = append(orderColumns, column)
-	}
-
 	orderSelects := ""
 	orderQuery := ""
-	if len(orderArgs) > 0 {
-		if len(orderColumns) > 0 {
-			orderSelects = ", " + strings.Join(orderColumns, ", ")
-		}
-		orderQuery = "order by "
-		for index, arg := range orderArgs {
-			if index != 0 {
-				orderQuery += ", "
+	orderArgsCombined := strings.TrimLeft(order, "order by ")
+	if len(orderArgsCombined) > 0 {
+		orderArgs := strings.Split(orderArgsCombined, ", ")
+		orderColumns := []string{}
+		for _, arg := range orderArgs {
+			column := strings.TrimSuffix(arg, " desc")
+			if column == otherModel.IDColumn || len(column) == 0 {
+				continue
 			}
-			orderQuery += "sorters."
-			orderQuery += arg
+			orderColumns = append(orderColumns, column)
+		}
+
+		if len(orderArgs) > 0 {
+			if len(orderColumns) > 0 {
+				orderSelects = ", " + strings.Join(orderColumns, ", ")
+			}
+			orderQuery = "order by "
+			for index, arg := range orderArgs {
+				if index != 0 {
+					orderQuery += ", "
+				}
+				orderQuery += "sorters."
+				orderQuery += arg
+			}
 		}
 	}
 
