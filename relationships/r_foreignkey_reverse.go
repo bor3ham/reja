@@ -44,6 +44,13 @@ func (fkr ForeignKeyReverse) GetValues(
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
 
+	server := c.GetServer()
+	otherModel := server.GetModel(fkr.Type)
+	order, _, err := otherModel.GetOrderQuery(otherModel.DefaultOrder)
+	if err != nil {
+		panic(err)
+	}
+
 	query := fmt.Sprintf(
 		`
 			select
@@ -51,11 +58,13 @@ func (fkr ForeignKeyReverse) GetValues(
 				%s
 			from %s
 			where %s
+			%s
 		`,
 		fkr.SourceIDColumn,
 		fkr.ColumnName,
 		fkr.SourceTable,
 		filter,
+		order,
 	)
 	rows, err := c.Query(query)
 	if err != nil {
@@ -75,7 +84,6 @@ func (fkr ForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	server := c.GetServer()
 	pageSize := -1
 	if !allRelations {
 		pageSize = server.GetIndirectPageSize()
