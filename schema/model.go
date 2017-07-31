@@ -1,9 +1,9 @@
 package schema
 
 import (
+	"errors"
 	"fmt"
 	"strings"
-	"errors"
 )
 
 type Model struct {
