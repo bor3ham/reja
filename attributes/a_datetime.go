@@ -28,6 +28,12 @@ func (dt Datetime) GetSelectDirectVariables() []interface{} {
 	}
 }
 
+func (dt Datetime) GetOrderMap() map[string]string {
+	orders := map[string]string{}
+	orders[dt.Key] = dt.ColumnName
+	return orders
+}
+
 func (dt *Datetime) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	dtVal := AssertDatetime(val)
 	if !dtVal.Provided {

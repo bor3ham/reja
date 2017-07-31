@@ -6,6 +6,10 @@ import (
 
 type AttributeStub struct{}
 
+func (stub AttributeStub) GetOrderMap() map[string]string {
+	return map[string]string{}
+}
+
 func (stub AttributeStub) AvailableFilters() []interface{} {
 	return []interface{}{}
 }

@@ -25,6 +25,7 @@ type Context interface {
 		*Model,
 		[]string,
 		[]interface{},
+		string,
 		int,
 		int,
 		*Include,

@@ -29,6 +29,12 @@ func (d Decimal) GetSelectDirectVariables() []interface{} {
 	}
 }
 
+func (d Decimal) GetOrderMap() map[string]string {
+	orders := map[string]string{}
+	orders[d.Key] = d.ColumnName
+	return orders
+}
+
 func (d *Decimal) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	dVal := AssertDecimal(val, d.DecimalPlaces)
 	if !dVal.Provided {

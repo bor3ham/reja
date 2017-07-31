@@ -27,6 +27,12 @@ func (b Bool) GetSelectDirectVariables() []interface{} {
 	}
 }
 
+func (b Bool) GetOrderMap() map[string]string {
+	orders := map[string]string{}
+	orders[b.Key] = b.ColumnName
+	return orders
+}
+
 func (b *Bool) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	boolVal := AssertBool(val)
 	if !boolVal.Provided {

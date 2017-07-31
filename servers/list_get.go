@@ -11,6 +11,8 @@ import (
 	// "github.com/davecgh/go-spew/spew"
 )
 
+const ORDER_ARG = "order"
+
 func listGET(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -97,10 +99,71 @@ func listGET(
 		panic(err)
 	}
 
+	// extract ordering
+	validatedOrderParam := ""
+	orderQueryArgs := []string{}
+	validOrders := map[string]string{
+		"id": m.IDColumn,
+	}
+	for _, attribute := range m.Attributes {
+		attrOrders := attribute.GetOrderMap()
+		for key, arg := range attrOrders {
+			validOrders[key] = arg
+		}
+	}
+	orders, err := GetStringParam(queryStrings, ORDER_ARG, "Ordering", m.DefaultOrder)
+	if err != nil {
+		BadRequest(c, w, "Bad Ordering Parameter", err.Error())
+		return
+	}
+	splitOrders := strings.Split(orders, ",")
+	orderedColumns := map[string]bool{}
+	for _, order := range splitOrders {
+		cleanOrder := strings.ToLower(strings.TrimSpace(order))
+		if len(cleanOrder) == 0 {
+			continue
+		}
+		posCleanOrder := strings.TrimPrefix(cleanOrder, "-")
+		column, exists := validOrders[posCleanOrder]
+		if !exists {
+			BadRequest(c, w, "Bad Ordering Parameter", fmt.Sprintf(
+				"Cannot order by '%s'.",
+				cleanOrder,
+			))
+			return
+		}
+		_, exists = orderedColumns[column]
+		if exists {
+			BadRequest(c, w, "Bad Ordering Parameter", "Cannot order by the same column twice.")
+			return
+		}
+		orderedColumns[column] = true
+		query := column
+		if posCleanOrder != cleanOrder {
+			query += " desc"
+		}
+		orderQueryArgs = append(orderQueryArgs, query)
+		if len(validatedOrderParam) != 0 {
+			validatedOrderParam += ","
+		}
+		validatedOrderParam += cleanOrder
+	}
+	orderQuery := ""
+	if len(orderQueryArgs) > 0 {
+		orderQuery = fmt.Sprintf(
+			"order by %s",
+			strings.Join(orderQueryArgs, ", "),
+		)
+	}
+	if validatedOrderParam == m.DefaultOrder {
+		validatedOrderParam = ""
+	}
+
 	instances, included, err := c.GetObjectsByFilter(
 		m,
 		whereQueries,
 		whereArgs,
+		orderQuery,
 		offset,
 		pageSize,
 		include,
@@ -110,6 +173,9 @@ func listGET(
 	}
 
 	validQueries := map[string][]string{}
+	if len(validatedOrderParam) > 0 {
+		validQueries[ORDER_ARG] = []string{validatedOrderParam}
+	}
 	validIncludeQuery := include.AsString()
 	if len(validIncludeQuery) > 0 {
 		validQueries["include"] = []string{validIncludeQuery}

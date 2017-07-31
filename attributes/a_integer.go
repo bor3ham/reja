@@ -27,6 +27,12 @@ func (i Integer) GetSelectDirectVariables() []interface{} {
 	}
 }
 
+func (i Integer) GetOrderMap() map[string]string {
+	orders := map[string]string{}
+	orders[i.Key] = i.ColumnName
+	return orders
+}
+
 func (i *Integer) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	iVal := AssertInteger(val)
 	if !iVal.Provided {

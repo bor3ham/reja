@@ -4,6 +4,7 @@ type Model struct {
 	Type          string
 	Table         string
 	IDColumn      string
+	DefaultOrder  string
 	Attributes    []Attribute
 	Relationships []Relationship
 	Manager       Manager

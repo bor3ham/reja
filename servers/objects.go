@@ -105,7 +105,7 @@ func (rc *RequestContext) GetObjectsByIDsAllRelations(
 	[]schema.Instance,
 	error,
 ) {
-	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, 0, 0, include, true)
+	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, "", 0, 0, include, true)
 }
 
 func (rc *RequestContext) GetObjectsByIDs(
@@ -117,13 +117,14 @@ func (rc *RequestContext) GetObjectsByIDs(
 	[]schema.Instance,
 	error,
 ) {
-	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, 0, 0, include, false)
+	return rc.getObjects(m, objectIds, []string{}, []interface{}{}, "", 0, 0, include, false)
 }
 
 func (rc *RequestContext) GetObjectsByFilter(
 	m *schema.Model,
 	whereQueries []string,
 	whereArgs []interface{},
+	orderQuery string,
 	offset int,
 	limit int,
 	include *schema.Include,
@@ -132,7 +133,7 @@ func (rc *RequestContext) GetObjectsByFilter(
 	[]schema.Instance,
 	error,
 ) {
-	return rc.getObjects(m, []string{}, whereQueries, whereArgs, offset, limit, include, false)
+	return rc.getObjects(m, []string{}, whereQueries, whereArgs, orderQuery, offset, limit, include, false)
 }
 
 func (rc *RequestContext) getObjects(
@@ -143,6 +144,7 @@ func (rc *RequestContext) getObjects(
 	// or if no ids provided, by filters
 	whereQueries []string,
 	whereArgs []interface{},
+	orderQuery string,
 	offset int,
 	limit int,
 
@@ -204,6 +206,7 @@ func (rc *RequestContext) getObjects(
 					%s
 				from %s
 				%s
+				%s
 				limit %d
 				offset %d
 	    	`,
@@ -211,6 +214,7 @@ func (rc *RequestContext) getObjects(
 			strings.Join(columns, ","),
 			m.Table,
 			whereClause,
+			orderQuery,
 			limit,
 			offset,
 		)

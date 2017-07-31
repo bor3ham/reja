@@ -30,6 +30,12 @@ func (t Text) GetSelectDirectVariables() []interface{} {
 	}
 }
 
+func (t Text) GetOrderMap() map[string]string {
+	orders := map[string]string{}
+	orders[t.Key] = t.ColumnName
+	return orders
+}
+
 func (t *Text) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
 	if val == nil || !AssertText(val).Provided {
 		if t.Default != nil {
