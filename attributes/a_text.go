@@ -94,15 +94,10 @@ func (t *Text) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface
 	return validNewText, nil
 }
 
-func (t *Text) GetInsertColumns(val interface{}) []string {
-	var columns []string
-	columns = append(columns, t.ColumnName)
-	return columns
-}
-func (t *Text) GetInsertValues(val interface{}) []interface{} {
+func (t *Text) GetInsert(val interface{}) ([]string, []interface{}) {
 	textVal := AssertText(val)
 
-	var values []interface{}
-	values = append(values, textVal.Value)
-	return values
+	columns := []string{t.ColumnName}
+	values := []interface{}{textVal.Value}
+	return columns, values
 }

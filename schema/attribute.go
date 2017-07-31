@@ -16,6 +16,5 @@ type Attribute interface {
 	Validate(interface{}) (interface{}, error)
 	ValidateUpdate(interface{}, interface{}) (interface{}, error)
 
-	GetInsertColumns(interface{}) []string
-	GetInsertValues(interface{}) []interface{}
+	GetInsert(interface{}) ([]string, []interface{})
 }

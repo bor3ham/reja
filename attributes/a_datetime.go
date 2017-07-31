@@ -70,15 +70,10 @@ func (dt *Datetime) ValidateUpdate(newVal interface{}, oldVal interface{}) (inte
 	return validNewDatetime, nil
 }
 
-func (dt *Datetime) GetInsertColumns(val interface{}) []string {
-	var columns []string
-	columns = append(columns, dt.ColumnName)
-	return columns
-}
-func (dt *Datetime) GetInsertValues(val interface{}) []interface{} {
+func (dt *Datetime) GetInsert(val interface{}) ([]string, []interface{}) {
 	dtVal := AssertDatetime(val)
 
-	var values []interface{}
-	values = append(values, dtVal.Value)
-	return values
+	columns := []string{dt.ColumnName}
+	values := []interface{}{dtVal.Value}
+	return columns, values
 }

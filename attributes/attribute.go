@@ -35,9 +35,6 @@ func (stub AttributeStub) Validate(val interface{}) (interface{}, error) {
 func (stub AttributeStub) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface{}, error) {
 	return nil, nil
 }
-func (stub AttributeStub) GetInsertColumns(val interface{}) []string {
-	return []string{}
-}
-func (stub AttributeStub) GetInsertValues(val interface{}) []interface{} {
-	return []interface{}{}
+func (stub AttributeStub) GetInsert(val interface{}) ([]string, []interface{}) {
+	return []string{}, []interface{}{}
 }

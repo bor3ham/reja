@@ -69,15 +69,10 @@ func (i *Integer) ValidateUpdate(newVal interface{}, oldVal interface{}) (interf
 	return validNewInteger, nil
 }
 
-func (i *Integer) GetInsertColumns(val interface{}) []string {
-	var columns []string
-	columns = append(columns, i.ColumnName)
-	return columns
-}
-func (i *Integer) GetInsertValues(val interface{}) []interface{} {
+func (i *Integer) GetInsert(val interface{}) ([]string, []interface{}) {
 	iVal := AssertInteger(val)
 
-	var values []interface{}
-	values = append(values, iVal.Value)
-	return values
+	columns := []string{i.ColumnName}
+	values := []interface{}{iVal.Value}
+	return columns, values
 }

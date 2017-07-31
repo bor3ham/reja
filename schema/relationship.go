@@ -25,8 +25,7 @@ type Relationship interface {
 		map[string]map[string][]string,
 	)
 
-	GetInsertColumns(interface{}) []string
-	GetInsertValues(interface{}) []interface{}
+	GetInsert(interface{}) ([]string, []interface{})
 	GetInsertQueries(string, interface{}) []Query
 	GetUpdateQueries(string, interface{}, interface{}) []Query
 

@@ -246,21 +246,21 @@ func (gfk *GenericForeignKey) ValidateUpdate(
 	return validNewPointer, nil
 }
 
-func (gfk *GenericForeignKey) GetInsertColumns(val interface{}) []string {
-	return []string{
+func (gfk *GenericForeignKey) GetInsert(val interface{}) ([]string, []interface{}) {
+	resultVal := AssertPointer(val)
+
+	columns := []string{
 		gfk.TypeColumnName,
 		gfk.IDColumnName,
 	}
-}
-func (gfk *GenericForeignKey) GetInsertValues(val interface{}) []interface{} {
-	resultVal := AssertPointer(val)
+
 	if resultVal.Data == nil {
-		return []interface{}{
+		return columns, []interface{}{
 			nil,
 			nil,
 		}
 	}
-	return []interface{}{
+	return columns, []interface{}{
 		resultVal.Data.Type,
 		resultVal.Data.ID,
 	}

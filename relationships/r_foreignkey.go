@@ -221,19 +221,19 @@ func (fk *ForeignKey) ValidateUpdate(
 	return validNewPointer, nil
 }
 
-func (fk *ForeignKey) GetInsertColumns(val interface{}) []string {
-	return []string{
+func (fk *ForeignKey) GetInsert(val interface{}) ([]string, []interface{}) {
+	resultVal := AssertPointer(val)
+
+	columns := []string{
 		fk.ColumnName,
 	}
-}
-func (fk *ForeignKey) GetInsertValues(val interface{}) []interface{} {
-	resultVal := AssertPointer(val)
+
 	if resultVal.Data == nil {
-		return []interface{}{
+		return columns, []interface{}{
 			nil,
 		}
 	}
-	return []interface{}{
+	return columns, []interface{}{
 		resultVal.Data.ID,
 	}
 }

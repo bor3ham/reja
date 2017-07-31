@@ -94,8 +94,9 @@ func listPOST(
 		// skip nil values (use database default)
 		value := values[valueIndex]
 		if value != nil {
-			insertColumns = append(insertColumns, attribute.GetInsertColumns(value)...)
-			insertValues = append(insertValues, attribute.GetInsertValues(value)...)
+			columns, values := attribute.GetInsert(value)
+			insertColumns = append(insertColumns, columns...)
+			insertValues = append(insertValues, values...)
 		}
 		valueIndex += 1
 	}
@@ -103,8 +104,9 @@ func listPOST(
 		// skip nil values (use database default)
 		value := values[valueIndex]
 		if value != nil {
-			insertColumns = append(insertColumns, relationship.GetInsertColumns(value)...)
-			insertValues = append(insertValues, relationship.GetInsertValues(value)...)
+			columns, values := relationship.GetInsert(value)
+			insertColumns = append(insertColumns, columns...)
+			insertValues = append(insertValues, values...)
 		}
 		valueIndex += 1
 	}

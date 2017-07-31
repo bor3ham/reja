@@ -91,8 +91,7 @@ func detailPATCH(
 		// skip nil values (use database default)
 		value := updates[valueIndex]
 		if value != nil {
-			columns := attribute.GetInsertColumns(value)
-			values := attribute.GetInsertValues(value)
+			columns, values := attribute.GetInsert(value)
 			for index, column := range columns {
 				updateKeys = append(updateKeys, fmt.Sprintf("%s = $%d", column, nextArgIndex))
 				updateArgs = append(updateArgs, values[index])
@@ -104,8 +103,7 @@ func detailPATCH(
 	for _, relation := range m.Relationships {
 		value := updates[valueIndex]
 		if value != nil {
-			columns := relation.GetInsertColumns(value)
-			values := relation.GetInsertValues(value)
+			columns, values := relation.GetInsert(value)
 			for index, column := range columns {
 				updateKeys = append(updateKeys, fmt.Sprintf("%s = $%d", column, nextArgIndex))
 				updateArgs = append(updateArgs, values[index])

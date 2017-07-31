@@ -72,15 +72,10 @@ func (d *Date) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface
 	return validNewDate, nil
 }
 
-func (d *Date) GetInsertColumns(val interface{}) []string {
-	var columns []string
-	columns = append(columns, d.ColumnName)
-	return columns
-}
-func (d *Date) GetInsertValues(val interface{}) []interface{} {
+func (d *Date) GetInsert(val interface{}) ([]string, []interface{}) {
 	dateVal := AssertDate(val)
 
-	var values []interface{}
-	values = append(values, dateVal.Value)
-	return values
+	columns := []string{d.ColumnName}
+	values := []interface{}{dateVal.Value}
+	return columns, values
 }

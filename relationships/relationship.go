@@ -147,11 +147,8 @@ func (stub RelationshipStub) ValidateUpdate(
 ) {
 	return nil, nil
 }
-func (stub RelationshipStub) GetInsertColumns(val interface{}) []string {
-	return []string{}
-}
-func (stub RelationshipStub) GetInsertValues(val interface{}) []interface{} {
-	return []interface{}{}
+func (stub RelationshipStub) GetInsert(val interface{}) ([]string, []interface{}) {
+	return []string{}, []interface{}{}
 }
 func (stub RelationshipStub) GetInsertQueries(newId string, val interface{}) []schema.Query {
 	return []schema.Query{}

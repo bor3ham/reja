@@ -69,15 +69,10 @@ func (b *Bool) ValidateUpdate(newVal interface{}, oldVal interface{}) (interface
 	return validNewBool, nil
 }
 
-func (b *Bool) GetInsertColumns(val interface{}) []string {
-	var columns []string
-	columns = append(columns, b.ColumnName)
-	return columns
-}
-func (b *Bool) GetInsertValues(val interface{}) []interface{} {
+func (b *Bool) GetInsert(val interface{}) ([]string, []interface{}) {
 	boolVal := AssertBool(val)
 
-	var values []interface{}
-	values = append(values, boolVal.Value)
-	return values
+	columns := []string{b.ColumnName}
+	values := []interface{}{boolVal.Value}
+	return columns, values
 }
