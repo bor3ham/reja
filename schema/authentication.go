@@ -8,5 +8,5 @@ type User interface {
 }
 
 type Authenticator interface {
-	GetUser(*http.Request) (User, error)
+	GetUser(http.ResponseWriter, *http.Request) (User, error)
 }

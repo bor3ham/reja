@@ -1,14 +1,11 @@
 package servers
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
-	"github.com/mailru/easyjson"
 	"net/http"
 	"strings"
-	// "github.com/davecgh/go-spew/spew"
 )
 
 const ORDER_ARG = "order"
@@ -170,17 +167,5 @@ func listGET(
 		responseBlob.Included = &generalIncluded
 	}
 
-	if c.GetServer().UseEasyJSON() {
-		_, _, err = easyjson.MarshalToHTTPResponseWriter(responseBlob, w)
-	} else {
-		encoder := json.NewEncoder(w)
-		if c.GetServer().Whitespace() {
-			encoder.SetIndent("", "    ")
-		}
-		encoder.SetEscapeHTML(false)
-		err = encoder.Encode(responseBlob)
-	}
-	if err != nil {
-		panic(err)
-	}
+	c.WriteToResponse(responseBlob)
 }

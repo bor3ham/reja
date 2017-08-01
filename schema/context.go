@@ -8,6 +8,7 @@ import (
 type Context interface {
 	GetServer() Server
 	GetRequest() *http.Request
+	WriteToResponse(blob interface{})
 
 	SetUser(User)
 	GetUser() User

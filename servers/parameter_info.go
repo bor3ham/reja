@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"encoding/json"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
 )
@@ -12,7 +11,11 @@ func ParameterInfoHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	rc := NewRequestContext(s, r)
+	rc := NewRequestContext(s, w, r)
+	err := rc.Authenticate()
+	if err != nil {
+		return
+	}
 
 	filters := []interface{}{}
 	for _, attribute := range m.Attributes {
@@ -28,15 +31,6 @@ func ParameterInfoHandler(
 		Filters: filters,
 	}
 
-	encoder := json.NewEncoder(w)
-	if rc.GetServer().Whitespace() {
-		encoder.SetIndent("", "    ")
-	}
-	encoder.SetEscapeHTML(false)
-	err := encoder.Encode(responseBlob)
-	if err != nil {
-		panic(err)
-	}
-
+	rc.WriteToResponse(responseBlob)
 	rc.LogStats()
 }

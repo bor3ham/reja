@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/gorilla/mux"
@@ -16,7 +15,11 @@ func RelationHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	rc := NewRequestContext(s, r)
+	rc := NewRequestContext(s, w, r)
+	err := rc.Authenticate()
+	if err != nil {
+		return
+	}
 
 	// parse query strings
 	_ = r.URL.Query()
@@ -63,14 +66,6 @@ func RelationHandler(
 		responseBlob = defaultValue
 	}
 
-	encoder := json.NewEncoder(w)
-	if rc.GetServer().Whitespace() {
-		encoder.SetIndent("", "    ")
-	}
-	err = encoder.Encode(responseBlob)
-	if err != nil {
-		panic(err)
-	}
-
+	rc.WriteToResponse(responseBlob)
 	rc.LogStats()
 }

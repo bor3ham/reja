@@ -118,8 +118,8 @@ func (s *Server) GetRoute(modelType string) string {
 	return path
 }
 
-func (s *Server) Authenticate(r *http.Request) (schema.User, error) {
-	return s.authenticator.GetUser(r)
+func (s *Server) Authenticate(w http.ResponseWriter, r *http.Request) (schema.User, error) {
+	return s.authenticator.GetUser(w, r)
 }
 
 func (s *Server) Handle(router *mux.Router, modelType string, path string) {

@@ -3,9 +3,13 @@ package servers
 import (
 	"database/sql"
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/utils"
+	"github.com/mailru/easyjson"
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/gorilla/context"
 	"net/http"
 	"sync"
+	"encoding/json"
 	"time"
 	"log"
 )
@@ -18,6 +22,7 @@ type CachedInstance struct {
 type RequestContext struct {
 	Server       schema.Server
 	Request      *http.Request
+	ResponseWriter http.ResponseWriter
 	user         schema.User
 	gorillaMutex sync.Mutex
 	began        time.Time
@@ -28,10 +33,11 @@ type RequestContext struct {
 	}
 }
 
-func NewRequestContext(s schema.Server, r *http.Request) *RequestContext {
+func NewRequestContext(s schema.Server, w http.ResponseWriter, r *http.Request) *RequestContext {
 	rc := RequestContext{
 		Server: s,
 		Request: r,
+		ResponseWriter: w,
 		began: time.Now(),
 	}
 	rc.InitCache()
@@ -43,6 +49,55 @@ func (rc *RequestContext) GetRequest() *http.Request {
 }
 func (rc *RequestContext) GetServer() schema.Server {
 	return rc.Server
+}
+func (rc *RequestContext) Authenticate() error {
+	user, err := rc.Server.Authenticate(rc.ResponseWriter, rc.Request)
+	if err != nil {
+		authError, ok := err.(utils.AuthError)
+		if ok {
+			rc.ResponseWriter.WriteHeader(authError.Status)
+			rc.WriteToResponse(schema.ErrorSet{
+				Errors: []map[string]interface{}{
+					map[string]interface{}{
+						"status": authError.Status,
+						"title": err.Error(),
+					},
+				},
+			})
+		} else {
+			rc.ResponseWriter.WriteHeader(http.StatusUnauthorized)
+			rc.WriteToResponse(schema.ErrorSet{
+				Errors: []map[string]interface{}{
+					map[string]interface{}{
+						"status": http.StatusUnauthorized,
+						"title": err.Error(),
+					},
+				},
+			})
+		}
+		return err
+	}
+	rc.SetUser(user)
+	return nil
+}
+func (rc *RequestContext) WriteToResponse(blob interface{}) {
+	var err error
+	easyBlob, hasEasyJson := blob.(interface{
+		MarshalEasyJSON(*jwriter.Writer)
+	})
+	if rc.Server.UseEasyJSON() && hasEasyJson {
+		_, _, err = easyjson.MarshalToHTTPResponseWriter(easyBlob, rc.ResponseWriter)
+	} else {
+		encoder := json.NewEncoder(rc.ResponseWriter)
+		if rc.Server.Whitespace() {
+			encoder.SetIndent("", "    ")
+		}
+		encoder.SetEscapeHTML(false)
+		err = encoder.Encode(blob)
+	}
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (rc *RequestContext) GetUser() schema.User {

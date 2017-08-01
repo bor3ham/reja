@@ -18,5 +18,5 @@ type Server interface {
 	UseEasyJSON() bool
 	LogSQL() bool
 
-	Authenticate(*http.Request) (User, error)
+	Authenticate(http.ResponseWriter, *http.Request) (User, error)
 }

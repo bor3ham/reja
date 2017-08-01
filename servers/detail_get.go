@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
@@ -40,12 +39,5 @@ func detailGET(
 		responseBlob.Included = generalIncluded
 	}
 
-	encoder := json.NewEncoder(w)
-	if c.GetServer().Whitespace() {
-		encoder.SetIndent("", "    ")
-	}
-	err = encoder.Encode(responseBlob)
-	if err != nil {
-		panic(err)
-	}
+	c.WriteToResponse(responseBlob)
 }
