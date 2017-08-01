@@ -18,6 +18,7 @@ type Server struct {
 	models map[string]schema.Model
 	routes map[string]string
 
+	logSQL     bool
 	whitespace bool
 	easyJSON   bool
 }
@@ -34,6 +35,7 @@ func New(db schema.Database, auth schema.Authenticator) *Server {
 		models: map[string]schema.Model{},
 		routes: map[string]string{},
 
+		logSQL: false,
 		whitespace: false,
 		easyJSON:   false,
 	}
@@ -57,6 +59,16 @@ func (s *Server) DisableWhitespace() {
 }
 func (s *Server) Whitespace() bool {
 	return s.whitespace
+}
+
+func (s *Server) EnableSQLLogging() {
+	s.logSQL = true
+}
+func (s *Server) DisableSQLLogging() {
+	s.logSQL = false
+}
+func (s *Server) LogSQL() bool {
+	return s.logSQL
 }
 
 func (s *Server) GetDatabase() schema.Database {

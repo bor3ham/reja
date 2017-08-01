@@ -10,17 +10,23 @@ type ContextTransaction struct {
 }
 
 func (t *ContextTransaction) QueryRow(query string, args ...interface{}) *sql.Row {
-	LogQuery(query)
+	if t.rc.GetServer().LogSQL() {
+		LogQuery(query)
+	}
 	t.rc.IncrementQueryCount()
 	return t.tx.QueryRow(query, args...)
 }
 func (t *ContextTransaction) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	LogQuery(query)
+	if t.rc.GetServer().LogSQL() {
+		LogQuery(query)
+	}
 	t.rc.IncrementQueryCount()
 	return t.tx.Query(query, args...)
 }
 func (t *ContextTransaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	LogQuery(query)
+	if t.rc.GetServer().LogSQL() {
+		LogQuery(query)
+	}
 	t.rc.IncrementQueryCount()
 	return t.tx.Exec(query, args...)
 }

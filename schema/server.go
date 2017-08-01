@@ -16,6 +16,7 @@ type Server interface {
 
 	Whitespace() bool
 	UseEasyJSON() bool
+	LogSQL() bool
 
 	Authenticate(*http.Request) (User, error)
 }
