@@ -23,16 +23,13 @@ func (gfk GenericForeignKey) GetType() string {
 	return ""
 }
 
-func (gfk GenericForeignKey) GetSelectExtraColumns() []string {
+func (gfk GenericForeignKey) GetSelectExtra() ([]string, []interface{}) {
+	var typeDest *string
+	var idDest *string
 	return []string{
 		gfk.TypeColumnName,
 		gfk.IDColumnName,
-	}
-}
-func (gfk GenericForeignKey) GetSelectExtraVariables() []interface{} {
-	var typeDest *string
-	var idDest *string
-	return []interface{}{
+	}, []interface{}{
 		&typeDest,
 		&idDest,
 	}

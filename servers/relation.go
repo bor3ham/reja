@@ -41,7 +41,7 @@ func RelationHandler(
 		return
 	}
 
-	extraColumns := relationship.GetSelectExtraColumns()
+	extraColumns, _ := relationship.GetSelectExtra()
 	var extraVariables [][]interface{}
 	if len(extraColumns) > 0 {
 		rows, err := rc.Query(fmt.Sprintf(
@@ -55,7 +55,7 @@ func RelationHandler(
 		}
 		defer rows.Close()
 		for rows.Next() {
-			vars := relationship.GetSelectExtraVariables()
+			_, vars := relationship.GetSelectExtra()
 			rows.Scan(vars...)
 			extraVariables = append(extraVariables, vars)
 		}

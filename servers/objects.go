@@ -162,7 +162,8 @@ func (rc *RequestContext) getObjects(
 	var query string
 	var args []interface{}
 	columns, _ := m.DirectFields()
-	columns = append(columns, m.ExtraColumns()...)
+	extraColumns, _ := m.ExtraFields()
+	columns = append(columns, extraColumns...)
 	if len(objectIds) > 0 {
 		// attempt to use cache
 		var newIds []string
@@ -237,7 +238,7 @@ func (rc *RequestContext) getObjects(
 			var id string
 			_, fields := m.DirectFields()
 			instanceFields = append(instanceFields, fields)
-			extras := m.ExtraVariables()
+			_, extras := m.ExtraFields()
 			extraFields = append(extraFields, extras)
 			flatExtras := flattened(extras)
 

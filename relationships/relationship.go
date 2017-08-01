@@ -103,11 +103,8 @@ func pointerSetFromPage(val interface{}) PointerSet {
 
 type RelationshipStub struct{}
 
-func (stub RelationshipStub) GetSelectExtraColumns() []string {
-	return []string{}
-}
-func (stub RelationshipStub) GetSelectExtraVariables() []interface{} {
-	return []interface{}{}
+func (stub RelationshipStub) GetSelectExtra() ([]string, []interface{}) {
+	return []string{}, []interface{}{}
 }
 func (stub RelationshipStub) AvailableFilters() []interface{} {
 	return []interface{}{}

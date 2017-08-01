@@ -22,12 +22,9 @@ func (fk ForeignKey) GetType() string {
 	return fk.Type
 }
 
-func (fk ForeignKey) GetSelectExtraColumns() []string {
-	return []string{fk.ColumnName}
-}
-func (fk ForeignKey) GetSelectExtraVariables() []interface{} {
+func (fk ForeignKey) GetSelectExtra() ([]string, []interface{}) {
 	var destination *string
-	return []interface{}{
+	return []string{fk.ColumnName}, []interface{}{
 		&destination,
 	}
 }

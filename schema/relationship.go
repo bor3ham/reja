@@ -4,8 +4,7 @@ type Relationship interface {
 	GetKey() string
 	GetType() string
 
-	GetSelectExtraColumns() []string
-	GetSelectExtraVariables() []interface{}
+	GetSelectExtra() ([]string, []interface{})
 
 	AvailableFilters() []interface{}
 	ValidateFilters(map[string][]string) ([]Filter, error)

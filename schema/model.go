@@ -27,19 +27,15 @@ func (m Model) DirectFields() ([]string, []interface{}) {
 	return allColumns, allVars
 }
 
-func (m Model) ExtraColumns() []string {
-	var columns []string
+func (m Model) ExtraFields() ([]string, [][]interface{}) {
+	var allColumns []string
+	var allVars [][]interface{}
 	for _, relationship := range m.Relationships {
-		columns = append(columns, relationship.GetSelectExtraColumns()...)
+		columns, vars := relationship.GetSelectExtra()
+		allColumns = append(allColumns, columns...)
+		allVars = append(allVars, vars)
 	}
-	return columns
-}
-func (m Model) ExtraVariables() [][]interface{} {
-	var fields [][]interface{}
-	for _, relationship := range m.Relationships {
-		fields = append(fields, relationship.GetSelectExtraVariables())
-	}
-	return fields
+	return allColumns, allVars
 }
 
 func (m Model) GetOrderQuery(asParam string) (string, string, error) {
