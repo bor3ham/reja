@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/context"
 	"net/http"
 	"sync"
+	"time"
+	"log"
 )
 
 type CachedInstance struct {
@@ -18,11 +20,22 @@ type RequestContext struct {
 	Request      *http.Request
 	user         schema.User
 	gorillaMutex sync.Mutex
+	began        time.Time
 
 	InstanceCache struct {
 		sync.Mutex
 		Instances map[string]map[string]CachedInstance
 	}
+}
+
+func NewRequestContext(s schema.Server, r *http.Request) *RequestContext {
+	rc := RequestContext{
+		Server: s,
+		Request: r,
+		began: time.Now(),
+	}
+	rc.InitCache()
+	return &rc
 }
 
 func (rc *RequestContext) GetRequest() *http.Request {
@@ -57,24 +70,32 @@ func (rc *RequestContext) GetQueryCount() int {
 	}
 	return 0
 }
-func (rc *RequestContext) QueryRow(query string, args ...interface{}) *sql.Row {
+
+func (rc *RequestContext) LogQuery(query string) {
 	if rc.GetServer().LogSQL() {
-		LogQuery(query)
+		log.Println(query)
 	}
+}
+func (rc *RequestContext) LogStats() {
+	log.Println("\t", rc.Request.Method, rc.Request.URL.String())
+	log.Println("Database queries:", rc.GetQueryCount())
+	log.Println("Request duration:", time.Since(rc.began))
+	log.Println()
+}
+
+
+func (rc *RequestContext) QueryRow(query string, args ...interface{}) *sql.Row {
+	rc.LogQuery(query)
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().QueryRow(query, args...)
 }
 func (rc *RequestContext) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	if rc.GetServer().LogSQL() {
-		LogQuery(query)
-	}
+	rc.LogQuery(query)
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().Query(query, args...)
 }
 func (rc *RequestContext) Exec(query string, args ...interface{}) (sql.Result, error) {
-	if rc.GetServer().LogSQL() {
-		LogQuery(query)
-	}
+	rc.LogQuery(query)
 	rc.IncrementQueryCount()
 	return rc.Server.GetDatabase().Exec(query, args...)
 }

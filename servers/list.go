@@ -7,12 +7,7 @@ import (
 )
 
 func ListHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *http.Request) {
-	// initialise request context
-	rc := &RequestContext{
-		Server:  s,
-		Request: r,
-	}
-	rc.InitCache()
+	rc := NewRequestContext(s, r)
 
 	// get the authenticated user
 	user, err := s.Authenticate(r)
@@ -42,5 +37,5 @@ func ListHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *htt
 		listGET(w, r, rc, m, queryStrings, include)
 	}
 
-	logQueryCount(rc.GetQueryCount())
+	rc.LogStats()
 }

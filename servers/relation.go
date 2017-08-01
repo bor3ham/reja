@@ -16,12 +16,7 @@ func RelationHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// initialise request context
-	rc := &RequestContext{
-		Server:  s,
-		Request: r,
-	}
-	rc.InitCache()
+	rc := NewRequestContext(s, r)
 
 	// parse query strings
 	_ = r.URL.Query()
@@ -76,4 +71,6 @@ func RelationHandler(
 	if err != nil {
 		panic(err)
 	}
+
+	rc.LogStats()
 }

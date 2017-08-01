@@ -12,12 +12,7 @@ func ParameterInfoHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// initialise request context
-	rc := &RequestContext{
-		Server:  s,
-		Request: r,
-	}
-	rc.InitCache()
+	rc := NewRequestContext(s, r)
 
 	filters := []interface{}{}
 	for _, attribute := range m.Attributes {
@@ -42,4 +37,6 @@ func ParameterInfoHandler(
 	if err != nil {
 		panic(err)
 	}
+
+	rc.LogStats()
 }

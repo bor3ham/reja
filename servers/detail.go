@@ -8,12 +8,7 @@ import (
 )
 
 func DetailHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *http.Request) {
-	// initialise request context
-	rc := &RequestContext{
-		Server:  s,
-		Request: r,
-	}
-	rc.InitCache()
+	rc := NewRequestContext(s, r)
 
 	// get the authenticated user
 	user, err := s.Authenticate(r)
@@ -47,6 +42,5 @@ func DetailHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *h
 		detailGET(w, r, rc, m, id, include)
 	}
 
-	// log request stats
-	logQueryCount(rc.GetQueryCount())
+	rc.LogStats()
 }
