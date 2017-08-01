@@ -2,6 +2,7 @@ package servers
 
 import (
 	"github.com/bor3ham/reja/schema"
+	"github.com/bor3ham/reja/utils"
 	"net/http"
 )
 
@@ -12,6 +13,17 @@ func ListHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *htt
 		Request: r,
 	}
 	rc.InitCache()
+
+	// get the authenticated user
+	user, err := s.Authenticate(r)
+	if err != nil {
+		authError, ok := err.(utils.AuthError)
+		if ok {
+			w.WriteHeader(authError.Status)
+		}
+		return
+	}
+	rc.SetUser(user)
 
 	// parse query strings
 	queryStrings := r.URL.Query()

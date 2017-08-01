@@ -16,6 +16,7 @@ type CachedInstance struct {
 type RequestContext struct {
 	Server       schema.Server
 	Request      *http.Request
+	user         schema.User
 	gorillaMutex sync.Mutex
 
 	InstanceCache struct {
@@ -29,6 +30,13 @@ func (rc *RequestContext) GetRequest() *http.Request {
 }
 func (rc *RequestContext) GetServer() schema.Server {
 	return rc.Server
+}
+
+func (rc *RequestContext) GetUser() schema.User {
+	return rc.user
+}
+func (rc *RequestContext) SetUser(user schema.User) {
+	rc.user = user
 }
 
 func (rc *RequestContext) IncrementQueryCount() {

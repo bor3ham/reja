@@ -1,5 +1,9 @@
 package schema
 
+import (
+	"net/http"
+)
+
 type Server interface {
 	GetDatabase() Database
 
@@ -12,4 +16,6 @@ type Server interface {
 
 	Whitespace() bool
 	UseEasyJSON() bool
+
+	Authenticate(*http.Request) (User, error)
 }

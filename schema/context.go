@@ -9,6 +9,9 @@ type Context interface {
 	GetServer() Server
 	GetRequest() *http.Request
 
+	SetUser(User)
+	GetUser() User
+
 	IncrementQueryCount()
 	QueryRow(string, ...interface{}) *sql.Row
 	Query(string, ...interface{}) (*sql.Rows, error)

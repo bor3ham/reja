@@ -9,6 +9,7 @@ import (
 
 type Server struct {
 	db schema.Database
+	authenticator schema.Authenticator
 
 	defaultDirectPageSize int
 	maximumDirectPageSize int
@@ -21,9 +22,10 @@ type Server struct {
 	easyJSON   bool
 }
 
-func New(db schema.Database) *Server {
+func New(db schema.Database, auth schema.Authenticator) *Server {
 	return &Server{
 		db: db,
+		authenticator: auth,
 
 		defaultDirectPageSize: 50,
 		maximumDirectPageSize: 100,
@@ -102,6 +104,10 @@ func (s *Server) GetRoute(modelType string) string {
 		panic(fmt.Sprintf("Route for model %s not found!", modelType))
 	}
 	return path
+}
+
+func (s *Server) Authenticate(r *http.Request) (schema.User, error) {
+	return s.authenticator.GetUser(r)
 }
 
 func (s *Server) Handle(router *mux.Router, modelType string, path string) {
