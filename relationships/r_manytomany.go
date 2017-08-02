@@ -84,7 +84,7 @@ func (m2m ManyToMany) GetValues(
 	spots := []string{}
 	args := []interface{}{}
 	for index, id := range ids {
-		spots = append(spots, fmt.Sprintf("$%d", index + 1))
+		spots = append(spots, fmt.Sprintf("$%d", index+1))
 		args = append(args, id)
 	}
 	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(spots, ", "))
@@ -362,7 +362,7 @@ func (m2m *ManyToMany) GetUpdateQueries(
 		spots := []string{}
 		args := []interface{}{}
 		for index, id := range nulling {
-			spots = append(spots, fmt.Sprintf("$%d", index + 2))
+			spots = append(spots, fmt.Sprintf("$%d", index+2))
 			args = append(args, id)
 		}
 		queries = append(queries, schema.Query{

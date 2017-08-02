@@ -27,12 +27,12 @@ func (gfk GenericForeignKey) GetSelectExtra() ([]string, []interface{}) {
 	var typeDest *string
 	var idDest *string
 	return []string{
-		gfk.TypeColumnName,
-		gfk.IDColumnName,
-	}, []interface{}{
-		&typeDest,
-		&idDest,
-	}
+			gfk.TypeColumnName,
+			gfk.IDColumnName,
+		}, []interface{}{
+			&typeDest,
+			&idDest,
+		}
 }
 
 func (gfk GenericForeignKey) GetDefaultValue() interface{} {

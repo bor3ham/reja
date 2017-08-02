@@ -2,16 +2,16 @@ package servers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
+	"github.com/gorilla/context"
 	"github.com/mailru/easyjson"
 	"github.com/mailru/easyjson/jwriter"
-	"github.com/gorilla/context"
+	"log"
 	"net/http"
 	"sync"
-	"encoding/json"
 	"time"
-	"log"
 )
 
 type CachedInstance struct {
@@ -20,12 +20,12 @@ type CachedInstance struct {
 }
 
 type RequestContext struct {
-	Server       schema.Server
-	Request      *http.Request
+	Server         schema.Server
+	Request        *http.Request
 	ResponseWriter http.ResponseWriter
-	user         schema.User
-	gorillaMutex sync.Mutex
-	began        time.Time
+	user           schema.User
+	gorillaMutex   sync.Mutex
+	began          time.Time
 
 	InstanceCache struct {
 		sync.Mutex
@@ -35,10 +35,10 @@ type RequestContext struct {
 
 func NewRequestContext(s schema.Server, w http.ResponseWriter, r *http.Request) *RequestContext {
 	rc := RequestContext{
-		Server: s,
-		Request: r,
+		Server:         s,
+		Request:        r,
 		ResponseWriter: w,
-		began: time.Now(),
+		began:          time.Now(),
 	}
 	rc.InitCache()
 	return &rc
@@ -60,7 +60,7 @@ func (rc *RequestContext) Authenticate() error {
 				Errors: []map[string]interface{}{
 					map[string]interface{}{
 						"status": authError.Status,
-						"title": err.Error(),
+						"title":  err.Error(),
 					},
 				},
 			})
@@ -70,7 +70,7 @@ func (rc *RequestContext) Authenticate() error {
 				Errors: []map[string]interface{}{
 					map[string]interface{}{
 						"status": http.StatusUnauthorized,
-						"title": err.Error(),
+						"title":  err.Error(),
 					},
 				},
 			})
@@ -82,7 +82,7 @@ func (rc *RequestContext) Authenticate() error {
 }
 func (rc *RequestContext) WriteToResponse(blob interface{}) {
 	var err error
-	easyBlob, hasEasyJson := blob.(interface{
+	easyBlob, hasEasyJson := blob.(interface {
 		MarshalEasyJSON(*jwriter.Writer)
 	})
 	if rc.Server.UseEasyJSON() && hasEasyJson {
@@ -137,7 +137,6 @@ func (rc *RequestContext) LogStats() {
 	log.Println("Request duration:", time.Since(rc.began))
 	log.Println()
 }
-
 
 func (rc *RequestContext) QueryRow(query string, args ...interface{}) *sql.Row {
 	rc.LogQuery(query)

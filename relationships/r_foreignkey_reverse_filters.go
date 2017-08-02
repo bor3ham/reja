@@ -60,7 +60,7 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 			spots := []string{}
 			args := []interface{}{}
 			for index, id := range ids {
-				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				spots = append(spots, fmt.Sprintf("$%d", index+1))
 				args = append(args, id)
 			}
 			return []string{
@@ -74,7 +74,7 @@ func (f ForeignKeyReverseContainsFilter) GetWhere(
 			spots := []string{}
 			args := []interface{}{}
 			for index, id := range ids {
-				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				spots = append(spots, fmt.Sprintf("$%d", index+1))
 				args = append(args, id)
 			}
 			return []string{
@@ -155,7 +155,7 @@ func (f ForeignKeyReverseCountFilter) GetWhere(
 		spots := []string{}
 		args := []interface{}{}
 		for index, id := range ids {
-			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			spots = append(spots, fmt.Sprintf("$%d", index+1))
 			args = append(args, id)
 		}
 		return []string{

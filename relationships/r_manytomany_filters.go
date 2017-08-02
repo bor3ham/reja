@@ -62,7 +62,7 @@ func (f ManyToManyContainsFilter) GetWhere(
 			spots := []string{}
 			args := []interface{}{}
 			for index, id := range ids {
-				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				spots = append(spots, fmt.Sprintf("$%d", index+1))
 				args = append(args, id)
 			}
 			return []string{
@@ -76,7 +76,7 @@ func (f ManyToManyContainsFilter) GetWhere(
 			spots := []string{}
 			args := []interface{}{}
 			for index, id := range ids {
-				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				spots = append(spots, fmt.Sprintf("$%d", index+1))
 				args = append(args, id)
 			}
 			return []string{
@@ -201,7 +201,7 @@ func (f ManyToManyCountFilter) GetWhere(
 		spots := []string{}
 		args := []interface{}{}
 		for index, id := range ids {
-			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			spots = append(spots, fmt.Sprintf("$%d", index+1))
 			args = append(args, id)
 		}
 		return []string{

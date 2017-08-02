@@ -8,7 +8,7 @@ import (
 )
 
 type Server struct {
-	db schema.Database
+	db            schema.Database
 	authenticator schema.Authenticator
 
 	defaultDirectPageSize int
@@ -25,7 +25,7 @@ type Server struct {
 
 func New(db schema.Database, auth schema.Authenticator) *Server {
 	return &Server{
-		db: db,
+		db:            db,
 		authenticator: auth,
 
 		defaultDirectPageSize: 50,
@@ -35,7 +35,7 @@ func New(db schema.Database, auth schema.Authenticator) *Server {
 		models: map[string]schema.Model{},
 		routes: map[string]string{},
 
-		logSQL: false,
+		logSQL:     false,
 		whitespace: true,
 		easyJSON:   false,
 	}

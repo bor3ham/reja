@@ -45,7 +45,7 @@ func (fkr ForeignKeyReverse) GetValues(
 	args := []interface{}{}
 	spots := []string{}
 	for index, id := range ids {
-		spots = append(spots, fmt.Sprintf("$%d", index + 1))
+		spots = append(spots, fmt.Sprintf("$%d", index+1))
 		args = append(args, id)
 	}
 	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(spots, ", "))
@@ -286,7 +286,7 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 	spots := []string{}
 	args := []interface{}{}
 	for index, pointer := range fkrVal.Data {
-		spots = append(spots, fmt.Sprintf("$%d", index + 2))
+		spots = append(spots, fmt.Sprintf("$%d", index+2))
 		args = append(args, *pointer.ID)
 	}
 
@@ -304,7 +304,7 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 	return []schema.Query{
 		schema.Query{
 			Query: query,
-			Args: append([]interface{}{newId}, args...),
+			Args:  append([]interface{}{newId}, args...),
 		},
 	}
 }
@@ -333,7 +333,7 @@ func (fkr *ForeignKeyReverse) GetUpdateQueries(id string, oldVal interface{}, ne
 		spots := []string{}
 		args := []interface{}{}
 		for index, id := range nulling {
-			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			spots = append(spots, fmt.Sprintf("$%d", index+1))
 			args = append(args, id)
 		}
 		queries = append(queries, schema.Query{
@@ -360,7 +360,7 @@ func (fkr *ForeignKeyReverse) GetUpdateQueries(id string, oldVal interface{}, ne
 		spots := []string{}
 		args := []interface{}{}
 		for index, id := range adding {
-			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			spots = append(spots, fmt.Sprintf("$%d", index+1))
 			args = append(args, id)
 		}
 		queries = append(queries, schema.Query{
