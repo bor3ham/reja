@@ -13,9 +13,9 @@ func (e AuthError) Error() string {
 	return e.text
 }
 
-func Unauthorised() AuthError {
+func Unauthorised(reason string) AuthError {
 	return AuthError{
-		text: "Login is required.",
+		text: reason,
 		Status: http.StatusUnauthorized,
 	}
 }

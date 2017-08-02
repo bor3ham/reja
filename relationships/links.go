@@ -9,7 +9,7 @@ func relationLink(c schema.Context, modelType string, id string, key string) str
 	server := c.GetServer()
 	request := c.GetRequest()
 	url := fmt.Sprintf(
-		"%s%s/%s/relationships/%s",
+		"https://%s%s/%s/relationships/%s",
 		request.Host,
 		server.GetRoute(modelType),
 		id,

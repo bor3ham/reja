@@ -136,7 +136,7 @@ func listGET(
 	}
 
 	pageLinks := utils.GetPaginationLinks(
-		r.Host+r.URL.Path,
+		"https://"+r.Host+r.URL.Path,
 		pageOffset,
 		pageSize,
 		c.GetServer().GetDefaultDirectPageSize(),
