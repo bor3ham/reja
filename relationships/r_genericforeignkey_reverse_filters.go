@@ -63,17 +63,29 @@ func (f GenericForeignKeyReverseContainsFilter) GetWhere(
 
 	if f.exclude {
 		if len(ids) > 0 {
+			spots := []string{}
+			args := []interface{}{}
+			for index, id := range ids {
+				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				args = append(args, id)
+			}
 			return []string{
-				fmt.Sprintf("%s not in (%s)", idColumn, strings.Join(ids, ", ")),
-			}, []interface{}{}
+				fmt.Sprintf("%s not in (%s)", idColumn, strings.Join(spots, ", ")),
+			}, args
 		} else {
 			return []string{}, []interface{}{}
 		}
 	} else {
 		if len(ids) > 0 {
+			spots := []string{}
+			args := []interface{}{}
+			for index, id := range ids {
+				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				args = append(args, id)
+			}
 			return []string{
-				fmt.Sprintf("%s in (%s)", idColumn, strings.Join(ids, ", ")),
-			}, []interface{}{}
+				fmt.Sprintf("%s in (%s)", idColumn, strings.Join(spots, ", ")),
+			}, args
 		} else {
 			return []string{"true is false"}, []interface{}{}
 		}
@@ -153,9 +165,15 @@ func (f GenericForeignKeyReverseCountFilter) GetWhere(
 	}
 
 	if len(ids) > 0 {
+		spots := []string{}
+		args := []interface{}{}
+		for index, id := range ids {
+			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			args = append(args, id)
+		}
 		return []string{
-			fmt.Sprintf("%s in (%s)", idColumn, strings.Join(ids, ", ")),
-		}, []interface{}{}
+			fmt.Sprintf("%s in (%s)", idColumn, strings.Join(spots, ", ")),
+		}, args
 	} else {
 		return []string{"true is false"}, []interface{}{}
 	}

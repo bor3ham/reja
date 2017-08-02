@@ -10,6 +10,7 @@ type Model struct {
 	Type          string
 	Table         string
 	IDColumn      string
+	IDGenerator   func(Context) string
 	DefaultOrder  string
 	Attributes    []Attribute
 	Relationships []Relationship

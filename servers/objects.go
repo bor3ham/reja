@@ -179,6 +179,11 @@ func (rc *RequestContext) getObjects(
 		}
 
 		if len(newIds) > 0 {
+			spots := []string{}
+			for index, id := range newIds {
+				spots = append(spots, fmt.Sprintf("$%d", index + 1))
+				args = append(args, id)
+			}
 			query = fmt.Sprintf(
 				`
 					select
@@ -190,7 +195,7 @@ func (rc *RequestContext) getObjects(
 				m.IDColumn,
 				strings.Join(columns, ","),
 				m.Table,
-				fmt.Sprintf("%s in (%s)", m.IDColumn, strings.Join(newIds, ", ")),
+				fmt.Sprintf("%s in (%s)", m.IDColumn, strings.Join(spots, ", ")),
 			)
 		}
 	} else {

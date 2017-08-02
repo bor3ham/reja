@@ -52,7 +52,13 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		panic(err)
 	}
 
-	idFilter := fmt.Sprintf("%s in (%s)", gfkr.OwnIDColumn, strings.Join(ids, ", "))
+	spots := []string{}
+	args := []interface{}{}
+	for index, id := range ids {
+		spots = append(spots, fmt.Sprintf("$%d", index + 2))
+		args = append(args, id)
+	}
+	idFilter := fmt.Sprintf("%s in (%s)", gfkr.OwnIDColumn, strings.Join(spots, ", "))
 	typeFilter := fmt.Sprintf("%s = $1", gfkr.OwnTypeColumn)
 	query := fmt.Sprintf(
 		`
@@ -70,7 +76,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		typeFilter,
 		order,
 	)
-	rows, err := c.Query(query, gfkr.OwnType)
+	rows, err := c.Query(query, append([]interface{}{gfkr.OwnType}, args...)...)
 	if err != nil {
 		panic(err)
 	}
@@ -290,12 +296,14 @@ func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 		panic("Bad pointer set value")
 	}
 
-	var ids []string
-	for _, pointer := range gfkrVal.Data {
-		ids = append(ids, *pointer.ID)
+	spots := []string{}
+	args := []interface{}{}
+	for index, pointer := range gfkrVal.Data {
+		spots = append(spots, fmt.Sprintf("$%d", index + 3))
+		args = append(args, *pointer.ID)
 	}
 
-	if len(ids) == 0 {
+	if len(spots) == 0 {
 		return []schema.Query{}
 	}
 
@@ -305,15 +313,15 @@ func (gfkr *GenericForeignKeyReverse) GetInsertQueries(
 		gfkr.OwnTypeColumn,
 		gfkr.OwnIDColumn,
 		gfkr.OtherIDColumn,
-		strings.Join(ids, ", "),
+		strings.Join(spots, ", "),
 	)
 	return []schema.Query{
 		schema.Query{
 			Query: query,
-			Args: []interface{}{
+			Args: append([]interface{}{
 				gfkr.OwnType,
 				newId,
-			},
+			}, args...),
 		},
 	}
 }
@@ -339,6 +347,12 @@ func (gfkr *GenericForeignKeyReverse) GetUpdateQueries(id string, oldVal interfa
 		}
 	}
 	if len(nulling) > 0 {
+		spots := []string{}
+		args := []interface{}{}
+		for index, id := range nulling {
+			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			args = append(args, id)
+		}
 		queries = append(queries, schema.Query{
 			Query: fmt.Sprintf(
 				"update %s set (%s = null, %s = null) where %s in (%s)",
@@ -346,9 +360,9 @@ func (gfkr *GenericForeignKeyReverse) GetUpdateQueries(id string, oldVal interfa
 				gfkr.OwnIDColumn,
 				gfkr.OwnTypeColumn,
 				gfkr.OtherIDColumn,
-				strings.Join(nulling, ", "),
+				strings.Join(spots, ", "),
 			),
-			Args: []interface{}{},
+			Args: args,
 		})
 	}
 
@@ -361,6 +375,12 @@ func (gfkr *GenericForeignKeyReverse) GetUpdateQueries(id string, oldVal interfa
 		}
 	}
 	if len(adding) > 0 {
+		spots := []string{}
+		args := []interface{}{}
+		for index, id := range adding {
+			spots = append(spots, fmt.Sprintf("$%d", index + 2))
+			args = append(args, id)
+		}
 		queries = append(queries, schema.Query{
 			Query: fmt.Sprintf(
 				"update %s set %s = %s, %s = $1 where %s in (%s)",
@@ -369,11 +389,11 @@ func (gfkr *GenericForeignKeyReverse) GetUpdateQueries(id string, oldVal interfa
 				id,
 				gfkr.OwnTypeColumn,
 				gfkr.OtherIDColumn,
-				strings.Join(adding, ", "),
+				strings.Join(spots, ", "),
 			),
-			Args: []interface{}{
+			Args: append([]interface{}{
 				gfkr.OwnType,
-			},
+			}, args...),
 		})
 	}
 

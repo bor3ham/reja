@@ -90,6 +90,11 @@ func listPOST(
 	var insertValues []interface{}
 
 	valueIndex = 0
+	// get id if determined
+	if m.IDGenerator != nil {
+		insertColumns = append(insertColumns, m.IDColumn)
+		insertValues = append(insertValues, m.IDGenerator(c))
+	}
 	for _, attribute := range m.Attributes {
 		// skip nil values (use database default)
 		value := values[valueIndex]

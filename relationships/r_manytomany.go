@@ -44,6 +44,9 @@ func (m2m ManyToMany) GetValues(
 
 	server := c.GetServer()
 	otherModel := server.GetModel(m2m.OtherType)
+	if otherModel == nil {
+		panic(fmt.Sprintf("Invalid other model %s", m2m.OtherType))
+	}
 	order, _, err := otherModel.GetOrderQuery(otherModel.DefaultOrder)
 	if err != nil {
 		panic(err)
@@ -78,7 +81,13 @@ func (m2m ManyToMany) GetValues(
 		}
 	}
 
-	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(ids, ", "))
+	spots := []string{}
+	args := []interface{}{}
+	for index, id := range ids {
+		spots = append(spots, fmt.Sprintf("$%d", index + 1))
+		args = append(args, id)
+	}
+	filter := fmt.Sprintf("%s in (%s)", m2m.OwnIDColumn, strings.Join(spots, ", "))
 	query := fmt.Sprintf(
 		`
 			select
@@ -110,7 +119,7 @@ func (m2m ManyToMany) GetValues(
 		m2m.OtherIDColumn,
 		orderQuery,
 	)
-	rows, err := c.Query(query)
+	rows, err := c.Query(query, args...)
 	if err != nil {
 		panic(err)
 	}
@@ -350,17 +359,23 @@ func (m2m *ManyToMany) GetUpdateQueries(
 		}
 	}
 	if len(nulling) > 0 {
+		spots := []string{}
+		args := []interface{}{}
+		for index, id := range nulling {
+			spots = append(spots, fmt.Sprintf("$%d", index + 2))
+			args = append(args, id)
+		}
 		queries = append(queries, schema.Query{
 			Query: fmt.Sprintf(
 				"delete from %s where %s = $1 and %s in (%s)",
 				m2m.Table,
 				m2m.OwnIDColumn,
 				m2m.OtherIDColumn,
-				strings.Join(nulling, ", "),
+				strings.Join(spots, ", "),
 			),
-			Args: []interface{}{
+			Args: append([]interface{}{
 				id,
-			},
+			}, args...),
 		})
 	}
 

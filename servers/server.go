@@ -36,7 +36,7 @@ func New(db schema.Database, auth schema.Authenticator) *Server {
 		routes: map[string]string{},
 
 		logSQL: false,
-		whitespace: false,
+		whitespace: true,
 		easyJSON:   false,
 	}
 }
@@ -119,6 +119,9 @@ func (s *Server) GetRoute(modelType string) string {
 }
 
 func (s *Server) Authenticate(w http.ResponseWriter, r *http.Request) (schema.User, error) {
+	if s.authenticator == nil {
+		return nil, nil
+	}
 	return s.authenticator.GetUser(w, r)
 }
 
@@ -145,23 +148,23 @@ func (s *Server) Handle(router *mux.Router, modelType string, path string) {
 	router.HandleFunc(path+"/parameters/", func(w http.ResponseWriter, r *http.Request) {
 		ParameterInfoHandler(s, &model, w, r)
 	})
-	router.HandleFunc(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+`/{id:[0-9a-zA-Z\-\_]+}`, func(w http.ResponseWriter, r *http.Request) {
 		DetailHandler(s, &model, w, r)
 	})
-	router.HandleFunc(path+"/{id:[0-9]+}/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(path+`/{id:[0-9a-zA-Z\-\_]+}/`, func(w http.ResponseWriter, r *http.Request) {
 		DetailHandler(s, &model, w, r)
 	})
 
 	for _, relationship := range model.Relationships {
 		relation := relationship
 		router.HandleFunc(
-			path+"/{id:[0-9]+}/relationships/"+relation.GetKey(),
+			path+`/{id:[0-9a-zA-Z\-\_]+}/relationships/`+relation.GetKey(),
 			func(w http.ResponseWriter, r *http.Request) {
 				RelationHandler(s, &model, relation, w, r)
 			},
 		)
 		router.HandleFunc(
-			path+"/{id:[0-9]+}/relationships/"+relation.GetKey()+"/",
+			path+`/{id:[0-9a-zA-Z\-\_]+}/relationships/`+relation.GetKey()+"/",
 			func(w http.ResponseWriter, r *http.Request) {
 				RelationHandler(s, &model, relation, w, r)
 			},

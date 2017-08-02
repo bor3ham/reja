@@ -42,7 +42,13 @@ func (fkr ForeignKeyReverse) GetValues(
 	if len(ids) == 0 {
 		return map[string]interface{}{}, map[string]map[string][]string{}
 	}
-	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(ids, ", "))
+	args := []interface{}{}
+	spots := []string{}
+	for index, id := range ids {
+		spots = append(spots, fmt.Sprintf("$%d", index + 1))
+		args = append(args, id)
+	}
+	filter := fmt.Sprintf("%s in (%s)", fkr.ColumnName, strings.Join(spots, ", "))
 
 	server := c.GetServer()
 	otherModel := server.GetModel(fkr.Type)
@@ -66,7 +72,7 @@ func (fkr ForeignKeyReverse) GetValues(
 		filter,
 		order,
 	)
-	rows, err := c.Query(query)
+	rows, err := c.Query(query, args...)
 	if err != nil {
 		panic(err)
 	}
@@ -277,12 +283,14 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 		panic("Bad pointer set value")
 	}
 
-	var ids []string
-	for _, pointer := range fkrVal.Data {
-		ids = append(ids, *pointer.ID)
+	spots := []string{}
+	args := []interface{}{}
+	for index, pointer := range fkrVal.Data {
+		spots = append(spots, fmt.Sprintf("$%d", index + 2))
+		args = append(args, *pointer.ID)
 	}
 
-	if len(ids) == 0 {
+	if len(spots) == 0 {
 		return []schema.Query{}
 	}
 
@@ -291,14 +299,12 @@ func (fkr *ForeignKeyReverse) GetInsertQueries(newId string, val interface{}) []
 		fkr.SourceTable,
 		fkr.ColumnName,
 		fkr.SourceIDColumn,
-		strings.Join(ids, ", "),
+		strings.Join(spots, ", "),
 	)
 	return []schema.Query{
 		schema.Query{
 			Query: query,
-			Args: []interface{}{
-				newId,
-			},
+			Args: append([]interface{}{newId}, args...),
 		},
 	}
 }
@@ -324,15 +330,21 @@ func (fkr *ForeignKeyReverse) GetUpdateQueries(id string, oldVal interface{}, ne
 		}
 	}
 	if len(nulling) > 0 {
+		spots := []string{}
+		args := []interface{}{}
+		for index, id := range nulling {
+			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			args = append(args, id)
+		}
 		queries = append(queries, schema.Query{
 			Query: fmt.Sprintf(
 				"update %s set %s = null where %s in (%s)",
 				fkr.SourceTable,
 				fkr.ColumnName,
 				fkr.SourceIDColumn,
-				strings.Join(nulling, ", "),
+				strings.Join(spots, ", "),
 			),
-			Args: []interface{}{},
+			Args: args,
 		})
 	}
 
@@ -345,6 +357,12 @@ func (fkr *ForeignKeyReverse) GetUpdateQueries(id string, oldVal interface{}, ne
 		}
 	}
 	if len(adding) > 0 {
+		spots := []string{}
+		args := []interface{}{}
+		for index, id := range adding {
+			spots = append(spots, fmt.Sprintf("$%d", index + 1))
+			args = append(args, id)
+		}
 		queries = append(queries, schema.Query{
 			Query: fmt.Sprintf(
 				"update %s set %s = %s where %s in (%s)",
@@ -352,9 +370,9 @@ func (fkr *ForeignKeyReverse) GetUpdateQueries(id string, oldVal interface{}, ne
 				fkr.ColumnName,
 				id,
 				fkr.SourceIDColumn,
-				strings.Join(adding, ", "),
+				strings.Join(spots, ", "),
 			),
-			Args: []interface{}{},
+			Args: args,
 		})
 	}
 
