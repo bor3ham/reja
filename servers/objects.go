@@ -362,25 +362,27 @@ func (rc *RequestContext) getObjects(
 			) {
 				defer wg.Done()
 
-				childIncludes, exists := include.Children[attribute]
-				if exists {
-					childInstances, childIncluded, err := rc.GetObjectsByIDs(
-						model,
-						ids,
-						childIncludes,
-					)
-					if err != nil {
-						includedResults <- IncludeResult{
-							Error: err,
+				if include != nil {
+					childIncludes, exists := include.Children[attribute]
+					if exists {
+						childInstances, childIncluded, err := rc.GetObjectsByIDs(
+							model,
+							ids,
+							childIncludes,
+						)
+						if err != nil {
+							includedResults <- IncludeResult{
+								Error: err,
+							}
+						} else {
+							includedResults <- IncludeResult{
+								Instances: childInstances,
+								Included:  childIncluded,
+								Error:     nil,
+							}
 						}
-					} else {
-						includedResults <- IncludeResult{
-							Instances: childInstances,
-							Included:  childIncluded,
-							Error:     nil,
-						}
-					}
 
+					}
 				}
 			}(&wg, rc, include, childModel, attribute)
 		}

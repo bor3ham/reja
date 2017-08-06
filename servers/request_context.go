@@ -51,7 +51,7 @@ func (rc *RequestContext) GetServer() schema.Server {
 	return rc.Server
 }
 func (rc *RequestContext) Authenticate() error {
-	user, err := rc.Server.Authenticate(rc.ResponseWriter, rc.Request)
+	user, err := rc.Server.Authenticate(rc.ResponseWriter, rc.Request, rc)
 	if err != nil {
 		authError, ok := err.(utils.AuthError)
 		if ok {
