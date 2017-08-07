@@ -24,6 +24,12 @@ func detailGET(
 		return
 	}
 
+	hasAccess := CanAccessAllInstances(c, instances)
+	if !hasAccess {
+		Forbidden(c, w, "Forbidden", "You do not have access to this object.")
+		return
+	}
+
 	responseBlob := struct {
 		Data     interface{} `json:"data"`
 		Included interface{} `json:"included,omitempty"`
