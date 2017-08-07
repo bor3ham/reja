@@ -1,9 +1,9 @@
 package servers
 
 import (
+	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
-	"fmt"
 )
 
 type Error struct {
@@ -44,7 +44,7 @@ func MethodNotAllowed(c schema.Context, w http.ResponseWriter) {
 	errorBlob := Error{
 		Exceptions: []Exception{
 			Exception{
-				Title:  "Method Not Allowed",
+				Title: "Method Not Allowed",
 				Detail: fmt.Sprintf(
 					"This endpoint does not support %s requests.",
 					c.GetRequest().Method,

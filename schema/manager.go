@@ -23,9 +23,7 @@ func (stub ManagerStub) BeforeUpdate(
 	c Context,
 	oldValues map[string]interface{},
 	newValues map[string]interface{},
-) (
-	error,
-) {
+) error {
 	return nil
 }
 func (stub ManagerStub) BeforeSave(c Context, values map[string]interface{}) error {
