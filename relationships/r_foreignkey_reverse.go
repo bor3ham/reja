@@ -226,6 +226,14 @@ func (fkr *ForeignKeyReverse) Validate(c schema.Context, val interface{}) (inter
 			fkr.Key,
 		))
 	}
+	// check that the user has access to the objects
+	canAccess := c.CanAccessAllInstances(instances)
+	if !canAccess {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: You do not have access to all objects in set.",
+			fkr.Key,
+		))
+	}
 	return fkrVal, nil
 }
 func (fkr *ForeignKeyReverse) ValidateUpdate(

@@ -181,6 +181,16 @@ func (fk *ForeignKey) Validate(c schema.Context, val interface{}) (interface{}, 
 			valID,
 		))
 	}
+	// check that the user has access to the object
+	canAccess := c.CanAccessAllInstances(instances)
+	if !canAccess {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: You do not have access to %s ID '%s'.",
+			fk.Key,
+			fk.Type,
+			valID,
+		))
+	}
 	return fkVal, nil
 }
 func (fk *ForeignKey) ValidateUpdate(

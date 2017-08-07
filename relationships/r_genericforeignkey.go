@@ -206,6 +206,16 @@ func (gfk *GenericForeignKey) Validate(c schema.Context, val interface{}) (inter
 			valID,
 		))
 	}
+	// check that the user has access to the object
+	canAccess := c.CanAccessAllInstances(instances)
+	if !canAccess {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: You do not have access to %s ID '%s'.",
+			gfk.Key,
+			valType,
+			valID,
+		))
+	}
 	return gfkVal, nil
 }
 func (gfk *GenericForeignKey) ValidateUpdate(

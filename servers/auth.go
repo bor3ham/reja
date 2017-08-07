@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
-	"github.com/davecgh/go-spew/spew"
+	// "github.com/davecgh/go-spew/spew"
 	"strings"
 )
 
-func CanAccessAllInstances(c schema.Context, instances []schema.Instance) bool {
+func (rc *RequestContext) CanAccessAllInstances(instances []schema.Instance) bool {
 	typeMap := map[string][]string{}
 	for _, instance := range instances {
 		instanceType := instance.GetType()
@@ -18,9 +18,8 @@ func CanAccessAllInstances(c schema.Context, instances []schema.Instance) bool {
 		}
 		typeMap[instanceType] = append(typeMap[instanceType], instance.GetID())
 	}
-	spew.Dump(typeMap)
 
-	server := c.GetServer()
+	server := rc.GetServer()
 	for modelType, ids := range typeMap {
 		model := server.GetModel(modelType)
 		nextArg, idSpots := utils.StringInAsArgs(1, ids)
@@ -38,13 +37,13 @@ func CanAccessAllInstances(c schema.Context, instances []schema.Instance) bool {
 			args = append(args, id)
 		}
 
-		authFilters, authArgs := model.Manager.GetFilterForUser(c.GetUser(), nextArg)
+		authFilters, authArgs := model.Manager.GetFilterForUser(rc.GetUser(), nextArg)
 		if len(authFilters) > 0 {
 			query += " and " + strings.Join(authFilters, " and ")
 			args = append(args, authArgs...)
 		}
 
-		rows, err := c.Query(query, args...)
+		rows, err := rc.Query(query, args...)
 		if err != nil {
 			panic(err)
 		}

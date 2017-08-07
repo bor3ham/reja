@@ -274,6 +274,14 @@ func (m2m *ManyToMany) Validate(c schema.Context, val interface{}) (interface{},
 			m2m.Key,
 		))
 	}
+	// check that the user has access to the objects
+	canAccess := c.CanAccessAllInstances(instances)
+	if !canAccess {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: You do not have access to all objects in set.",
+			m2m.Key,
+		))
+	}
 	return m2mVal, nil
 }
 func (m2m *ManyToMany) ValidateUpdate(

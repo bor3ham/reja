@@ -38,4 +38,6 @@ type Context interface {
 		[]Instance,
 		error,
 	)
+
+	CanAccessAllInstances([]Instance) bool
 }

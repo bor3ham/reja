@@ -236,6 +236,14 @@ func (gfkr *GenericForeignKeyReverse) Validate(
 			gfkr.Key,
 		))
 	}
+	// check that the user has access to the objects
+	canAccess := c.CanAccessAllInstances(instances)
+	if !canAccess {
+		return nil, errors.New(fmt.Sprintf(
+			"Relationship '%s' invalid: You do not have access to all objects in set.",
+			gfkr.Key,
+		))
+	}
 	return gfkrVal, nil
 }
 func (gfkr *GenericForeignKeyReverse) ValidateUpdate(

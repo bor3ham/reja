@@ -24,7 +24,7 @@ func detailGET(
 		return
 	}
 
-	hasAccess := CanAccessAllInstances(c, instances)
+	hasAccess := c.CanAccessAllInstances(instances)
 	if !hasAccess {
 		Forbidden(c, w, "Forbidden", "You do not have access to this object.")
 		return
