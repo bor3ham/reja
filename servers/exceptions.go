@@ -9,7 +9,7 @@ type Error struct {
 	Exceptions []Exception `json:"errors"`
 }
 type Exception struct {
-	Title string `json:"title"`
+	Title  string `json:"title"`
 	Detail string `json:"detail"`
 }
 

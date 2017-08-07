@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 func StringInAsArgs(nextArg int, in []string) (int, string) {

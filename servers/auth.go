@@ -1,10 +1,10 @@
 package servers
 
 import (
+	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
 	"github.com/davecgh/go-spew/spew"
-	"fmt"
 	"strings"
 )
 

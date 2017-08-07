@@ -7,6 +7,7 @@ type Manager interface {
 
 type ManagerStub struct {
 }
+
 func (stub ManagerStub) GetFilterForUser(user User, nextArg int) ([]string, []interface{}) {
 	return []string{}, []interface{}{}
 }
