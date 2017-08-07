@@ -75,6 +75,11 @@ func listGET(
 		whereQueries = append(whereQueries, queries...)
 		whereArgs = append(whereArgs, args...)
 	}
+	// and from auth
+	authQueries, authArgs := m.Manager.GetFilterForUser(c.GetUser(), len(whereArgs)+1)
+	whereQueries = append(whereQueries, authQueries...)
+	whereArgs = append(whereArgs, authArgs...)
+
 	whereClause := ""
 	if len(whereQueries) > 0 {
 		whereClause = fmt.Sprintf("where %s", strings.Join(whereQueries, " and "))
