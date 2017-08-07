@@ -1,43 +1,40 @@
 package servers
 
 import (
-	"encoding/json"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
 )
 
+type Error struct {
+	Exceptions []Exception `json:"errors"`
+}
+type Exception struct {
+	Title string `json:"title"`
+	Detail string `json:"detail"`
+}
+
 func BadRequest(c schema.Context, w http.ResponseWriter, title string, detail string) {
-	errorBlob := struct {
-		Exceptions []interface{} `json:"errors"`
-	}{}
-	errorBlob.Exceptions = append(errorBlob.Exceptions, struct {
-		Title  string
-		Detail string
-	}{
-		Title:  title,
-		Detail: detail,
-	})
-	encoder := json.NewEncoder(w)
-	if c.GetServer().Whitespace() {
-		encoder.SetIndent("", "    ")
+	errorBlob := Error{
+		Exceptions: []Exception{
+			Exception{
+				Title:  title,
+				Detail: detail,
+			},
+		},
 	}
-	encoder.Encode(errorBlob)
+	w.WriteHeader(http.StatusBadRequest)
+	c.WriteToResponse(errorBlob)
 }
 
 func Forbidden(c schema.Context, w http.ResponseWriter, title string, detail string) {
-	errorBlob := struct {
-		Exceptions []interface{} `json:"errors"`
-	}{}
-	errorBlob.Exceptions = append(errorBlob.Exceptions, struct {
-		Title  string
-		Detail string
-	}{
-		Title:  title,
-		Detail: detail,
-	})
-	encoder := json.NewEncoder(w)
-	if c.GetServer().Whitespace() {
-		encoder.SetIndent("", "    ")
+	errorBlob := Error{
+		Exceptions: []Exception{
+			Exception{
+				Title:  title,
+				Detail: detail,
+			},
+		},
 	}
-	encoder.Encode(errorBlob)
+	w.WriteHeader(http.StatusForbidden)
+	c.WriteToResponse(errorBlob)
 }
