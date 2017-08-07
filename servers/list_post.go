@@ -85,6 +85,21 @@ func listPOST(
 		valueIndex += 1
 	}
 
+	// run manager validation
+	mapValues = mapFromValues(values, m.Attributes, m.Relationships)
+	// instance = m.Manager.Create()
+	// instance.SetValues(mapValues)
+	err = m.Manager.BeforeCreate(c, mapValues)
+	if err != nil {
+		BadRequest(c, w, "Bad New Instance", err.Error())
+		return
+	}
+	err = m.Manager.BeforeSave(c, mapValues)
+	if err != nil {
+		BadRequest(c, w, "Bad Instance", err.Error())
+		return
+	}
+
 	// build insert query
 	var insertColumns []string
 	var insertValues []interface{}

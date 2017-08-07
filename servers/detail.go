@@ -32,6 +32,8 @@ func DetailHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *h
 		detailPATCH(w, r, rc, m, id, include)
 	} else if r.Method == "GET" {
 		detailGET(w, r, rc, m, id, include)
+	} else {
+		MethodNotAllowed(rc, w)
 	}
 
 	rc.LogStats()

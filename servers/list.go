@@ -27,6 +27,8 @@ func ListHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *htt
 		listPOST(w, r, rc, m, queryStrings, include)
 	} else if r.Method == "GET" {
 		listGET(w, r, rc, m, queryStrings, include)
+	} else {
+		MethodNotAllowed(rc, w)
 	}
 
 	rc.LogStats()
