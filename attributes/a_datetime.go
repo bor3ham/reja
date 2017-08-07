@@ -32,14 +32,13 @@ func (dt Datetime) GetOrderMap() map[string]string {
 }
 
 func (dt *Datetime) DefaultFallback(val interface{}, instance interface{}) (interface{}, error) {
-	dtVal := AssertDatetime(val)
-	if !dtVal.Provided {
+	if val == nil || !AssertDatetime(val).Provided {
 		if dt.Default != nil {
 			return dt.Default(instance), nil
 		}
 		return nil, nil
 	}
-	return dtVal, nil
+	return val, nil
 }
 func (dt *Datetime) Validate(val interface{}) (interface{}, error) {
 	dtVal := AssertDatetime(val)
