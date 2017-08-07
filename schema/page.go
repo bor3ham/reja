@@ -30,3 +30,12 @@ func (p *Page) UnmarshalJSON(data []byte) error {
 	p.Included = val.Included
 	return nil
 }
+
+func (p Page) IDs() []string {
+	ids := []string{}
+	for _, value := range p.Data {
+		ip := AssertInstancePointer(value)
+		ids = append(ids, *ip.ID)
+	}
+	return ids
+}
