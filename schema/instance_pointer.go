@@ -27,3 +27,11 @@ func (ip *InstancePointer) SetID(id string) {
 func (ip *InstancePointer) GetType() string {
 	return ip.Type
 }
+
+func AssertInstancePointer(value interface{}) InstancePointer {
+	ip, ok := value.(InstancePointer)
+	if !ok {
+		panic("Bad instance pointer")
+	}
+	return ip
+}
