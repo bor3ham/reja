@@ -81,6 +81,21 @@ func detailPATCH(
 		valueIndex += 1
 	}
 
+	// run manager validation
+	updatesMap = mapFromValues(updates, m.Attributes, m.Relationships)
+	// instance = m.Manager.Create()
+	// instance.SetValues(mapValues)
+	err = m.Manager.BeforeUpdate(c, originalsMap, updatesMap)
+	if err != nil {
+		BadRequest(c, w, "Bad Instance Update", err.Error())
+		return
+	}
+	err = m.Manager.BeforeSave(c, updatesMap)
+	if err != nil {
+		BadRequest(c, w, "Bad Instance", err.Error())
+		return
+	}
+
 	// build update query
 	nextArgIndex := 1
 	var updateKeys []string
