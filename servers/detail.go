@@ -8,6 +8,9 @@ import (
 
 func DetailHandler(s schema.Server, m *schema.Model, w http.ResponseWriter, r *http.Request) {
 	rc := NewRequestContext(s, w, r)
+
+	defer catchExceptions(rc, w)()
+
 	err := rc.Authenticate()
 	if err != nil {
 		return

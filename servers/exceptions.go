@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
+	"log"
 )
 
 type Error struct {
@@ -54,4 +55,26 @@ func MethodNotAllowed(c schema.Context, w http.ResponseWriter) {
 	}
 	w.WriteHeader(http.StatusForbidden)
 	c.WriteToResponse(errorBlob)
+}
+
+func InternalServerError(c schema.Context, w http.ResponseWriter) {
+	errorBlob := Error{
+		Exceptions: []Exception{
+			Exception{
+				Title: "Internal Server Error",
+				Detail: "Something went wrong. Please try again later.",
+			},
+		},
+	}
+	w.WriteHeader(http.StatusInternalServerError)
+	c.WriteToResponse(errorBlob)
+}
+
+func catchExceptions(c schema.Context, w http.ResponseWriter) func() {
+	return func() {
+		if err := recover(); err != nil {
+			InternalServerError(c, w)
+			log.Printf("Runtime panic: %v", err)
+		}
+	}
 }
