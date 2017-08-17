@@ -110,7 +110,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		if !ok {
 			panic("Bad count received")
 		}
-		if total >= offset && (pageSize < 0 || count <= pageSize) {
+		if total >= offset && (pageSize < 0 || count < pageSize) {
 			count += 1
 			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherId,

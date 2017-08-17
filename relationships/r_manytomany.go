@@ -162,7 +162,7 @@ func (m2m ManyToMany) GetValues(
 		}
 		maps[myID][m2m.OtherType] = append(maps[myID][m2m.OtherType], otherID)
 
-		if total >= offset && (pageSize < 0 || count <= pageSize) {
+		if total >= offset && (pageSize < 0 || count < pageSize) {
 			count += 1
 			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherID,
