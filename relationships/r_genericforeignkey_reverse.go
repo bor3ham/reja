@@ -36,7 +36,8 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
-	allRelations bool,
+	offset int,
+	pageSize int,
 ) (
 	map[string]interface{},
 	map[string]map[string][]string,
@@ -94,10 +95,6 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		values[id] = value
 	}
 	// go through result data
-	pageSize := -1
-	if !allRelations {
-		pageSize = server.GetIndirectPageSize()
-	}
 	for rows.Next() {
 		var otherId, ownId string
 		rows.Scan(&otherId, &ownId)
@@ -113,8 +110,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		if !ok {
 			panic("Bad count received")
 		}
-		total += 1
-		if pageSize < 0 || total <= pageSize {
+		if total >= offset && (pageSize < 0 || count <= pageSize) {
 			count += 1
 			value.Data = append(value.Data, schema.InstancePointer{
 				ID:   &otherId,
@@ -122,6 +118,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 			})
 			value.Metadata["count"] = count
 		}
+		total += 1
 		value.Metadata["total"] = total
 		// update the value
 		values[ownId] = value

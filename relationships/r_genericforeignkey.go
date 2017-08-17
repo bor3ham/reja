@@ -43,7 +43,8 @@ func (gfk GenericForeignKey) GetValues(
 	m *schema.Model,
 	ids []string,
 	extra [][]interface{},
-	allRelations bool,
+	offset int,
+	pageSize int,
 ) (
 	map[string]interface{},
 	map[string]map[string][]string,

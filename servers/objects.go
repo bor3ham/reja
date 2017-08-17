@@ -275,7 +275,11 @@ func (rc *RequestContext) getObjects(
 					relationExtras = append(relationExtras, result[index])
 				}
 
-				values, maps := relation.GetValues(rc, m, ids, relationExtras, allRelations)
+				pageSize := -1
+				if !allRelations {
+					pageSize = rc.Server.GetIndirectPageSize()
+				}
+				values, maps := relation.GetValues(rc, m, ids, relationExtras, 0, pageSize)
 				relationResults <- RelationResult{
 					Index:        index,
 					Key:          relation.GetKey(),

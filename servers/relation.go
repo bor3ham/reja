@@ -16,10 +16,43 @@ func RelationHandler(
 	r *http.Request,
 ) {
 	rc := NewRequestContext(s, w, r)
+	defer catchExceptions(rc, w)()
 	err := rc.Authenticate()
 	if err != nil {
 		return
 	}
+
+	// parse query strings
+	queryStrings := r.URL.Query()
+	// get pagination stuff
+	minPageSize := 1
+	maxPageSize := rc.GetServer().GetMaximumDirectPageSize()
+	pageSize, err := GetIntParam(
+		queryStrings,
+		"page[size]",
+		"Page Size",
+		rc.GetServer().GetDefaultDirectPageSize(),
+		&minPageSize,
+		&maxPageSize,
+	)
+	if err != nil {
+		BadRequest(rc, w, "Bad Page Size Parameter", err.Error())
+		return
+	}
+	minPageOffset := 1
+	pageOffset, err := GetIntParam(
+		queryStrings,
+		"page[offset]",
+		"Page Offset",
+		1,
+		&minPageOffset,
+		nil,
+	)
+	if err != nil {
+		BadRequest(rc, w, "Bad Page Offset Parameter", err.Error())
+		return
+	}
+	offset := (pageOffset - 1) * pageSize
 
 	// parse query strings
 	_ = r.URL.Query()
@@ -58,7 +91,7 @@ func RelationHandler(
 			extraVariables = append(extraVariables, vars)
 		}
 	}
-	values, _ := relationship.GetValues(rc, m, []string{id}, extraVariables, false)
+	values, _ := relationship.GetValues(rc, m, []string{id}, extraVariables, offset, pageSize)
 	defaultValue := relationship.GetDefaultValue()
 	var responseBlob interface{}
 	responseBlob, exists := values[id]

@@ -16,7 +16,8 @@ type Relationship interface {
 		*Model,
 		[]string,
 		[][]interface{},
-		bool,
+		int,
+		int,
 	) (
 		map[string]interface{},
 		map[string]map[string][]string,
