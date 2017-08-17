@@ -2,6 +2,7 @@ package relationships
 
 import (
 	"errors"
+	"math"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
@@ -139,7 +140,7 @@ func (gfkr GenericForeignKeyReverse) GetValues(
 		}
 		value.Links = utils.GetPaginationLinks(
 			relationLink(c, m.Type, id, gfkr.Key),
-			1,
+			int(math.Floor(float64(offset / pageSize))) + 1,
 			pageSize,
 			server.GetDefaultDirectPageSize(),
 			total,

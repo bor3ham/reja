@@ -2,6 +2,7 @@ package relationships
 
 import (
 	"errors"
+	"math"
 	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"github.com/bor3ham/reja/utils"
@@ -183,7 +184,7 @@ func (m2m ManyToMany) GetValues(
 		}
 		value.Links = utils.GetPaginationLinks(
 			relationLink(c, m.Type, id, m2m.Key),
-			1,
+			int(math.Floor(float64(offset / pageSize))) + 1,
 			pageSize,
 			server.GetDefaultDirectPageSize(),
 			total,
