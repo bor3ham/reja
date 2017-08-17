@@ -18,6 +18,7 @@ func listGET(
 	queryStrings map[string][]string,
 	include *schema.Include,
 ) {
+	// todo: condense into helper method (same as relation.go)
 	minPageSize := 1
 	maxPageSize := c.GetServer().GetMaximumDirectPageSize()
 	pageSize, err := GetIntParam(

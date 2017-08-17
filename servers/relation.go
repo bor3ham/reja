@@ -24,6 +24,7 @@ func RelationHandler(
 
 	// parse query strings
 	queryStrings := r.URL.Query()
+	// todo: condense into helper method (same as list_get.go)
 	// get pagination stuff
 	minPageSize := 1
 	maxPageSize := rc.GetServer().GetMaximumDirectPageSize()
