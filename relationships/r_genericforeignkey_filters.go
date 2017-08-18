@@ -295,7 +295,7 @@ func (gfk GenericForeignKey) ValidateFilters(queries map[string][]string) ([]sch
 
 		compareValues := []string{}
 		for _, value := range idStrings {
-			compareValues = append(compareValues, strings.ToLower(strings.TrimSpace(value)))
+			compareValues = append(compareValues, strings.TrimSpace(value))
 		}
 
 		valids = append(valids, GenericForeignKeyIDFilter{

@@ -220,7 +220,7 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 	if exists {
 		compareValues := []string{}
 		for _, value := range containsStrings {
-			compareValues = append(compareValues, strings.ToLower(strings.TrimSpace(value)))
+			compareValues = append(compareValues, strings.TrimSpace(value))
 		}
 
 		valids = append(valids, ManyToManyContainsFilter{
@@ -243,7 +243,7 @@ func (m2m ManyToMany) ValidateFilters(queries map[string][]string) ([]schema.Fil
 	if exists {
 		compareValues := []string{}
 		for _, value := range excludesStrings {
-			compareValues = append(compareValues, strings.ToLower(strings.TrimSpace(value)))
+			compareValues = append(compareValues, strings.TrimSpace(value))
 		}
 
 		valids = append(valids, ManyToManyContainsFilter{

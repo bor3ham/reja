@@ -228,7 +228,7 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 	if exists {
 		compareValues := []string{}
 		for _, value := range containsStrings {
-			compareValues = append(compareValues, strings.ToLower(strings.TrimSpace(value)))
+			compareValues = append(compareValues, strings.TrimSpace(value))
 		}
 
 		valids = append(valids, GenericForeignKeyReverseContainsFilter{
@@ -253,7 +253,7 @@ func (gfkr GenericForeignKeyReverse) ValidateFilters(queries map[string][]string
 	if exists {
 		compareValues := []string{}
 		for _, value := range excludesStrings {
-			compareValues = append(compareValues, strings.ToLower(strings.TrimSpace(value)))
+			compareValues = append(compareValues, strings.TrimSpace(value))
 		}
 
 		valids = append(valids, GenericForeignKeyReverseContainsFilter{

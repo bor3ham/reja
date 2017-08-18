@@ -138,7 +138,7 @@ func (fk ForeignKey) ValidateFilters(queries map[string][]string) ([]schema.Filt
 
 		compareValues := []string{}
 		for _, value := range exactStrings {
-			compareValues = append(compareValues, strings.ToLower(strings.TrimSpace(value)))
+			compareValues = append(compareValues, strings.TrimSpace(value))
 		}
 
 		valids = append(valids, ForeignKeyExactFilter{
