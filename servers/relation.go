@@ -69,7 +69,7 @@ func RelationHandler(
 	}
 	// abort if it doesn't exist
 	if len(instances) == 0 {
-		fmt.Fprintf(w, "No %s with that ID", m.Type)
+		NotFound(rc, w, m.Type, id)
 		return
 	}
 

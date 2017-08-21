@@ -41,6 +41,23 @@ func Forbidden(c schema.Context, w http.ResponseWriter, title string, detail str
 	c.WriteToResponse(errorBlob)
 }
 
+func NotFound(c schema.Context, w http.ResponseWriter, model string, id string) {
+	errorBlob := Error{
+		Exceptions: []Exception{
+			Exception{
+				Title:  "Not Found",
+				Detail: fmt.Sprintf(
+					"No %s found with ID '%s'.",
+					model,
+					id,
+				),
+			},
+		},
+	}
+	w.WriteHeader(http.StatusNotFound)
+	c.WriteToResponse(errorBlob)
+}
+
 func MethodNotAllowed(c schema.Context, w http.ResponseWriter) {
 	errorBlob := Error{
 		Exceptions: []Exception{

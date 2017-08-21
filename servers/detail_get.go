@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"fmt"
 	"github.com/bor3ham/reja/schema"
 	"net/http"
 )
@@ -20,7 +19,7 @@ func detailGET(
 	}
 
 	if len(instances) == 0 {
-		fmt.Fprintf(w, "No %s with that ID", m.Type)
+		NotFound(c, w, m.Type, id)
 		return
 	}
 

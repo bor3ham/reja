@@ -27,7 +27,7 @@ func detailPATCH(
 		panic(err)
 	}
 	if len(instances) == 0 {
-		fmt.Fprintf(w, "No %s with that ID", m.Type)
+		NotFound(c, w, m.Type, id)
 		return
 	}
 	instance := instances[0]
